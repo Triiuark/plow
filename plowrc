@@ -1,0 +1,79 @@
+# syntax: option=value
+#
+######################################################################
+#
+# general options you have to set
+#
+
+[general]
+
+#
+# full path to your "overall" music folder
+# (the folder where all your music is in)
+#
+path=/home/LOGIN/music
+
+
+#
+# complete path to your playlist
+#
+playlist=/home/LOGIN/playlists/plow.m3u
+
+
+#
+# default output order (SQL "ORDER BY" syntax )
+#
+order=album ASC, part ASC, track ASC
+
+
+#
+# the player you wish to use, at minimum player0 is required
+# (this will be the default player)
+# you can select a player with plow -1 ... -9
+#
+player0=mplayer -playlist
+player1=audacious
+player2=xmms
+player3=amarok
+
+
+#
+# the player numbers that requires not to fork
+#
+playernofork=0
+
+
+#
+# full path to your portable music player
+#
+portable=/media/MP3_PLAYER
+
+
+#
+# filename on portable
+#
+portable_name=%artist% / %album% - %track% - %title% %fileext%
+
+
+#
+# information string for m3u playlist
+#
+extinf=%times% ", " %artist% " - " %title%
+
+
+######################################################################
+#
+# in this section you can put abbrevations for often used
+# command line options
+# you can call these abbrevations using .NAME
+# where NAME is your abbrevation
+# you can use all command line options here
+#
+
+[abbr]
+# this one executes an sql statement, which selects all records
+# with different artists - sampler
+sampler=-q "SELECT id_album, album FROM tbl_album WHERE album_id_artist=1;"
+
+# select all files where genre contains rock
+rock=-g rock

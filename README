@@ -1,0 +1,41 @@
+Currently supported tags/files: Ogg/Vorbis, ID3v2 (mp3)
+
+
+Requirements:
+  - sqlite3 libs and excecutable (best is >= 3.3)
+  - KDE taglib (1.4)
+
+
+Compiling:
+
+  # make
+
+
+Installation:
+
+  # make install
+
+  Note: If you don't want to install plow you have to create
+        the database with:
+        # sqlite3 plow.db < sql/plow.struct.no_id.sql
+        then copy plow.db to ~/.plow/ as described in configuration
+        section
+
+
+Configuration:
+
+  # mkdir ~/.plow
+  # cp /usr/local/share/plow.db ~/.plow/
+  # cp /usr/local/share/plowrc ~/.plow/
+
+  EDIT! ~/.plow/plowrc
+
+  # plow -I /path/to/music
+
+
+Running:
+
+  just try
+  # plow --help
+  or
+  # plow
