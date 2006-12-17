@@ -1,41 +1,49 @@
-Currently supported tags/files: Ogg/Vorbis, ID3v2 (mp3)
+Overview
+========
 
+plow is a powerfull command-line tool for putting songs from your
+music collection into a playlist. Most id3v2/ogg tag information
+is used by plow to create a (sqlite3) database for filtering.
+Additionaly plow supports fields like mood, tempo, language, etc.
+
+
+How to compile and install
+==========================
 
 Requirements:
-  - sqlite3 libs and excecutable (best is >= 3.3)
-  - KDE taglib (1.4)
+  * sqlite3 libs and excecutable (best is >= 3.3)
+  * KDE taglib (1.4)
+
+Download source code, then:
+  $ tar zxvf plow-x.y.z.tar.gz
+  $ cd plow-x.y.z.tar.gz
+  $ ./configure
+  $ make
+  $ make install
 
 
-Compiling:
+Setting up and using plow
+=========================
 
-  # make
+If you use plow for the first time you have to run setup.sh. You will
+find it in the installation directory, usally /usr/local/share/plow or
+/usr/share/plow.
+  $ source /usr/local/share/plow/setup.sh
 
+You can also do this without setup.sh:
+  $ mkdir ~/.plow
+  $ cp /usr/local/share/plow/plowrc ~/.plow
+  $ sqlite3 ~/.plow/plow.db < /usr/local/share/plow/plow.struct.no_id.sql
 
-Installation:
+Then edit ~/.plow/plowrc and change at least path, playlist and player0
+settings under [general] section.
 
-  # make install
+Run:
+  $ plow -I /path/to/music
+to fill the database. This may take a long time.
 
-  Note: If you don't want to install plow you have to create
-        the database with:
-        # sqlite3 plow.db < sql/plow.struct.no_id.sql
-        then copy plow.db to ~/.plow/ as described in configuration
-        section
+Thats it now you can try:
+  $ plow --help
+or just create a playlist containing all files
+  $ plow
 
-
-Configuration:
-
-  # mkdir ~/.plow
-  # cp /usr/local/share/plow.db ~/.plow/
-  # cp /usr/local/share/plowrc ~/.plow/
-
-  EDIT! ~/.plow/plowrc
-
-  # plow -I /path/to/music
-
-
-Running:
-
-  just try
-  # plow --help
-  or
-  # plow

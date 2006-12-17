@@ -1,0 +1,12 @@
+plow-0.0.2 (2006-12-17)
+
+ * plow now uses autotools, so you have to run
+   ./configure to create Makefile
+ * new package structure:
+   moved plowrc, sql/plow.struct.sql, sql/plow.struct.no_id.sql to data/
+   created data/setup.sh.in
+   removed Makefile
+   added necessary files to use autotools (configure.ac, Makefile.am and
+   src/Makefile.am)
+ * new script setup.sh (will be created from data/setup.sh.in
+   during configure) creates necessary folder and files to use plow
