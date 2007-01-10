@@ -52,7 +52,7 @@ using namespace std;
 const char *USAGE = "Usage: plow [LIST_OPTIONS]|[-L <tbl>]|[-q <sql>]\
 |[-C]|[-I <dir>]|[--help]";
 
-const char *SELECT  = "SELECT\n\t'%s' || file, artist, title, length,\
+const char *SELECT  = "SELECT\n\t'%s' || file as file, artist, title, length,\
  album, genre,\n\tlanguage, mood, tempo, rating, situation, part,\
  track,\n\tparts, tracks\nFROM\n\ttbl_music, tbl_artist, tbl_album,\
  tbl_genre, tbl_rating,\n\ttbl_language,tbl_mood, tbl_situation,\
