@@ -58,6 +58,10 @@ const char *SELECT  = "SELECT\n\t'%s' || file as file, artist, title, length,\
  tbl_genre, tbl_rating,\n\ttbl_language,tbl_mood, tbl_situation,\
  tbl_tempo\n";
 
+const char *SELECT_ALL  = "SELECT\n\t*\
+ \nFROM\n\ttbl_music, tbl_artist, tbl_album,\
+ tbl_genre, tbl_rating,\n\ttbl_language,tbl_mood, tbl_situation,\
+ tbl_tempo\n";
 
 const char *WHERE   = "WHERE\n\tid_artist=_id_artist AND\
  id_album=_id_album\n\tAND id_genre=_id_genre AND\
@@ -224,6 +228,10 @@ string toFileName(const string &fname) {
   return filename;
 } // toFileName
 
+/********************************************************************
+ *  functions for copy list to portable                             *
+ ********************************************************************/
+
 /*
  * get the required fields for the filename
  */
@@ -231,93 +239,130 @@ string infoString(Sqlite3Result &rs,
                   uint row,
                   const vector<string *> &tokens,
                   bool removeslash = false) {
-  ostringstream oss, oss2;
-  uint strsize = 0;
-  string actual;
-  bool isField = true;
-  for(uint i = 0; i < tokens.size(); i++) {
-    oss.str("");
-    isField = true;
-    actual  = *tokens[i];
-    strsize = actual.size();
 
-    if(actual.c_str()[0] == '%'
-        && actual.c_str()[strsize - 1] == '%') {
-      if(actual == "%track0%") {
+  const string  forbidden = "\\\n\r\" '$@*{}[]()/:;&?";
+
+  string        out;
+  string        tmp;
+  string        tmp2;
+  ostringstream tmp3;
+
+  uint strsize = 0;
+
+  bool isField   = true;
+  bool lastEmpty = false;
+
+  for(uint i = 0; i < tokens.size(); i++) {
+    tmp = "";
+    isField = true;
+
+    strsize = tokens[i]->size();
+
+    //
+    // first some 'special' fields
+    //
+    if(tokens[i]->c_str()[0] == '%'
+        && tokens[i]->c_str()[strsize - 1] == '%') {
+      if(*tokens[i] == "%track0%") {
         if(strlen(rs.get(row, "track")) < 2) {
-          oss << 0;
+          tmp += "0";
         }
-        oss << rs.get(row, "track");
-      }
-      else if(actual == "%tracks0%") {
+        tmp += rs.get(row, "track");
+      } else if(*tokens[i] == "%tracks0%") {
         if(strlen(rs.get(row, "tracks")) < 2) {
-          oss << 0;
+          tmp += "0";
         }
-        oss << rs.get(row, "tracks");
-      }
-      else if(actual == "%part0%") {
+        tmp += rs.get(row, "tracks");
+      } else if(*tokens[i] == "%part0%") {
         if(strlen(rs.get(row, "part")) < 2) {
-          oss << 0;
+          tmp += "0";
         }
-        oss << rs.get(row, "part");
-      }
-      else if(actual == "%parts0%") {
+        tmp += rs.get(row, "part");
+      } else if(*tokens[i] == "%parts0%") {
         if(strlen(rs.get(row, "parts")) < 2) {
-          oss << 0;
+          tmp += "0";
         }
-        oss << rs.get(row, "parts");
-      }
-      else if(actual == "%fileext%") {
-        string tmp(rs.get(row, "file"));
-        uint pos = tmp.rfind('.');
+        tmp += rs.get(row, "parts");
+      } else if(*tokens[i] == "%fileext%") {
+        tmp2 = rs.get(row, "file");
+        uint pos = tmp2.rfind('.');
         if(pos != string::npos) {
-          oss << tmp.substr(pos);
+          tmp += tmp2.substr(pos);
         }
-      }
-      else if(actual == "%lengths%") {
-        oss << (uint)(atof(rs.get(row, "length"))/1000.0);
-      }
-      else if(actual == "%artistIfNoSamplerOrAlbum%") {
+      } else if(*tokens[i] == "%lengths%") {
+        tmp3.str("");
+        tmp3 << (uint)(atof(rs.get(row, "length"))/1000.0);
+        tmp += tmp3.str();
+      } else if(*tokens[i] == "%artistOrAlbum%") {
         if(strcmp(rs.get(row, "album_id_artist"), "1") != 0) {
-          oss << rs.get(row, "artist");
+          tmp += rs.get(row, "artist");
         } else {
-          oss << rs.get(row, "album");
+          tmp += rs.get(row, "album");
         }
-      }
-      else if(actual == "%albumIfNoSamplerOrEmpty%") {
+      } else if(*tokens[i] == "%albumOrArtist%") {
         if(strcmp(rs.get(row, "album_id_artist"), "1") != 0) {
-          oss << rs.get(row, "album");
+          tmp += rs.get(row, "album");
+        } else {
+          tmp += rs.get(row, "artist");
         }
-      }
-      else if(actual == "%artistIfSamplerOrEmpty%") {
+      } else if(*tokens[i] == "%albumOrEmpty%") {
+        if(strcmp(rs.get(row, "album_id_artist"), "1") != 0) {
+          tmp += rs.get(row, "album");
+        } else {
+          lastEmpty = true;
+        }
+      } else if(*tokens[i] == "%emptyOrAlbum%") {
         if(strcmp(rs.get(row, "album_id_artist"), "1") == 0) {
-          oss << rs.get(row, "artist");
+          tmp += rs.get(row, "album");
+        } else {
+          lastEmpty = true;
+        }
+      } else if(*tokens[i] == "%artistOrEmpty%") {
+        if(strcmp(rs.get(row, "album_id_artist"), "1") != 0) {
+          tmp += rs.get(row, "artist");
+        } else {
+          lastEmpty = true;
+        }
+      } else if(*tokens[i] == "%emptyOrArtist%") {
+        if(strcmp(rs.get(row, "album_id_artist"), "1") == 0) {
+          tmp += rs.get(row, "artist");
+        } else {
+          lastEmpty = true;
         }
       }
+
+      //
+      // now fields from database
+      //
+
       else {
-        string bla = &(actual.c_str()[1]);
-        bla.erase(bla.size() - 1, 1);
-        if(rs.get(row, bla.c_str()) != NULL) {
-          oss << rs.get(row, bla.c_str());
+        tmp2 = &(tokens[i]->c_str()[1]);
+        tmp2.erase(tmp2.size() - 1, 1);
+        if(rs.get(row, tmp2.c_str()) != NULL) {
+          tmp += rs.get(row, tmp2.c_str());
         } else {
           isField = false;
-          oss << actual;
+          tmp += *tokens[i];
         }
       }
-    } else {
+    } else if (!lastEmpty) {
       isField = false;
-      oss << actual;
+      tmp += *tokens[i];
+    } else if (lastEmpty) {
+      lastEmpty = false;
     }
 
     if(removeslash && isField) {
-      oss2 << toFileName(oss.str());
+      // create a legal file name
+      replaceChars(forbidden, tmp);
+      out.append(tmp);
     } else {
-      oss2 << oss.str();
+      out += tmp;
     }
   }
 
-  return oss2.str();
-} // infoString
+  return out;
+} // infoString()
 
 /*
  * copy files
@@ -329,7 +374,7 @@ int copy2Portable() {
   int err = 0;
 
   string portable = gipIni->get("[general]portable");
-  cout << "copy files to " << portable << " ..." << endl;
+  cout << "copy playlist to " << portable;
   vector<string> *files = new vector<string>;
   //if(!portable.empty()) {
   err = statvfs(portable.c_str() , &stfs);
@@ -342,7 +387,7 @@ int copy2Portable() {
   }
   //}
   uint64_t freebytes = (stfs.f_bsize / 1024) * stfs.f_bfree;
-  cout << freebytes << endl;
+  cout << " (" << freebytes << " bytes free) ..." << endl;
   ifstream inputStream;
   inputStream.open(gsPlaylist.c_str(), ios::in);
   if(!inputStream) {
@@ -369,9 +414,15 @@ int copy2Portable() {
       }
     }
   }
-  cout << size << endl;
   delete[] buf;
-  cout << bla << " files." << endl;
+
+  char cs = 's';
+  if(bla == 1)
+  {
+    cs = '\0';
+  }
+  cout << "... " << bla << " file" << cs << " (" << size;
+  cout << " bytes) ..." << endl;
   long result = freebytes - size;
   if(result < 0) {
     cout << "not enough space available." << endl;
@@ -381,9 +432,8 @@ int copy2Portable() {
 
   string dst;
   string f;
-  string n;
   string *s;
-  string query(SELECT);
+  string query(SELECT_ALL);
   query.append(WHERE);
   string q;
   Sqlite3Result *rs;
@@ -392,31 +442,29 @@ int copy2Portable() {
   for(uint i = 0, j = files->size(); i < files->size(); i++, j--) {
     s = new string(files->at(i));
     f = (s->substr(gsMusicDirectory.size()));
-    //exit(0);
-    q = query;
-    q.append(" AND file='");
-    q.append(f);
-    q.append("';");
-    rs = exe(q.c_str(), &err);
-    if(err){
-      cerr << "Error " << endl;
-      continue;
+
+    if(!gipIni->get("[general]portable_name").empty()) {
+      q = query;
+      q.append(" AND file='");
+      q.append(f);
+      q.append("';");
+      rs = exe(q.c_str(), &err);
+      if(err) {
+        cerr << "Error " << endl;
+        continue;
+      }
+      f = infoString(*rs, 0, namestring, true);
     }
-    f = infoString(*rs, 0, namestring, true);
-    //cout << f << endl;
-    //f = toFileName(f);
+
     dst = portable + "/" + f;
-    //cout << dst << endl;
-    //exit(0);
 
     delete s; s = NULL;
     copyfile(files->at(i), dst);
     cout << j<< " " << flush;
-
   }
   delete files; files = NULL;
+
   cout <<  "done" << endl;
-  //delete[] dst;
 
   inputStream.close();
 

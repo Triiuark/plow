@@ -1,0 +1,41 @@
+#!/bin/bash
+
+name='plow'
+version=''
+
+if test $1; then
+	version=$1
+else
+   echo "You have to set a version."
+   exit 1
+fi
+
+package="${name}-${version}"
+
+mkdir -p /tmp/${package}
+
+dir=`pwd`
+plow_dir=`dirname $0`
+
+cd ${plow_dir}
+
+cp AUTHORS ChangeLog COPYING NEWS README TODO SConstruct /tmp/${package}
+if test "$?" -eq 1; then
+	echo  "You have to change to trunk directory."
+	exit 1
+fi
+
+mkdir /tmp/${package}/src
+cp src/*.cpp /tmp/${package}/src
+cp src/*.h /tmp/${package}/src
+mkdir /tmp/${package}/data
+cp data/* /tmp/${package}/data
+mkdir /tmp/${package}/bin
+
+cd /tmp
+tar czf ${package}.tar.gz ${package}
+cd ${dir}
+mv /tmp/${package}.tar.gz ./
+rm -rf /tmp/${package}
+echo "${dir}/${package}.tar.gz created ..."
+

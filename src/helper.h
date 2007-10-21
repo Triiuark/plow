@@ -32,4 +32,15 @@ int copyfile(const string &src, const string &dst);
 
 uint utf8strlen(const char *utf8str);
 
+/**
+ * replaces every character listed in @a chars in @a in by @a by, but
+ * a continious group of more than one character is replaced by only one
+ * @a by
+ *
+ * @param chars a string containing all characters to replace
+ * @param in the string where characters should be replaced
+ * @param by
+ */
+void replaceChars(const string &chars, string &in, char by='_');
+
 #endif

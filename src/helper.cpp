@@ -182,3 +182,25 @@ uint utf8strlen(const char *utf8str) {
   }
   return rl;
 }
+
+void replaceChars(const string &chars, string &in, char by) {
+  char out[in.length() + 1];
+  bool replaced = false;
+  uint i        = 0;
+  uint j        = 0;
+
+  while(in.c_str()[i] != 0) {
+    if(chars.find(in.c_str()[i]) == string::npos) {
+      replaced = false;
+      out[j++] = in.c_str()[i];
+    } else if(!replaced) {
+      replaced = true;
+      out[j++] = by;
+    }
+    i++;
+  }
+
+  out[j] = 0;
+
+  in = out;
+}
