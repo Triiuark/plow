@@ -205,34 +205,6 @@ Sqlite3Result *exe(const char *query, int *err) {
  ********************************************************************/
 
 /*
- * create a legal filename
- */
-string toFileName(const string &fname) {
-  const char   *fnamecstr = fname.c_str();
-  const string  forbidden = "\\\n\r\" '$@*{}[]()/:;&";
-
-  string filename = "";
-  bool   wasbad   = false;
-  uint   i        = 0;
-
-  while(fnamecstr[i] != 0) {
-    if(forbidden.find(fnamecstr[i]) == string::npos) {
-      wasbad = false;
-      filename.append(1, fnamecstr[i]);
-    } else if(!wasbad) {
-      wasbad = true;
-      filename.append(1, '_');
-    }
-    i++;
-  }
-  return filename;
-} // toFileName
-
-/********************************************************************
- *  functions for copy list to portable                             *
- ********************************************************************/
-
-/*
  * get the required fields for the filename
  */
 string infoString(Sqlite3Result &rs,
