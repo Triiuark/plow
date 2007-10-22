@@ -116,6 +116,7 @@ void printusage() {
   cout << "-0...9          select player number set in configuration";
   cout << " file"                                                  << endl;
   cout << "-Q              print out the sql statement"            << endl;
+  cout << "-S              shuffle the playlist"                   << endl;
   cout << "--add           append to playlist"                     << endl;
   cout << "--noplay        don't start a player"                   << endl;
   cout << endl;
@@ -737,19 +738,10 @@ int main(int argc, char** argv) {
     string order = ";";
     gipIni = new IniParser(inifile.c_str());
     if(!gipIni->error()) {
-      gsMusicDirectory     = gipIni->get("[general]path");
-
+      gsMusicDirectory = gipIni->get("[general]path");
 
       if(!gipIni->get("[general]playlist").empty()) {
         gsPlaylist = gipIni->get("[general]playlist");
-      }
-
-      if(!gbShuffle && !gipIni->get("[general]order").empty()) {
-        order  = "ORDER BY\n\t";
-        order += gipIni->get("[general]order");
-        order += ";";
-      } else if(gbShuffle) {
-        order = "ORDER BY\n\tRANDOM();";
       }
     } else {
       errmsg << "Error ";
@@ -759,17 +751,24 @@ int main(int argc, char** argv) {
 
     parseArgs(argc, argv);
 
+    /* if we're still here we have to build a playlist ;-) */
+
+    if(!gbShuffle && !gipIni->get("[general]order").empty()) {
+      order  = "ORDER BY\n\t";
+      order += gipIni->get("[general]order");
+      order += ";";
+    } else if(gbShuffle) {
+      order = "ORDER BY\n\tRANDOM();";
+    }
+
     char select[strlen(SELECT) + gsMusicDirectory.size() + 1];
     sprintf(select, SELECT, gsMusicDirectory.c_str());
-
-    /* if we're still here we have to build a playlist ;-) */
 
     char buffer[strlen(select) + strlen(WHERE) +\
                 strlen(gsSelect.c_str()) + strlen(order.c_str()) + 1];
 
-    sprintf(
-        buffer, "%s%s%s%s", select, WHERE,
-        gsSelect.c_str(), order.c_str());
+    sprintf(buffer, "%s%s%s%s", select, WHERE,
+            gsSelect.c_str(), order.c_str());
 
 
     if(gbShowquery) {
