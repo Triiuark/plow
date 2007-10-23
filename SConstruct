@@ -2,6 +2,7 @@
 
 fileList=Split("""bin/main.cpp
                   bin/helper.cpp
+		  bin/PlowException.cpp
                   bin/IniParser.cpp
                   bin/StringParser.cpp
                   bin/ID3Reader.cpp

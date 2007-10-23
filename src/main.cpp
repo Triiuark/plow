@@ -16,6 +16,10 @@
 * Free Software Foundation, Inc.,                                      *
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
 ***********************************************************************/
+#ifndef PACKAGE_NAME
+#define PACKAGE_NAME "plow"
+#endif
+
 
 #include <iostream>
 #include <fstream>
@@ -32,6 +36,7 @@
 
 
 #include "helper.h"
+#include "PlowException.h"
 #include "IniParser.h"
 #include "Sqlite3.h"
 #include "Sqlite3Result.h"
@@ -349,24 +354,21 @@ int copy2Portable() {
   string portable = gipIni->get("[general]portable");
   cout << "copy playlist to " << portable;
   vector<string> *files = new vector<string>;
-  //if(!portable.empty()) {
+
   err = statvfs(portable.c_str() , &stfs);
   if(err) {
-    cout << "Error (statvfs, " << __FILE__ << ", ";
-    cout << __LINE__ << ", " << errno << "): ";
-    cout << strerror(errno) << endl;
     delete files; files = NULL;
-    return -1;
+    throw PlowException("copy2Portable", portable.c_str());
   }
-  //}
+
   uint64_t freebytes = (stfs.f_bsize / 1024) * stfs.f_bfree;
   cout << " (" << freebytes << " bytes free) ..." << endl;
+
   ifstream inputStream;
   inputStream.open(gsPlaylist.c_str(), ios::in);
   if(!inputStream) {
-    cerr << "Error opening input stream" << endl;
     delete files; files = NULL;
-    return -1;
+    throw PlowException("copy2Portable", gsPlaylist.c_str());
   }
   char *buf = new char[1024];
   string *file;
@@ -825,6 +827,9 @@ int main(int argc, char** argv) {
     } else {
       delete gipIni;
     }
+  } catch(PlowException &e) {
+    e.print();
+    return 1;
   } catch (string &str) {
     cerr << "Exception: " << str << endl;
     return 1;
