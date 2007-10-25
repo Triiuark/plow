@@ -57,11 +57,11 @@ using namespace std;
 const char *USAGE = "Usage: plow [LIST_OPTIONS]|[-L <tbl>]|[-q <sql>]\
 |[-C]|[-I <dir>]|[--help]";
 
-const char *SELECT  = "SELECT\n\t'%s' || file as file, artist, title, length,\
- album, genre,\n\tlanguage, mood, tempo, rating, situation, part,\
- track,\n\tparts, tracks\nFROM\n\ttbl_music, tbl_artist, tbl_album,\
- tbl_genre, tbl_rating,\n\ttbl_language,tbl_mood, tbl_situation,\
- tbl_tempo\n";
+const char *SELECT  = "SELECT\n\t'%s' || file as file, artist, title,\
+ length, album, genre,\n\tlanguage, mood, tempo, rating, situation,\
+ part, track,\n\tparts, tracks\nFROM\n\ttbl_music, tbl_artist,\
+ tbl_album, tbl_genre, tbl_rating,\n\ttbl_language,tbl_mood,\
+ tbl_situation, tbl_tempo\n";
 
 const char *SELECT_ALL  = "SELECT\n\t*\
  \nFROM\n\ttbl_music, tbl_artist, tbl_album,\
@@ -103,7 +103,10 @@ bool gbShuffle       = false; // shuffle playlist
 
 void add2Db(char *path, const char *dbPath, const char *musicPath);
 
-void printusage() {
+
+
+void printusage()
+{
   cout << USAGE << endl;
   cout << endl;
   cout << "                 playlist options"                      << endl;
@@ -184,40 +187,30 @@ void printusage() {
   cout << " # artist contains queen AND stone age"                 << endl;
 } // printusage()
 
-void errorhandler(const char *errstr) {
-  cerr << "plow: " << errstr << endl;
-  cout << endl;
-  cout << USAGE << endl;
-  exit(1);
-} // errorhandler
 
-Sqlite3Result *exe(const char *query, int *err) {
+
+Sqlite3Result *exe(const char *query)
+{
   Sqlite3 sql(gsDatabase.c_str());
   Sqlite3Result *rs = sql.exe(query);
-  *err = 0;
-  if(sql.error()) {
-    cout << "SQL error: ";
-    cout << sql.errmsg() << endl;
-    cout << query;
-    cout << endl;
-    delete rs; rs = NULL;
-    *err = 1;
-  }
+
   return rs;
 } // exe()
+
+
 
 /********************************************************************
  *  functions for copy list to portable                             *
  ********************************************************************/
 
-/*
+/**
  * get the required fields for the filename
  */
 string infoString(Sqlite3Result &rs,
                   uint row,
                   const vector<string *> &tokens,
-                  bool removeslash = false) {
-
+                  bool removeslash = false)
+{
   const string  forbidden = "\\\n\r\" '$@*{}[]()/:;&?";
 
   string        out;
@@ -342,125 +335,127 @@ string infoString(Sqlite3Result &rs,
   return out;
 } // infoString()
 
-/*
- * copy files
- */
-int copy2Portable() {
-  /* TODO beware of different blocksizes!!! */
-  struct statvfs stfs;
-  struct stat    st;
-  int err = 0;
 
-  string portable = gipIni->get("[general]portable");
-  cout << "copy playlist to " << portable;
+
+/**
+ * copy files in playlist to the portable device
+ */
+void copy2Portable()
+{
   vector<string> *files = new vector<string>;
 
-  err = statvfs(portable.c_str() , &stfs);
-  if(err) {
-    delete files; files = NULL;
-    throw PlowException("copy2Portable", portable.c_str());
-  }
+  string portable = gipIni->get("[general]portable");
 
-  uint64_t freebytes = (stfs.f_bsize / 1024) * stfs.f_bfree;
-  cout << " (" << freebytes << " bytes free) ..." << endl;
+  cout << "Copying " << flush;
+
+  //
+  // read playlist and add files to files
+  //
 
   ifstream inputStream;
   inputStream.open(gsPlaylist.c_str(), ios::in);
   if(!inputStream) {
-    delete files; files = NULL;
+    delete files;
     throw PlowException("copy2Portable", gsPlaylist.c_str());
   }
+
   char *buf = new char[1024];
-  string *file;
-  unsigned long size = 0;
-  int bla = 0;
+
+  int numFiles = 0;
   while(inputStream.getline(buf, 1024)) {
     if(buf[0] != '#') {
-      bla++;
-      err = stat(buf, &st);
-      if(err) {
-        cout << strerror(errno) << endl;
-      } else {
-        size += st.st_size / 1024;
-        file = new string(buf);
-        //sprintf(file, buf);
-        files->push_back(*file);
-        //cout << buf << endl;
-      }
+      numFiles++;
+      files->push_back(buf);
     }
   }
-  delete[] buf;
-
-  char cs = 's';
-  if(bla == 1)
-  {
-    cs = '\0';
-  }
-  cout << "... " << bla << " file" << cs << " (" << size;
-  cout << " bytes) ..." << endl;
-  long result = freebytes - size;
-  if(result < 0) {
-    cout << "not enough space available." << endl;
-    delete files; files = NULL;
-    return -1;
-  }
-
-  string dst;
-  string f;
-  string *s;
-  string query(SELECT_ALL);
-  query.append(WHERE);
-  string q;
-  Sqlite3Result *rs;
-  StringParser sp(gipIni->get("[general]portable_name").c_str());
-  vector<string *> namestring = sp.getTokens();
-  for(uint i = 0, j = files->size(); i < files->size(); i++, j--) {
-    s = new string(files->at(i));
-    f = (s->substr(gsMusicDirectory.size()));
-
-    if(!gipIni->get("[general]portable_name").empty()) {
-      q = query;
-      q.append(" AND file='");
-      q.append(f);
-      q.append("';");
-      rs = exe(q.c_str(), &err);
-      if(err) {
-        cerr << "Error " << endl;
-        continue;
-      }
-      f = infoString(*rs, 0, namestring, true);
-    }
-
-    dst = portable + "/" + f;
-
-    delete s; s = NULL;
-    copyfile(files->at(i), dst);
-    cout << j<< " " << flush;
-  }
-  delete files; files = NULL;
-
-  cout <<  "done" << endl;
 
   inputStream.close();
+  delete[] buf;
 
-  return 0;
-} //copy2Portable
+
+  cout << numFiles <<  " files to " << portable << " ..." << endl;
+
+  string dst;
+
+  //
+  // find out how to rename files and copy them
+  //
+
+  string portableName = gipIni->get("[general]portable_name");
+
+  string query(SELECT_ALL);
+  query.append(WHERE);
+  query.append(" AND file='");
+
+  string q;
+
+  Sqlite3Result *rs;
+
+  for(uint i = 0, j = files->size(); i < files->size(); i++, j--) {
+
+    dst = portable + "/";
+
+    if(!portableName.empty()) {
+      q  = query + files->at(i).substr(gsMusicDirectory.size()) + "';";
+      rs = exe(q.c_str());
+
+      if(rs->cols() == 0) {
+        string *tmp = new string("file not found in database: ");
+        tmp->append(files->at(i));
+        errno = 0;
+        PlowException *e = new PlowException("copy2Portable", tmp->c_str());
+        e->print();
+        delete rs;
+        delete tmp;
+        delete e;
+        continue;
+      }
+
+      dst += infoString(*rs, 0,
+                 StringParser(portableName.c_str()).getTokens(), true);
+
+      delete rs;
+    } else {
+      // fallback: use original filename
+      dst += files->at(i).substr(gsMusicDirectory.size());
+    }
+
+    try {
+      if(copyfile(files->at(i), dst) == 1) {
+        // file already exists
+        cout << "*";
+      }
+      cout << j << " " << flush;
+    } catch (PlowException &e) {
+      cout << endl;
+      e.print();
+      if(e.errn() == ENOSPC || e.errn() == ENOTDIR) {
+        // no space left on device or can't create dir -> break here
+        break;
+      }
+    }
+  }
+
+  delete files;
+
+  cout << "\n... done" << endl;
+
+} //copy2Portable()
+
+
 
 /********************************************************************
  * functions for -q and -L options                                  *
  ********************************************************************/
 
-/*
+/**
  *  executes query and prints out the result as a nice table
  */
-void printResult(const char *query) {
-  int err;
-  Sqlite3Result *rs = exe(query, &err);
-  if(err) {
-    exit(1);
-  }
+void printResult(const char *query)
+{
+  Sqlite3Result *rs = exe(query);
+
   if(rs->cols()) {
-    //rs->maxlen();
     cout << "| ";
     int len = 0;
     for(int i = 0; i < rs->cols(); i++) {
@@ -489,15 +484,16 @@ void printResult(const char *query) {
   exit(0);
 } // printResult()
 
+
+
 /********************************************************************
  * functions for creating playlist                                  *
  ********************************************************************/
-int createList(const char *query) {
-  int err;
-  Sqlite3Result *rs = exe(query, &err);
-  if(err) {
-    return 1;
-  }
+
+int createList(const char *query)
+{
+  Sqlite3Result *rs = exe(query);
+
   if(rs->rows() == 0) {
     gbPlay = false;
     cout << "Empty result. Sorry." << endl;
@@ -513,12 +509,9 @@ int createList(const char *query) {
     open_mode=ios::app;
   }
   ofstream m3u(gsPlaylist.c_str(), open_mode);
-  err = errno;
+  //err = errno;
   if(!m3u) {
-    cout << "\nError opening playlistfile (" << gsPlaylist << "): ";
-    cout << strerror(err) << endl;
-    delete rs; rs = NULL;
-    return 1;
+    throw PlowException("createList", "Can't open playlist file.");
   }
   if(!gbAddToPlaylist) {
     m3u << "#EXTM3U" << endl;
@@ -549,8 +542,8 @@ int createList(const char *query) {
   return 0;
 } // createList()
 
-int parseField(int argc, char **argv, int i) {
-
+int parseField(int argc, char **argv, int i)
+{
   map<char, string> fieldNames;
 
   fieldNames['T'] = "title";
@@ -566,15 +559,16 @@ int parseField(int argc, char **argv, int i) {
   char f = argv[i][1];
 
   if(fieldNames[f] == "") {
-    errorhandler("unknown option");
+    throw PlowException("parseField", "Unknown option", USAGE);
+    //errorhandler("unknown option");
   }
   if(argc < i + 2) {
-    errorhandler("missing argument");
+    throw PlowException("parseField", "Missing argument", USAGE);
+    //errorhandler("missing argument");
   }
 
   char pre[9];
   char post[7];
-
 
   if(argv[i][2] == 0) {
     sprintf(pre, " LIKE '%%");
@@ -583,7 +577,8 @@ int parseField(int argc, char **argv, int i) {
     sprintf(pre, "='");
     sprintf(post, "' OR ");
   } else if(argv[i][2] != 0) {
-    errorhandler("wrong synatx");
+    throw PlowException("parseField", "Wrong syntax", USAGE);
+    //errorhandler("wrong synatx");
   }
 
   if(argv[i][0] == '+') {
@@ -591,7 +586,6 @@ int parseField(int argc, char **argv, int i) {
   } else {
     gsSelect.append("\tAND (");
   }
-
 
   i++;
   while(i < argc && (argv[i][0]!='-' && argv[i][0]!='+')){
@@ -606,7 +600,10 @@ int parseField(int argc, char **argv, int i) {
   return i-1;
 } // parseField()
 
-void parseArgs(int argc, char** argv) {
+
+
+void parseArgs(int argc, char** argv)
+{
   for(int i = 1; i < argc; i++) {
     //cout << i << ": " << argv[i] << endl;
     switch(argv[i][0]) {
@@ -614,7 +611,10 @@ void parseArgs(int argc, char** argv) {
         switch(argv[i][1]) {
 
           case 0: // -
-            errorhandler("missing argument");
+            //errorhandler("missing argument");
+            throw PlowException("parseArgs",
+                      "Missing argument",
+                      USAGE);
           break;
 
           case '-': // --
@@ -626,16 +626,25 @@ void parseArgs(int argc, char** argv) {
               printusage();
               exit(0);
             } else {
-              errorhandler("wrong syntax near --");
+              //errorhandler("wrong syntax near --");
+              throw PlowException("parseArgs",
+                        "Wrong syntax near --",
+                        USAGE);
             }
           break;
 
           case 'q': // -q
             if(argv[i][2] != 0) {
-              errorhandler("wrong syntax near -q");
+              //errorhandler("wrong syntax near -q");
+              throw PlowException("parseArgs",
+                        "Wrong syntax near -q",
+                        USAGE);
             } else {
               if(argv[i + 1] == 0) {
-                errorhandler("Missing sql statement for option -q");
+                //errorhandler("Missing sql statement for option -q");
+                throw PlowException("parseArgs",
+                          "Missing sql statement for option -q",
+                          USAGE);
               } else {
                 printResult(argv[i + 1]);
               }
@@ -662,7 +671,9 @@ void parseArgs(int argc, char** argv) {
                      gsMusicDirectory.c_str());
               exit(0);
             } else {
-              errorhandler("missing argument for option I");
+              //errorhandler("missing argument for option I");
+              throw PlowException("parseArgs",
+                        "Missing argument for option -I", USAGE);
             }
 
           break;
@@ -675,7 +686,9 @@ void parseArgs(int argc, char** argv) {
                   argv[i + 1], argv[i + 1], argv[i + 1], argv[i + 1]);
               printResult(query);
             } else {
-              errorhandler("missing argument for option -L");
+              //errorhandler("missing argument for option -L");
+              throw PlowException("parseArgs",
+                        "Missing argument for option -L", USAGE);
             }
           break;
 
@@ -709,12 +722,14 @@ void parseArgs(int argc, char** argv) {
           StringParser abbrP(abbr.c_str());
           parseArgs(abbrP.getSize(), abbrP.getArgv());
         } else {
-          errorhandler("missing abbrevation name");
+          //errorhandler("missing abbrevation name");
+          throw PlowException("parseArgs", "Missing abbrevation name", USAGE);
         }
       break;
 
       default: // ?
-        errorhandler("wrong syntax");
+        //errorhandler("wrong syntax");
+        throw PlowException("parseArgs","Wrong syntax", USAGE);
       break;
     } // switch(argv[i][0])
   } // for(int i = 0; i < argc; i++)
@@ -722,7 +737,8 @@ void parseArgs(int argc, char** argv) {
 
 
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   try {
 
     bool forkplayer     = true;  // wether or not to fork player
@@ -787,8 +803,11 @@ int main(int argc, char** argv) {
       inivalue.append(1, gcPlayerNumber);
       player << gipIni->get(inivalue.c_str());
       if(player.str().empty()) {
-        cerr << "No player with number " << gcPlayerNumber << flush;
-        cerr << " set in inifile. Using player 0." << endl;
+        errmsg << "No player with number " << gcPlayerNumber;
+        errmsg << " set in inifile. Using player 0.";
+        PlowException *e = new PlowException("main", errmsg.str().c_str());
+        e->print();
+        delete e;
         inivalue = "[general]player0";
         player << gipIni->get(inivalue.c_str());
         gcPlayerNumber = 0;
@@ -814,14 +833,16 @@ int main(int argc, char** argv) {
       switch(child_pid) {
         case 0: /* child */
           execvp(playerArgs[0], playerArgs);
-          err = errno;
-          errmsg << "Can't execute player (" << playerArgs[0] << "): ";
-          errmsg << strerror(err);
-          errorhandler(errmsg.str().c_str());
+          //err = errno;
+          errmsg << "Can't execute player (" << playerArgs[0] << ")";
+          //errmsg << strerror(err);
+          //errorhandler(errmsg.str().c_str());
+          throw PlowException("main", errmsg.str().c_str());
           //break;
         case -1: /* fork error */
-          errmsg << "Can't fork() process: " << strerror(err);
-          errorhandler(errmsg.str().c_str());
+          //errmsg << "Can't fork() process: " << strerror(err);
+          //errorhandler(errmsg.str().c_str());
+          throw PlowException("main", "Can't fork() process");
           //break;
       }
     } else {
@@ -832,17 +853,20 @@ int main(int argc, char** argv) {
     return 1;
   } catch (string &str) {
     cerr << "Exception: " << str << endl;
+    cout << endl;
     return 1;
   } catch (...) {
     cerr << "Unhandled exception" << endl;
+    cout << endl;
     return 1;
   }
   return 0;
 } // main()
 
 
-void add2Db(char *path, const char *dbPath, const char *musicPath) {
 
+void add2Db(char *path, const char *dbPath, const char *musicPath)
+{
   Sqlite3Result *sr, *sr2;
   string query, query2, query3;
 
@@ -859,7 +883,9 @@ void add2Db(char *path, const char *dbPath, const char *musicPath) {
   TagReader *tag;
   p_queue *fnames = new p_queue;
 
-  getFiles(fnames, path, true);
+  ostringstream errmsg;
+
+  getFiles(*fnames, path, true);
   cout << ">" << fnames->size() << " files found." << endl;
   if(fnames->size() == 0) {
     delete fnames;
@@ -909,8 +935,13 @@ void add2Db(char *path, const char *dbPath, const char *musicPath) {
     }
 
     if(tag->error()) {
-      cerr << "Error (" << tag->error() << ") at ";
-      cerr << fnames->top() << endl;
+      errmsg << "Error (" << tag->error() << ") at ";
+      errmsg << fnames->top() << endl;
+      PlowException *e = new PlowException("add2Db",
+                                 errmsg.str().c_str())
+      e->print();
+      delete e;
+      errmsg.flush();
     }
     delete tag;
     delete[] fnames->top();
@@ -919,9 +950,9 @@ void add2Db(char *path, const char *dbPath, const char *musicPath) {
   query += "COMMIT TRANSACTION;";
 
   sr = sql.exe(query.c_str());
-  if(sql.error()) {
-    cerr << sql.errmsg() << endl;
-  }
+  //if(sql.error()) {
+  //  cerr << sql.errmsg() << endl;
+  //}
   delete sr;
 
   delete fnames; fnames = NULL;
@@ -1005,7 +1036,7 @@ void add2Db(char *path, const char *dbPath, const char *musicPath) {
       query += "COMMIT TRANSACTION;";
 
       sr2 = sql.exe(query.c_str());
-      if(sql.error()) cout << sql.errmsg()<<endl;
+      //if(sql.error()) cout << sql.errmsg()<<endl;
       delete sr2;
 
     }
@@ -1041,9 +1072,9 @@ void add2Db(char *path, const char *dbPath, const char *musicPath) {
     }
     query += " COMMIT TRANSACTION;";
     sr2 = sql.exe(query.c_str());
-    if(sql.error()) {
-      cerr << sql.errmsg() << endl;
-    }
+    //if(sql.error()) {
+      //cerr << sql.errmsg() << endl;
+    //}
     delete sr2;
   }
   delete sr;
@@ -1053,7 +1084,7 @@ void add2Db(char *path, const char *dbPath, const char *musicPath) {
       "SELECT DISTINCT tmp_id_album, tmp_parts, tmp_tracks FROM tbl_tmp;");
 
   query = "BEGIN TRANSACTION;";
-  if(sql.error()) cout << sql.errmsg() << endl;
+  //if(sql.error()) cout << sql.errmsg() << endl;
   for(int i = 0; i < sr->rows(); i++) {
     query += "UPDATE tbl_album SET parts='";
     query += sr->get(i, "tmp_parts");
@@ -1066,9 +1097,9 @@ void add2Db(char *path, const char *dbPath, const char *musicPath) {
   delete sr; sr = NULL;
   query += "COMMIT TRANSACTION;";
   sr = sql.exe(query.c_str());
-  if(sql.error()) {
-    cerr << sql.errmsg() << endl;
-  }
+  //if(sql.error()) {
+  //  cerr << sql.errmsg() << endl;
+  //}
   delete sr; sr = NULL;
   cout << " ... done." << endl;
 
@@ -1123,12 +1154,12 @@ void add2Db(char *path, const char *dbPath, const char *musicPath) {
     query += "COMMIT TRANSACTION";
 
     sr2 = sql.exe(query.c_str());
-    if(sql.error() != 0) {
-      cerr << sql.errmsg() << endl;
-    }
+    //if(sql.error() != 0) {
+    //  cerr << sql.errmsg() << endl;
+    //}
     delete sr2;
   } else {
-    cerr << sql.errmsg() << endl;
+    //cerr << sql.errmsg() << endl;
   }
   delete sr;
 

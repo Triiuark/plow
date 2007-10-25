@@ -23,11 +23,47 @@
 #include "global.h"
 
 using namespace std;
+/**
+ * puts every regular file with access mode @a mode in @a path into
+ * @a fnames, if @a recursive it does for subfolders, too
+ *
+ * @param fnames    a queue to put found files in
+ *                  (in descending order)
+ * @param path      to search for files
+ * @param recursive if set search in subfolders
+ * @param mode      access mode granted for files,
+ *                  default: R_OK = readable @n
+ *                  mode is a mask consisting of one or more of
+ *                  R_OK, W_OK, X_OK and  F_OK. (see: @a man @a access )
+ */
+void getFiles(p_queue &fnames,
+              char *path,
+              const bool recursive,
+              int mode = R_OK);
 
-void getFiles(p_queue *fnames, char* path, const bool recursive);
+/**
+ * creates (recursive) the complete @a path
+ * and sets permission to @a mode
+ *
+ * @param path to create
+ * @param mode to use, default: 0755
+ *
+ * @throw PlowException thrown on any error
+ */
+void mkdir_r(const string &path, int mode = 0755);
 
-int mkdir_r(const string &path, int mode = 0777);
 
+
+/**
+ * copies file @a src to @a dst (and creates complete path)
+ *
+ * @param src source file name
+ * @param dst destination file name
+ *
+ * @throw PlowException thrown on any error
+ *
+ * @return 0 on success, 1 if @a dst exists
+ */
 int copyfile(const string &src, const string &dst);
 
 uint utf8strlen(const char *utf8str);

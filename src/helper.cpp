@@ -31,13 +31,14 @@
 #include <sys/types.h>
 #include <errno.h>
 
+#include "PlowException.h"
+
 using namespace std;
 
-/*
- * puts every regular file in path into fnames,
- * if recursive it does for subfolders, too
- */
-void getFiles(p_queue *fnames, char* path, const bool recursive) {
+void getFiles(p_queue &fnames,
+              char *path,
+              const bool recursive,
+              int mode) {
 
   struct dirent *dent;
   struct stat    st;
@@ -55,15 +56,18 @@ void getFiles(p_queue *fnames, char* path, const bool recursive) {
   }
 
   while((dent = readdir(dir))) {
-    if(strcmp(dent->d_name, ".") != 0 && strcmp(dent->d_name, "..") != 0 ) {
+    if(strcmp(dent->d_name, ".") != 0
+        && strcmp(dent->d_name, "..") != 0 ) {
       fname = new char[strlen(path) + 1 + strlen(dent->d_name) + 1];
       sprintf(fname, "%s/%s", path, dent->d_name);
 
       if(lstat(fname, &st) == 0) {
         if(recursive && S_ISDIR(st.st_mode)) {
-          getFiles(fnames, fname, recursive);
+          getFiles(fnames, fname, recursive, mode);
         } else if(S_ISREG(st.st_mode)) {
-          fnames->push(fname);
+          if(access(fname, mode) == 0) {
+            fnames.push(fname);
+          }
         } else {
           delete[] fname;
         }
@@ -75,81 +79,91 @@ void getFiles(p_queue *fnames, char* path, const bool recursive) {
   closedir(dir);
 }
 
-/*
- * creates (recursive) the complete path and sets permission to mode
- */
-int mkdir_r(const string &path, int mode) {
+void mkdir_r(const string &path, int mode) {
+
   struct stat st;
+
   if(path.size() == 0 || stat(path.c_str(), &st) == 0) {
     if(!S_ISDIR(st.st_mode)) {
-      return -1;
+      throw PlowException("mkdir_r",
+                          path.c_str(),
+                          "(Re)moving this file may help.");
     }
-    return 0;
+    // path exists
+    // TODO: has it mode?
+    return;
   }
 
-  int  err = 0;
   uint pos = path.find_last_of('/');
 
   if(pos != string::npos && pos != 0) {
     string parentpath(path);
     parentpath.resize(pos);
-    err = mkdir_r(parentpath);
-    if(err) {
-      return err;
-    }
+
+    mkdir_r(parentpath);
   }
 
-  if(mkdir(path.c_str(), mode)) {
-    err = errno; // EEXIST never happens!!!
+  if(mkdir(path.c_str(), mode) == -1) {
+    // EEXIST never happens, its caught above
+    throw PlowException("mkdir_r", path.c_str());
   }
-  return err;
 }
 
-/*
- * copies file src to dst (and creates folder if required)
- */
+
 int copyfile(const string &src, const string &dst) {
 
   int err = 0;
-  //cout << ">>>" << src << ": " << dst << endl;
+
   struct stat st;
-  if(!stat(dst.c_str(), &st)){
-    //cout << "File already exists: " << dst << endl;
-    return 0;
+
+  if(stat(dst.c_str(), &st) == 0) {
+    // file exists
+    return 1;
   }
 
   string path(dst);
   path.resize(path.rfind('/'));
-
-  err = mkdir_r(path);
-  if(err) {
-    //cout << "Fehler: " << strerror(err) << " / " << path2 << endl;
-    return err;
-  }
+  mkdir_r(path);
 
   ifstream source;
   ofstream destination;
   source.open(src.c_str(), ios::binary|ios::in);
   if(!source) {
-    //cout << "Fehler:  öffnen source" << src << endl;
-    return -1;
-
+    throw PlowException("copyfile", src.c_str());
   }
 
   destination.open(dst.c_str(), ios::binary|ios::out);
-  if(!destination) {
-    //cout << strerror(errno) << "Fehler:  öffnen destination" << dst << endl;
-    source.close();
-    return -1;
-  }
 
+  err = errno;
+  if(!destination) {
+    source.close();
+    errno = err;
+    throw PlowException("copyfile", dst.c_str());
+  }
   char c;
+  errno = 0;
   while(source.get(c)) {
     destination.put(c);
+    if(errno != 0) {
+      err = errno;
+      source.close();
+      destination.close();
+      unlink(dst.c_str());
+      errno = err;
+      throw PlowException("copyfile", dst.c_str());
+    }
   }
+  err = errno;
 
   source.close();
   destination.close();
+
+  if(err != 0) {
+    unlink(dst.c_str());
+    errno = err;
+    throw PlowException("copyfile", src.c_str());
+  }
+
   return 0;
 }
 

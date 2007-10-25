@@ -91,7 +91,11 @@ IniParser::~IniParser() {
   a_array_s_it it = options->begin();
 
   while(it != options->end()) {
-    delete[] it->first;
+    if(it->second != "") {
+      //TODO: if it is empty, maybe key wasn't created with new,
+      // so I can't delete it
+      delete[] it->first;
+    }
     ++it;
   }
 

@@ -50,7 +50,9 @@ PlowException::~PlowException() {
 
 
 void PlowException::print() {
+  cout << endl;
   cerr << message() << endl;
+  cout << endl;
 }
 
 
@@ -60,16 +62,16 @@ string PlowException::message() {
   string out("Error in ");
 
   out.append(mcs_where);
-  out.append(":\n  > ");
+  out.append(":\n  >");
   out.append(mcs_what);
 
   if(mi_err != 0) {
-    out.append(":\n    > ");
+    out.append(":\n  >");
     out.append(strerror(mi_err));
   }
 
   if(!mcs_solution.empty()) {
-    out.append("\n  > ");
+    out.append("\n  >");
     out.append(mcs_solution);
   }
 

@@ -20,27 +20,61 @@
 #ifndef PLOW_SQLITE3_H
 #define PLOW_SQLITE3_H
 
-//#include <sqlite3.h> // maybe for sqlite3 error constants
-
 #include "Sqlite3Result.h"
 
 using namespace std;
 
+/**
+ * @brief handles sqlite 3 connection
+ */
 class Sqlite3 {
 
   public:
+    /**
+     * creates a new Sqlite3 object with the given @a databaseName
+     *
+     * @param databaseName
+     */
     Sqlite3(const char *databaseName);
 
-    Sqlite3Result *exe(const char *query);
-    void           free_table(char **sqlresult);
-    int            error();
-    const char    *errmsg();
 
+
+    /**
+     *
+     */
     ~Sqlite3();
+
+
+
+    /**
+     * executes a sql statement and returns the resulting table as a
+     * Sqlite3Result object
+     *
+     * @param query the statement to execute
+     *
+     * @return a new Sqlite3Result that has to be freed, using @a delete
+     */
+    Sqlite3Result *exe(const char *query);
+
+
+
+    /**
+     *
+     * @return
+     */
+    int error();
+
+
+
+    /**
+     *
+     * @return
+     */
+    //const char *errmsg();
 
   private:
     int         rc;
-    const char *dbname;
+    const char *mcs_dbname;
     char       *errstr;
 };
 
