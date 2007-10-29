@@ -13,9 +13,19 @@ fileList=Split("""bin/main.cpp
 
 BuildDir('bin', 'src', duplicate = 0)
 
-env = Environment(CC        = "g++",
-                  CCFLAGS   = "-O2 -march=pentium4 -pipe -Wall `taglib-config --cflags`",
-                  LINKFLAGS = "`taglib-config --libs`")
+
+CXXFLAGS=[]
+if ARGUMENTS.get('cxxflags', 0):
+  CXXFLAGS=ARGUMENTS.get('cxxflags').split()
+CXXFLAGS.append('-Wall')
+CXXFLAGS.append('`taglib-config --cflags`')
+if ARGUMENTS.get('version', 0):
+  print ARGUMENTS.get('version', 0)
+  CXXFLAGS.append('-DVERSION="\\"' + ARGUMENTS.get('version',0 ) + '\\""')
+print CXXFLAGS
+env = Environment(CC        = 'g++',
+                  CCFLAGS   = CXXFLAGS,
+                  LINKFLAGS = '`taglib-config --libs`')
 
 ### configuration stuff
 taglibVersion = 1.4
@@ -51,12 +61,7 @@ if not conf.CheckLib("sqlite3"):
 
 env = conf.Finish()
 ### end configuration stuff
-
-env.Append(CCFLAGS = " -g")
+if ARGUMENTS.get('debug', 0):
+  env.Append(CCFLAGS = '-ggdb')
 env.Program("bin/plow", Split(fileList))
-#import sys
-#print sys
-#for f, w in sys.items():
-#	print f
-#	print w
 
