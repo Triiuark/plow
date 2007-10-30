@@ -23,17 +23,22 @@
 #include <fstream>
 
 #include "helper.h"
+#include "PlowException.h"
 
 using namespace std;
+
+
 
 IniParser::IniParser(const char *iniFile) {
   err     = 0;
   options = NULL;
+  string errmsg;
 
   ifstream ini(iniFile);
-
   if(!ini) {
-    err = 3;
+    errmsg = "Could not open ";
+    errmsg += iniFile;
+    throw PlowException("IniParser", errmsg.c_str());
     return;
   }
 
@@ -78,13 +83,19 @@ IniParser::IniParser(const char *iniFile) {
   ini.close();
 }
 
+
+
 string IniParser::get(const char *option) {
   return (*options)[option];
 }
 
+
+
 int IniParser::error() {
   return err;
 }
+
+
 
 IniParser::~IniParser() {
 
@@ -100,5 +111,4 @@ IniParser::~IniParser() {
   }
 
   delete options; options = NULL;
-
 }

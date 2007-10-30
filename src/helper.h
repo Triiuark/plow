@@ -23,6 +23,9 @@
 #include "global.h"
 
 using namespace std;
+
+
+
 /**
  * puts every regular file with access mode @a mode in @a path into
  * @a fnames, if @a recursive it does for subfolders, too
@@ -40,6 +43,8 @@ void getFiles(p_queue &fnames,
               char *path,
               const bool recursive,
               int mode = R_OK);
+
+
 
 /**
  * creates (recursive) the complete @a path
@@ -66,6 +71,16 @@ void mkdir_r(const string &path, int mode = 0755);
  */
 int copyfile(const string &src, const string &dst);
 
+
+
+/**
+ * calculates the real string length of utf-8 string @a utf8str
+ * (returns number of characters instead of bytes)
+ *
+ * @param utf8str utf-8 encoded string
+ *
+ * @return length in characters of utf8str
+ */
 uint utf8strlen(const char *utf8str);
 
 /**

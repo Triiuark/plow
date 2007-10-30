@@ -55,7 +55,7 @@
 using namespace std;
 
 const char *USAGE = "Usage: plow [LIST_OPTIONS]|[-L <tbl>]|[-q <sql>]\
-|[-C]|[-I <dir>]|[--help]";
+|[-C]|[-I <dir>]\n            |[--help]|[--version]";
 
 const char *SELECT  = "SELECT\n\t'%s' || file as file, artist, title,\
  length, album, genre,\n\tlanguage, mood, tempo, rating, situation,\
@@ -165,6 +165,7 @@ void printusage()
   cout << "                ****************************************";
   cout << "**************"                                         << endl;
   cout << "--help          print this message"                     << endl;
+  cout << "--version       print out version"                      << endl;
   cout << endl;
   cout << endl;
   cout << "                 examples"                              << endl;
@@ -494,7 +495,7 @@ void printResult(const char *query)
  * functions for creating playlist                                  *
  ********************************************************************/
 
-int createList(const char *query)
+void createList(const char *query)
 {
   Sqlite3Result *rs = exe(query);
 
@@ -502,7 +503,7 @@ int createList(const char *query)
     gbPlay = false;
     cout << "Empty result. Sorry." << endl;
     delete rs;
-    return 0;
+    return;
   } else if(rs->rows() == 1) {
     cout << "1 file found";
   } else {
@@ -544,8 +545,8 @@ int createList(const char *query)
   uint mins  = (total_playtime - (hours * 3600)) / 60;
   uint secs  = (total_playtime - (hours * 3600)) - (mins * 60);
   cout << " (" << hours << "h" << mins << "m" << secs << "s)." << endl;
+
   delete rs;
-  return 0;
 } // createList()
 
 int parseFieldForSet(int argc, char **argv, int i)
@@ -766,8 +767,6 @@ void parseArgs(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-  try {
-
     bool forkplayer     = true;  // wether or not to fork player
 
     ostringstream errmsg;
@@ -775,28 +774,27 @@ int main(int argc, char** argv)
     string pdir = getenv("HOME");
     pdir.append("/.plow");
 
-    gsDatabase   = pdir + "/plow.db";
+    gsDatabase = pdir + "/plow.db";
     gsPlaylist = pdir + "/plow.m3u";
 
     string inifile = pdir + "/plowrc";
 
     string order = ";";
-    gIniParser = new IniParser(inifile.c_str());
-    if(!gIniParser->error()) {
-      gsMusicDirectory = gIniParser->get("[general]path");
 
-      if(!gIniParser->get("[general]playlist").empty()) {
-        gsPlaylist = gIniParser->get("[general]playlist");
-      }
-    } else {
-      errmsg << "Error ";
-      cout << "inifile error: " << gIniParser->error() << endl;
-      cout << inifile << endl;
+  try {
+    gIniParser = new IniParser(inifile.c_str());
+
+    gsMusicDirectory = gIniParser->get("[general]path");
+
+    if(!gIniParser->get("[general]playlist").empty()) {
+      gsPlaylist = gIniParser->get("[general]playlist");
     }
 
     parseArgs(argc, argv);
 
-    /* if we're still here we have to build a playlist ;-) */
+     //
+    // if we're still here we have to build a playlist ;-)
+    //
 
     if(!gbShuffle && !gIniParser->get("[general]order").empty()) {
       order  = "ORDER BY\n\t";
@@ -820,9 +818,7 @@ int main(int argc, char** argv)
       cout << buffer << "\n" << endl;
     }
 
-    int err = createList(buffer);
-
-    if(err) {return 1;}
+    createList(buffer);
 
     ostringstream player;
     if(gbPlay) {
@@ -854,7 +850,6 @@ int main(int argc, char** argv)
 
       if(forkplayer) {
         child_pid = fork();
-        err = errno;
       }
 
       switch(child_pid) {

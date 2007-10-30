@@ -35,6 +35,8 @@
 
 using namespace std;
 
+
+
 void getFiles(p_queue &fnames,
               char *path,
               const bool recursive,
@@ -79,6 +81,8 @@ void getFiles(p_queue &fnames,
   closedir(dir);
 }
 
+
+
 void mkdir_r(const string &path, int mode) {
 
   struct stat st;
@@ -108,6 +112,7 @@ void mkdir_r(const string &path, int mode) {
     throw PlowException("mkdir_r", path.c_str());
   }
 }
+
 
 
 int copyfile(const string &src, const string &dst) {
@@ -168,10 +173,7 @@ int copyfile(const string &src, const string &dst) {
 }
 
 
-/*
- * calculates the real string length of utf-8 string utf8str
- * (returns number of characters instead of bytes)
- */
+
 uint utf8strlen(const char *utf8str) {
   uint len = strlen(utf8str);
   uint rl  = 0;
@@ -196,6 +198,8 @@ uint utf8strlen(const char *utf8str) {
   }
   return rl;
 }
+
+
 
 void replaceChars(const string &chars, string &in, char by) {
   char out[in.length() + 1];
