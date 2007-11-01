@@ -24,7 +24,8 @@
 
 using namespace std;
 
-class IniParser {
+class IniParser
+{
   public:
     IniParser(const char *iniFile);
 
@@ -36,7 +37,6 @@ class IniParser {
   private:
     int err;
     a_array_s *options;
-
 };
 
 #endif

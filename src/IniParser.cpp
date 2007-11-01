@@ -25,6 +25,8 @@
 #include "helper.h"
 #include "PlowException.h"
 
+#include <cerrno>
+
 using namespace std;
 
 
@@ -39,7 +41,8 @@ IniParser::IniParser(const char *iniFile) {
     errmsg = "Could not open ";
     errmsg += iniFile;
     throw PlowException("IniParser", errmsg.c_str());
-    return;
+    //throw string(strerror(errno));
+    //return;
   }
 
   options = new a_array_s;

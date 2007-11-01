@@ -22,82 +22,53 @@
 #endif
 
 #include <iostream>
-#include <fstream>
 #include <iomanip>
+#include <fstream>
 #include <sstream>
-
-#include <cstring>
-
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/statvfs.h>
-
-#include <errno.h>
-
-
-#include "helper.h"
-#include "PlowException.h"
-#include "IniParser.h"
-#include "Sqlite3.h"
-#include "Sqlite3Result.h"
-
-#include "StringParser.h"
 
 #include <string>
 #include <vector>
 #include <queue>
 
-#include <sqlite3.h> // for error constants
+#include <cstring>
+#include <cerrno>
 
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/statvfs.h>
+#include <sqlite3.h>     // for error constants
+
+
+#include "constants.h"
 #include "global.h"
+#include "helper.h"
+
+#include "PlowException.h"
+#include "IniParser.h"
+#include "Sqlite3.h"
+#include "Sqlite3Result.h"
+#include "StringParser.h"
 #include "TagReader.h"
 
 using namespace std;
 
-const char *USAGE = "Usage: plow [LIST_OPTIONS]|[-L <tbl>]|[-q <sql>]\
-|[-C]|[-I <dir>]\n            |[--help]|[--version]";
-
-const char *SELECT  = "SELECT\n\t'%s' || file as file, artist, title,\
- length, album, genre,\n\tlanguage, mood, tempo, rating, situation,\
- part, track,\n\tparts, tracks\nFROM\n\ttbl_music, tbl_artist,\
- tbl_album, tbl_genre, tbl_rating,\n\ttbl_language,tbl_mood,\
- tbl_situation, tbl_tempo\n";
-
-const char *SELECT_ALL  = "SELECT\n\t*\
- \nFROM\n\ttbl_music, tbl_artist, tbl_album,\
- tbl_genre, tbl_rating,\n\ttbl_language,tbl_mood, tbl_situation,\
- tbl_tempo\n";
-
-const char *WHERE   = "WHERE\n\tid_artist=_id_artist AND\
- id_album=_id_album\n\tAND id_genre=_id_genre AND\
- id_rating=_id_rating\n\tAND id_language=_id_language AND\
- id_mood=_id_mood\n\tAND id_situation=_id_situation AND\
- id_tempo=_id_tempo\n";
 
 IniParser *gIniParser;
 
 string gsSelect;
-
 string gsSet;
-
 string gsDatabase;
-
 string gsMusicDirectory;
-
 string gsPlaylist;
 
 char gcPlayerNumber  = '0';   // player number
                               // -0 | -1 | ... | -9
-
 bool gbShowquery     = false; // print out the query
                               // -Q
-
 bool gbPlay          = true;  // start playing after all
                               // --noplay = do not play
-
 bool gbAddToPlaylist = false; // add the query to current playlist
                               // --add
-
 bool gbShuffle       = false; // shuffle playlist
                               // -S
 
@@ -111,83 +82,7 @@ void printusage()
 {
   cout << USAGE << endl;
   cout << endl;
-  cout << "                 playlist options"                      << endl;
-  cout << "                ****************************************";
-  cout << "**************"                                         << endl;
-  cout << "-|+<C>[e] str   - search for fields containing str"     << endl;
-  cout << "                + search for fields not containing str" << endl;
-  cout << "                e str matches exactly"                  << endl;
-  cout << "                <C> is one of A (album),     a (artist),";
-  cout << " g (genre),"                                            << endl;
-  cout << "                              l (language),  m (mood),  ";
-  cout << " r (rating),"                                           << endl;
-  cout << "                              s (situation), t (tempo), ";
-  cout << " T (title)"                                             << endl;
-  cout << "-0...9          select player number set in configuration";
-  cout << " file"                                                  << endl;
-  cout << "-Q              print out the sql statement"            << endl;
-  cout << "-S              shuffle the playlist"                   << endl;
-  cout << "--add           append to playlist"                     << endl;
-  cout << "--noplay        don't start a player"                   << endl;
-  cout << endl;
-  cout << endl;
-  cout << "                 print table"                           << endl;
-  cout << "                ****************************************";
-  cout << "**************"                                         << endl;
-  cout << "-L <tbl>        <tbl> is one of album, artist,";
-  cout << " genre,     language,"                                  << endl;
-  cout << "                                mood,  rating,";
-  cout << " situation, tempo"                                      << endl;
-  cout << endl;
-  cout << endl;
-  cout << "                 execute sql statement"                 << endl;
-  cout << "                ****************************************";
-  cout << "**************"                                         << endl;
-  cout << "-q <sql>        executes statement <sql>"               << endl;
-  cout << endl;
-  cout << endl;
-  cout << "                 copy playlist"                         << endl;
-  cout << "                ****************************************";
-  cout << "**************"                                         << endl;
-  cout << "-C              copy all files in the current playlist" << endl;
-  cout << "                to portable_device set in config file"  << endl;
-  cout << endl;
-  cout << endl;
-  cout << "                 insert new files into db"              << endl;
-  cout << "                ****************************************";
-  cout << "**************"                                         << endl;
-  cout << "-I <dir>        insert all (supported) files in <dir>";
-  cout << " into database"                                         << endl;
-  cout << "                Note: <dir> has to be an absolute path" << endl;
-  cout << endl;
-  cout << endl;
-  cout << "                 help"                                  << endl;
-  cout << "                ****************************************";
-  cout << "**************"                                         << endl;
-  cout << "--help          print this message"                     << endl;
-  cout << "--version       print out version"                      << endl;
-  cout << endl;
-  cout << endl;
-  cout << "                 examples"                              << endl;
-  cout << "                ****************************************";
-  cout << "**************"                                         << endl;
-  cout << "plow -a queen               ";
-  cout << " # artist contains queen"                               << endl;
-  cout << "plow -a queen -T rock       ";
-  cout << " # artist contains queen"                               << endl;
-  cout << "                             # AND title contains rock" << endl;
-  cout << "plow -ae Queen              ";
-  cout << " # artist is exactly Queen"                             << endl;
-  cout << "plow +a queen               ";
-  cout << " # artist NOT contains queen"                           << endl;
-  cout << "plow +ae Queen              ";
-  cout << " # artist IS NOT Queen"                                 << endl;
-  cout << "plow -a queen beatles       ";
-  cout << " # artist contains queen OR beatles"                    << endl;
-  cout << "plow -a queen +a queens     ";
-  cout << " # artist contains queen AND NOT queens"                << endl;
-  cout << "plow -a queen -a \"stone age\"";
-  cout << " # artist contains queen AND stone age"                 << endl;
+  cout << HELP << endl;
 } // printusage()
 
 
@@ -308,7 +203,6 @@ string infoString(Sqlite3Result &rs,
       //
       // now fields from database
       //
-
       else {
         tmp2 = &(tokens[i]->c_str()[1]);
         tmp2.erase(tmp2.size() - 1, 1);
@@ -655,10 +549,10 @@ void parseArgs(int argc, char** argv)
               delete gIniParser;
               exit(0);
             } else if(strcmp(argv[i], "--version") == 0) {
-	      cout << PACKAGE << " " << VERSION << endl;
-	      delete gIniParser;
-	      exit(0);
-	    } else {
+              cout << PACKAGE << " " << VERSION << endl;
+              delete gIniParser;
+              exit(0);
+            } else {
               throw PlowException("parseArgs",
                         "Wrong syntax near '--'",
                         USAGE);
@@ -783,7 +677,25 @@ int main(int argc, char** argv)
 
   try {
     gIniParser = new IniParser(inifile.c_str());
+  } catch (PlowException &e) {
+    if(e.errn() == ENOENT) {
+      cout << "running setup ..." << endl;
+      mkdir_r(pdir);
+      ofstream fout(inifile.c_str());
+      fout << INI_FILE;
+      fout.close();
+      cout << "... created " << inifile << endl;
+      exe(DATABASE);
+      cout << "... created database " << gsDatabase << endl;
+      cout << "You have to edit " << inifile << " now." << endl;
+      return 0;
+    } else {
+      e.print();
+      return 1;
+    }
+  }
 
+  try {
     gsMusicDirectory = gIniParser->get("[general]path");
 
     if(!gIniParser->get("[general]playlist").empty()) {
