@@ -16,6 +16,7 @@
 * Free Software Foundation, Inc.,                                      *
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
 ***********************************************************************/
+
 #define PACKAGE "plow"
 #ifndef VERSION
 #define VERSION "unknown version"
@@ -33,11 +34,7 @@
 #include <cstring>
 #include <cerrno>
 
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/statvfs.h>
-#include <sqlite3.h>     // for error constants
-
+#include <sqlite3.h>
 
 #include "constants.h"
 #include "global.h"
