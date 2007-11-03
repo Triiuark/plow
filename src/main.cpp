@@ -278,8 +278,6 @@ string infoString(Sqlite3Result &rs,
  */
 void copy2Portable()
 {
-  init();
-
   vector<string> *files = new vector<string>;
 
   string portable = gIniParser->get("[general]portable");
@@ -629,6 +627,7 @@ void parseArgs(int argc, char** argv)
           break;
 
           case 'C': // -C
+            init();
             copy2Portable();
             delete gIniParser;
             exit(0);
@@ -636,6 +635,7 @@ void parseArgs(int argc, char** argv)
 
           case 'I': // -I
             if(i + 1 < argc) {
+              init();
               add2Db(argv[i+1],
                      gsDatabase.c_str(),
                      gsMusicDirectory.c_str());
