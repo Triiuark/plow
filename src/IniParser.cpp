@@ -21,97 +21,125 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
+
+#include <cerrno>
 
 #include "helper.h"
 #include "PlowException.h"
-
-#include <cerrno>
 
 using namespace std;
 
 
 
 IniParser::IniParser(const char *iniFile) {
-  err     = 0;
-  options = NULL;
-  string errmsg;
+  mSM_options = 0;
+  ostringstream errmsg;
 
   ifstream ini(iniFile);
   if(!ini) {
-    errmsg = "Could not open ";
-    errmsg += iniFile;
-    throw PlowException("IniParser", errmsg.c_str());
-    //throw string(strerror(errno));
-    //return;
+    errmsg << "Could not open " <<  iniFile;
+    throw PlowException("IniParser", errmsg.str().c_str());
   }
 
-  options = new a_array_s;
+  mSM_options = new StrMap;
 
-  uint length = 1024; //TODO: search for a runtime solution
+  const string whitespace(" \t");
 
-  char buffer[length];
-  char group [length];
+  string buffer;
+  string group;
+  string value;
 
   char *option;
-  char *value;
 
-  while(ini.getline(buffer, length)) {
-    if(!strlen(buffer) || buffer[0] == '#') {
+  uint pos;
+  uint line = 0;
+
+  while(getline(ini, buffer)) {
+    ++line;
+    value = "";
+
+    // trim buffer
+    pos = buffer.find_first_not_of(whitespace);
+    if(pos != string::npos) {
+      buffer = buffer.substr(pos);
+    }
+    pos = buffer.find_last_not_of(whitespace);
+    if(pos != string::npos) {
+      buffer = buffer.substr(0, pos + 1);
+    }
+
+    // ignore empty lines and comments
+    if(buffer.length() == 0 || buffer.c_str()[0] == '#') {
       continue;
     }
-    if(buffer[0] == '[') {
-      if(buffer[strlen(buffer) - 1] == ']') {
-        sprintf(group, "%s", buffer);
+
+    // get section
+    if(buffer.c_str()[0] == '[') {
+      if(buffer.c_str()[buffer.length() - 1] == ']') {
+        group = buffer;
       } else {
-        err = 1;
-        break;
+        errmsg << "Corrupted section name in ";
+        errmsg << iniFile << " at line " << line << ".";
+        throw PlowException("IniParser", errmsg.str().c_str());
       }
-    } else {
-      value = index(buffer, '=');
-      if(!value) {
-        err = 2;
-        continue;
+    }
+
+    // get option - value pairs
+    else {
+      pos = buffer.find_first_of("=");
+
+      if(pos == string::npos) {
+        errmsg << "Missing '=' in " << iniFile;
+        errmsg << " at line " << line << ".";
+        throw PlowException("IniParser", errmsg.str().c_str());
+      } else if(pos == 0) {
+        errmsg << "Missing option in" << iniFile;
+        errmsg << " at line " << line << ".";
+        throw PlowException("IniParser", errmsg.str().c_str());
       }
 
-      value[0] = 0; // buffer = 'OPTION=VALUE'
-                    // remove '=VALUE' from buffer
+      value  = buffer.substr(pos + 1);
+      buffer = buffer.substr(0, pos);
+      pos    = buffer.find_last_not_of(whitespace);
+      buffer = buffer.substr(0, pos + 1);
+      pos    = value.find_first_not_of(whitespace);
+      if(pos != string::npos) {
+        value  = value.substr(pos);
+      }
 
-      option = new char[strlen(group) + strlen(buffer) + 1];
-      sprintf(option, "%s%s", group, buffer);
+      if(value.length() > 0) {
+        option = new char[group.length() + buffer.length() + 1];
+        sprintf(option, "%s%s", group.c_str(), buffer.c_str());
 
-      (*options)[option] = &value[1]; // value without '='
+        (*mSM_options)[option] = value;
+      }
     }
   }
-
   ini.close();
 }
 
 
 
-string IniParser::get(const char *option) {
-  return (*options)[option];
+string IniParser::get(const char *option)
+{
+  return (*mSM_options)[option];
 }
 
 
 
-int IniParser::error() {
-  return err;
-}
+IniParser::~IniParser()
+{
+  StrMapIt it = mSM_options->begin();
 
-
-
-IniParser::~IniParser() {
-
-  a_array_s_it it = options->begin();
-
-  while(it != options->end()) {
+  while(it != mSM_options->end()) {
     if(it->second != "") {
-      //TODO: if it is empty, maybe key wasn't created with new,
+      //if it is empty, key wasn't created with new,
       // so I can't delete it
       delete[] it->first;
     }
     ++it;
   }
 
-  delete options; options = NULL;
+  delete mSM_options;
 }

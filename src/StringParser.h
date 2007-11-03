@@ -25,19 +25,45 @@
 
 using namespace std;
 
-class StringParser {
+/**
+ * @brief splits a string into tokens
+ */
+class StringParser
+{
   public:
+    /**
+     * creates a new StringParser
+     *
+     * @param str the string
+     * @param delim the delimiter
+     */
     StringParser(const char *str, const char delim = ' ');
 
+    /**
+     * @returns a vector containing the tokens
+     */
     vector<string *> getTokens();
 
+    /**
+     * @returns a char ** like argv of the tokens,
+     *          but it is 0 terminated so we know where it ends
+     *         (e.g. for use in execvp)
+     */
     char **getArgv();
+
+    /**
+     * @returns the number of tokens
+     */
     uint   getSize();
 
+    /**
+     * destroys the StringParser
+     */
     ~StringParser();
+
   private:
-    char **argv;
-    vector<string *> tokens;
+    char **m_argv;
+    vector<string *> m_tokens;
 };
 
 #endif

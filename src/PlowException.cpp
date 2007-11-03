@@ -20,8 +20,8 @@
 #include "PlowException.h"
 
 #include <iostream>
-#include <cerrno>
 #include <string>
+#include <cerrno>
 
 #include "global.h"
 
@@ -29,7 +29,8 @@ using namespace std;
 
 PlowException::PlowException(const char *where,
                              const char *what,
-                             const char *solution) {
+                             const char *solution)
+{
   mi_err = errno;
   if(errno != 0) {
     errno = 0;
@@ -44,12 +45,15 @@ PlowException::PlowException(const char *where,
 
 
 
-PlowException::~PlowException() {
+PlowException::~PlowException()
+{
+  // empty
 }
 
 
 
-void PlowException::print() {
+void PlowException::print()
+{
   cout << endl;
   cerr << message() << endl;
   cout << endl;
@@ -57,8 +61,8 @@ void PlowException::print() {
 
 
 
-string PlowException::message() {
-
+string PlowException::message()
+{
   string out("Error in ");
 
   out.append(mcs_where);
@@ -80,6 +84,7 @@ string PlowException::message() {
 
 
 
-int PlowException::errn() {
+int PlowException::error()
+{
   return mi_err;
 }

@@ -25,25 +25,45 @@
 /**
  * @brief main exception class of plow
  */
-class PlowException {
-
+class PlowException
+{
   public:
+    /**
+     * creates a new PlowException with the given messages
+     * @param where    the function name, where the error occurs
+     * @param what     what exactly is the problem
+     * @param solution a hint to solve the problem, if there is one
+     */
     PlowException(const char *where,
                   const char *what,
                   const char *solution = 0);
 
-    ~PlowException();
-
-    void print();
+    /**
+     * @returns a string containing an error description
+     */
     std::string message();
-    int errn();
+
+    /**
+     * prints message() to std::cerr
+     */
+    void print();
+
+    /**
+     * @returns the value of errno at the moment
+     *          of creating this PlowException
+     */
+    int error();
+
+    /**
+     * destroys the PlowException
+     */
+    ~PlowException();
 
   private:
     int mi_err;
     std::string mcs_where;
     std::string mcs_what;
     std::string mcs_solution;
-
 };
 
 #endif

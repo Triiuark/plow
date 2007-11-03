@@ -28,15 +28,16 @@
 
 using namespace TagLib;
 
-OggReader::OggReader(const char* fname, a_array_cs &fields) {
+OggReader::OggReader(const char* fname, CStrMap &fields)
+{
   err    = 0;
-  values = new a_array_s;
+  mSM_values = new StrMap;
   Ogg::Vorbis::File f(fname);
   Ogg::XiphComment *tag;
   if((tag = f.tag())) {
     const Ogg::FieldListMap *flm = &tag->fieldListMap();
 
-    a_array_cs_it it = fields.begin();
+    CStrMapIt it = fields.begin();
 
     const StringList *sl;
 
@@ -45,7 +46,7 @@ OggReader::OggReader(const char* fname, a_array_cs &fields) {
       sl = &(*flm)[fields[it->first]];
 
       if(!sl->isEmpty()) {
-        (*values)[it->first] = (*sl)[0].to8Bit(true);
+        (*mSM_values)[it->first] = (*sl)[0].to8Bit(true);
       }
 
       ++it;
@@ -58,63 +59,84 @@ OggReader::OggReader(const char* fname, a_array_cs &fields) {
     int len = f.audioProperties()->length() * 1000;
     char *buff = new char[16];
     sprintf(buff, "%d", len);
-    (*values)["length"] = (buff);
+    (*mSM_values)["length"] = (buff);
     delete[] buff;
   }
 }
 
-const char *OggReader::getId()      {
-  return (*values)["id"].c_str();
+const char *OggReader::getId()
+{
+  return (*mSM_values)["id"].c_str();
 }
 
-const char *OggReader::getArtist()  {
-  return (*values)["artist"].c_str();
+const char *OggReader::getArtist()
+{
+  return (*mSM_values)["artist"].c_str();
 }
 
-const char *OggReader::getTitle()   {
-  return (*values)["title"].c_str();
+const char *OggReader::getTitle()
+{
+  return (*mSM_values)["title"].c_str();
 }
 
-const char *OggReader::getAlbum()   {
-  return (*values)["album"].c_str();
+const char *OggReader::getAlbum()
+{
+  return (*mSM_values)["album"].c_str();
 }
 
-const char *OggReader::getPart()    {
-  return (*values)["part"].c_str();
+const char *OggReader::getPart()
+{
+  return (*mSM_values)["part"].c_str();
 }
 
-const char *OggReader::getParts()   {
-  return (*values)["parts"].c_str();
+const char *OggReader::getParts()
+{
+  return (*mSM_values)["parts"].c_str();
 }
 
-const char *OggReader::getTrack()   {
-  return (*values)["track"].c_str();
+const char *OggReader::getTrack()
+{
+  return (*mSM_values)["track"].c_str();
 }
 
-const char *OggReader::getTracks()  {
-  return (*values)["tracks"].c_str();
+const char *OggReader::getTracks()
+{
+  return (*mSM_values)["tracks"].c_str();
 }
 
-const char *OggReader::getGenre()   {
-  return (*values)["genre"].c_str();
+const char *OggReader::getGenre()
+{
+  return (*mSM_values)["genre"].c_str();
 }
 
-const char *OggReader::getRating()   {
-  return (*values)["rating"].c_str();
+const char *OggReader::getRating()
+{
+  return (*mSM_values)["rating"].c_str();
 }
 
-const char *OggReader::getYear()    {
-  return (*values)["year"].c_str();
+const char *OggReader::getYear()
+{
+  return (*mSM_values)["year"].c_str();
 }
 
-const char *OggReader::getComment() {
-  return (*values)["comment"].c_str();
+const char *OggReader::getComment()
+{
+  return (*mSM_values)["comment"].c_str();
 }
 
-const char *OggReader::getLength()  {
-  return (*values)["length"].c_str();
+const char *OggReader::getLength()
+{
+  return (*mSM_values)["length"].c_str();
 }
 
-const char *OggReader::get(const char *field) {
-  return (*values)[field].c_str();
+const char *OggReader::get(const char *field)
+{
+  return (*mSM_values)[field].c_str();
+}
+
+
+
+OggReader::~OggReader()
+{
+  delete mSM_values;
 }

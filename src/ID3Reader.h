@@ -24,15 +24,11 @@
 
 #include "AbstractReader.h"
 
-class ID3Reader : public AbstractReader {
-
+class ID3Reader : public AbstractReader
+{
   public:
-    ID3Reader(
-      const char* fname,
-      a_array_cs &fields
-    );
-
-    ~ID3Reader() {}
+    ID3Reader(const char* fname, CStrMap &fields);
+    ~ID3Reader();
 
     const char *getId();
     const char *getArtist();
@@ -55,7 +51,7 @@ class ID3Reader : public AbstractReader {
   private:
     int err;
 
-    a_array_s *values;
+    StrMap *mSM_values;
 };
 
 #endif

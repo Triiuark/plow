@@ -1,7 +1,6 @@
 Important
 =========
 
-* improve plow initialization (first run setup)
 * improve error handling
 * code documentation
 * own key for tags support

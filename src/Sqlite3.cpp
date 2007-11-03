@@ -28,35 +28,40 @@
 
 using namespace std;
 
-Sqlite3::Sqlite3(const char *databaseName) {
+Sqlite3::Sqlite3(const char *databaseName)
+{
   mcs_dbname = databaseName;
-  errstr     = NULL;
-  rc         = 0;
+  mi_error   = 0;
 }
 
 
 
-Sqlite3Result *Sqlite3::exe(const char *query) {
-  sqlite3        *db;
-  Sqlite3Result  *rs = NULL;
+Sqlite3Result *Sqlite3::exe(const char *query)
+{
+  sqlite3       *db;
+  Sqlite3Result *rs = 0;
   char          **result;
-  char           *zErrMsg;
-  int             nrow;
-  int             ncol;
+  char          *zErrMsg;
+  int           nrow;
+  int           ncol;
 
-  delete[] errstr; errstr = NULL;
+  mi_error = sqlite3_open(mcs_dbname, &db);
 
-  rc = sqlite3_open(mcs_dbname, &db);
-
-  if(rc == SQLITE_OK) {
-    rc = sqlite3_get_table(db, query, &result, &nrow, &ncol, &zErrMsg);
-    if(rc == SQLITE_OK) {
+  if(mi_error == SQLITE_OK) {
+    mi_error = sqlite3_get_table(db,
+                                 query,
+                                 &result,
+                                 &nrow,
+                                 &ncol,
+                                 &zErrMsg);
+    if(mi_error == SQLITE_OK) {
       rs = new Sqlite3Result(result, nrow, ncol);
-
     }
+
     if(zErrMsg) {
       throw PlowException("Sqlite3::exe", zErrMsg);
     }
+
   } else {
     throw PlowException("Sqlite3::exe", sqlite3_errmsg(db));
   }
@@ -67,13 +72,15 @@ Sqlite3Result *Sqlite3::exe(const char *query) {
 
 
 
-int Sqlite3::error() {
-  return rc;
+int Sqlite3::error()
+{
+  return mi_error;
 }
 
 
 
 
-Sqlite3::~Sqlite3() {
-  delete[] errstr; errstr = NULL;
+Sqlite3::~Sqlite3()
+{
+  // empty
 }

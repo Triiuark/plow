@@ -49,14 +49,15 @@
 
 using namespace std;
 
+IniParser *gIniParser = 0;
 
-IniParser *gIniParser;
-
+string gsPlowHome;
 string gsSelect;
 string gsSet;
 string gsDatabase;
 string gsMusicDirectory;
 string gsPlaylist;
+
 
 char gcPlayerNumber  = '0';   // player number
                               // -0 | -1 | ... | -9
@@ -70,11 +71,17 @@ bool gbShuffle       = false; // shuffle playlist
                               // -S
 
 
-
+/**
+ * adds files in path into database dbPath, and strips musicPath from
+ * file names
+ */
 void add2Db(char *path, const char *dbPath, const char *musicPath);
 
 
 
+/**
+ * prints out a help message
+ */
 void printusage()
 {
   cout << USAGE << endl;
@@ -84,6 +91,11 @@ void printusage()
 
 
 
+/**
+ * @param query a sql statement
+ *
+ * @returns a new Sqlite3Result object for @a query
+ */
 Sqlite3Result *exe(const char *query)
 {
   Sqlite3 sql(gsDatabase.c_str());
@@ -94,9 +106,39 @@ Sqlite3Result *exe(const char *query)
 
 
 
-/********************************************************************
- *  functions for copy list to portable                             *
- ********************************************************************/
+void init()
+{
+  if(!gIniParser) {
+    string inifile = gsPlowHome + "/plow.conf";
+
+    try {
+      gIniParser       = new IniParser(inifile.c_str());
+      gsMusicDirectory = gIniParser->get("[general]path");
+
+      if(!gIniParser->get("[general]playlist").empty()) {
+        gsPlaylist = gIniParser->get("[general]playlist");
+      }
+    } catch (PlowException &e) {
+      if(e.error() == ENOENT) {
+        cout << "running setup ..." << endl;
+        mkdir_r(gsPlowHome);
+        ofstream fout(inifile.c_str());
+        fout << INI_FILE;
+        fout.close();
+        cout << "... created " << inifile << endl;
+        exe(DATABASE);
+        cout << "... created database " << gsDatabase << endl;
+        cout << "You have to edit " << inifile << " now." << endl;
+        exit(0);
+      } else {
+        e.print();
+        exit(1);
+      }
+    }
+  }
+}
+
+
 
 /**
  * get the required fields for the filename
@@ -127,69 +169,69 @@ string infoString(Sqlite3Result &rs,
     //
     // first some 'special' fields
     //
-    if(tokens[i]->c_str()[0] == '%'
-        && tokens[i]->c_str()[strsize - 1] == '%') {
-      if(*tokens[i] == "%track0%") {
+    if(tokens[i]->c_str()[0] == '['
+        && tokens[i]->c_str()[strsize - 1] == ']') {
+      if(*tokens[i] == "[track0]") {
         if(strlen(rs.get(row, "track")) < 2) {
           tmp += "0";
         }
         tmp += rs.get(row, "track");
-      } else if(*tokens[i] == "%tracks0%") {
+      } else if(*tokens[i] == "[tracks0]") {
         if(strlen(rs.get(row, "tracks")) < 2) {
           tmp += "0";
         }
         tmp += rs.get(row, "tracks");
-      } else if(*tokens[i] == "%part0%") {
+      } else if(*tokens[i] == "[part0]") {
         if(strlen(rs.get(row, "part")) < 2) {
           tmp += "0";
         }
         tmp += rs.get(row, "part");
-      } else if(*tokens[i] == "%parts0%") {
+      } else if(*tokens[i] == "[parts0]") {
         if(strlen(rs.get(row, "parts")) < 2) {
           tmp += "0";
         }
         tmp += rs.get(row, "parts");
-      } else if(*tokens[i] == "%fileext%") {
+      } else if(*tokens[i] == "[fileext]") {
         tmp2 = rs.get(row, "file");
         uint pos = tmp2.rfind('.');
         if(pos != string::npos) {
           tmp += tmp2.substr(pos);
         }
-      } else if(*tokens[i] == "%lengths%") {
+      } else if(*tokens[i] == "[lengths]") {
         tmp3.str("");
         tmp3 << (uint)(atof(rs.get(row, "length"))/1000.0);
         tmp += tmp3.str();
-      } else if(*tokens[i] == "%artistOrAlbum%") {
+      } else if(*tokens[i] == "[artistOrAlbum]") {
         if(strcmp(rs.get(row, "album_id_artist"), "1") != 0) {
           tmp += rs.get(row, "artist");
         } else {
           tmp += rs.get(row, "album");
         }
-      } else if(*tokens[i] == "%albumOrArtist%") {
+      } else if(*tokens[i] == "[albumOrArtist]") {
         if(strcmp(rs.get(row, "album_id_artist"), "1") != 0) {
           tmp += rs.get(row, "album");
         } else {
           tmp += rs.get(row, "artist");
         }
-      } else if(*tokens[i] == "%albumOrEmpty%") {
+      } else if(*tokens[i] == "[albumOrEmpty]") {
         if(strcmp(rs.get(row, "album_id_artist"), "1") != 0) {
           tmp += rs.get(row, "album");
         } else {
           lastEmpty = true;
         }
-      } else if(*tokens[i] == "%emptyOrAlbum%") {
+      } else if(*tokens[i] == "[emptyOrAlbum]") {
         if(strcmp(rs.get(row, "album_id_artist"), "1") == 0) {
           tmp += rs.get(row, "album");
         } else {
           lastEmpty = true;
         }
-      } else if(*tokens[i] == "%artistOrEmpty%") {
+      } else if(*tokens[i] == "[artistOrEmpty]") {
         if(strcmp(rs.get(row, "album_id_artist"), "1") != 0) {
           tmp += rs.get(row, "artist");
         } else {
           lastEmpty = true;
         }
-      } else if(*tokens[i] == "%emptyOrArtist%") {
+      } else if(*tokens[i] == "[emptyOrArtist]") {
         if(strcmp(rs.get(row, "album_id_artist"), "1") == 0) {
           tmp += rs.get(row, "artist");
         } else {
@@ -232,13 +274,20 @@ string infoString(Sqlite3Result &rs,
 
 
 /**
- * copy files in playlist to the portable device
+ * copies files in playlist to the portable device
  */
 void copy2Portable()
 {
+  init();
+
   vector<string> *files = new vector<string>;
 
   string portable = gIniParser->get("[general]portable");
+
+  if(portable.empty()) {
+    cout << "no portable device set in config file" << endl;
+    exit(1);
+  }
 
   cout << "Copying " << flush;
 
@@ -262,7 +311,6 @@ void copy2Portable()
       files->push_back(buf);
     }
   }
-
   inputStream.close();
   delete[] buf;
 
@@ -286,7 +334,6 @@ void copy2Portable()
   Sqlite3Result *rs;
 
   for(uint i = 0, j = files->size(); i < files->size(); i++, j--) {
-
     dst = portable + "/";
 
     if(!portableName.empty()) {
@@ -297,7 +344,8 @@ void copy2Portable()
         string *tmp = new string("file not found in database: ");
         tmp->append(files->at(i));
         errno = 0;
-        PlowException *e = new PlowException("copy2Portable", tmp->c_str());
+        PlowException *e = new PlowException("copy2Portable",
+                                             tmp->c_str());
         e->print();
         delete rs;
         delete tmp;
@@ -305,9 +353,10 @@ void copy2Portable()
         continue;
       }
 
-      dst += infoString(*rs, 0,
-                 StringParser(portableName.c_str()).getTokens(), true);
-
+      dst += infoString(*rs,
+                        0,
+                        StringParser(portableName.c_str()).getTokens(),
+                        true);
       delete rs;
     } else {
       // fallback: use original filename
@@ -321,9 +370,8 @@ void copy2Portable()
       }
       cout << j << " " << flush;
     } catch (PlowException &e) {
-      cout << endl;
       e.print();
-      if(e.errn() == ENOSPC || e.errn() == ENOTDIR) {
+      if(e.error() == ENOSPC || e.error() == ENOTDIR) {
         // no space left on device or can't create dir -> break here
         break;
       }
@@ -338,12 +386,10 @@ void copy2Portable()
 
 
 
-/********************************************************************
- * functions for -q and -L options                                  *
- ********************************************************************/
-
 /**
- *  executes query and prints out the result as a nice table
+ * executes query and prints out the result as a nice table
+ *
+ * @param query a sql statement
  */
 void printResult(const char *query)
 {
@@ -352,10 +398,11 @@ void printResult(const char *query)
   if(rs->cols()) {
     cout << "| ";
     int len = 0;
-    for(int i = 0; i < rs->cols(); i++) {
+    for(int i = 0; i < rs->cols(); ++i) {
       len = strlen(rs->getHead(i)) - utf8strlen(rs->getHead(i));
       cout << setw(rs->getWidth(i) + len);
-      cout <<  setiosflags(ios::left) << rs->getHead(i);
+      cout << setiosflags(ios::left);
+      cout << rs->getHead(i);
       cout << " | ";
     }
     cout << endl;
@@ -375,17 +422,15 @@ void printResult(const char *query)
     cout << "Successfully executed satement. Empty result." << endl;
   }
   delete rs;
-
-  delete gIniParser;
-  exit(0);
 } // printResult()
 
 
 
-/********************************************************************
- * functions for creating playlist                                  *
- ********************************************************************/
-
+/**
+ * creates a playlist for the given query
+ *
+ * @param query a sql statement
+ */
 void createList(const char *query)
 {
   Sqlite3Result *rs = exe(query);
@@ -440,22 +485,21 @@ void createList(const char *query)
   delete rs;
 } // createList()
 
-int parseFieldForSet(int argc, char **argv, int i)
-{
-  string tables(
-      "album artist genre language mood rating situation tempo");
-  for(; i < argc; ++i){
-    char *field = argv[i];
-    char *value = strchr(field, '=');
-    value[0] = '\0';
-    ++value;
-    cout << field << ": " << value << endl;
-  }
-  return i-1;
-} // parseField()
 
 
-int parseField(int argc, char **argv, int i)
+/**
+ * parses the command-line arguments for the filtering
+ * (creates gsSelect)
+ *
+ * @param argc number of arguments
+ * @param argv arguments
+ * @param i    number of the argument to parse
+ *
+ * @throws PlowException on any error
+ *
+ * @return number of the next argument to parse
+ */
+int parseFilter(int argc, char **argv, int i)
 {
   map<char, string> fieldNames;
 
@@ -475,11 +519,11 @@ int parseField(int argc, char **argv, int i)
 
   if(fieldNames[f] == "") {
     errmsg << "Missing option near '" << argv[i] << "'";
-    throw PlowException("parseField", errmsg.str().c_str(), USAGE);
+    throw PlowException("parseFilter", errmsg.str().c_str(), USAGE);
   }
   if(argc < i + 2) {
     errmsg << "Missing argument for option '" << f << "'";
-    throw PlowException("parseField", errmsg.str().c_str(), USAGE);
+    throw PlowException("parseFilter", errmsg.str().c_str(), USAGE);
   }
 
   char pre[9];
@@ -492,8 +536,9 @@ int parseField(int argc, char **argv, int i)
     sprintf(pre, "='");
     sprintf(post, "' OR ");
   } else if(argv[i][2] != 0) {
-    errmsg << "Wrong syntax near '" << argv[i][1] << argv[i][2] << "'";
-    throw PlowException("parseField", errmsg.str().c_str(), USAGE);
+    errmsg << "Wrong syntax near '";
+    errmsg << argv[i][1] << argv[i][2] << "'";
+    throw PlowException("parseFilter", errmsg.str().c_str(), USAGE);
   }
 
   if(argv[i][0] == '+') {
@@ -517,16 +562,22 @@ int parseField(int argc, char **argv, int i)
 
 
 
+/**
+ * parses the command-line arguments
+ *
+ * @param argc number of arguments
+ * @param argv arguments
+ *
+ * @throws PlowException on any error
+ */
 void parseArgs(int argc, char** argv)
 {
   for(int i = 1; i < argc; i++) {
-    //cout << i << ": " << argv[i] << endl;
     switch(argv[i][0]) {
       case '-': // -?
         switch(argv[i][1]) {
 
           case 0: // -
-            //errorhandler("missing argument");
             throw PlowException("parseArgs",
                       "Missing option after -",
                       USAGE);
@@ -537,10 +588,6 @@ void parseArgs(int argc, char** argv)
               gbPlay = false;
             } else if(strcmp(argv[i], "--add") == 0) {
               gbAddToPlaylist = true;
-            } else if(strcmp(argv[i], "--set") == 0) {
-              gbPlay = false;
-              i = parseFieldForSet(argc, argv, i+1);
-              cout << "..." << gsSet << endl;
             } else if(strcmp(argv[i], "--help") == 0) {
               printusage();
               delete gIniParser;
@@ -568,6 +615,7 @@ void parseArgs(int argc, char** argv)
                           USAGE);
               } else {
                 printResult(argv[i + 1]);
+                exit(0);
               }
             }
           break;
@@ -595,7 +643,8 @@ void parseArgs(int argc, char** argv)
               exit(0);
             } else {
               throw PlowException("parseArgs",
-                        "Missing argument for option '-I'", USAGE);
+                                  "Missing argument for option '-I'",
+                                  USAGE);
             }
 
           break;
@@ -604,12 +653,19 @@ void parseArgs(int argc, char** argv)
             if(argv[i + 1]) {
               char query[42 + 4 * strlen(argv[i + 1])];
               sprintf(query,
-                  "SELECT \"id_%s\", \"%s\" FROM \"tbl_%s\" ORDER BY \"%s\";",
-                  argv[i + 1], argv[i + 1], argv[i + 1], argv[i + 1]);
+                      "SELECT \"id_%s\", \"%s\"\
+                          FROM \"tbl_%s\" ORDER BY \"%s\";",
+                      argv[i + 1],
+                      argv[i + 1],
+                      argv[i + 1],
+                      argv[i + 1]);
               printResult(query);
+              delete gIniParser;
+              exit(0);
             } else {
               throw PlowException("parseArgs",
-                        "Missing argument for option '-L'", USAGE);
+                                  "Missing argument for option '-L'",
+                                  USAGE);
             }
           break;
 
@@ -620,16 +676,17 @@ void parseArgs(int argc, char** argv)
           break;
 
           default: // -?
-            i = parseField(argc, argv, i);
+            i = parseFilter(argc, argv, i);
           break;
         } // switch(argv[i][1])
       break; // case '-'
 
       case '+': // +?
-        i = parseField(argc, argv, i);
+        i = parseFilter(argc, argv, i);
       break;
 
-      // parse abbrevations set in inifile and call this function again
+      // parse abbrevations set in inifile
+      // and call this function again
       case '.':  // .?
         if(argv[i][1] != 0) {
           char buf[strlen(argv[i]) + 6];
@@ -643,7 +700,9 @@ void parseArgs(int argc, char** argv)
           StringParser abbrP(abbr.c_str());
           parseArgs(abbrP.getSize(), abbrP.getArgv());
         } else {
-          throw PlowException("parseArgs", "Missing abbrevation name", USAGE);
+          throw PlowException("parseArgs",
+                              "Missing abbrevation name",
+                              USAGE);
         }
       break;
 
@@ -656,61 +715,34 @@ void parseArgs(int argc, char** argv)
 
 
 
+/**
+ * hmm
+ */
 int main(int argc, char** argv)
 {
-    bool forkplayer     = true;  // wether or not to fork player
+    bool forkplayer = true;  // wether or not to fork player
 
     ostringstream errmsg;
 
-    string pdir = getenv("HOME");
-    pdir.append("/.plow");
+    gsPlowHome = getenv("HOME");
+    gsPlowHome.append("/.plow");
 
-    gsDatabase = pdir + "/plow.db";
-    gsPlaylist = pdir + "/plow.m3u";
-
-    string inifile = pdir + "/plowrc";
+    gsDatabase = gsPlowHome + "/plow.sqlite";
+    gsPlaylist = gsPlowHome + "/plow.m3u";
 
     string order = ";";
 
   try {
-    gIniParser = new IniParser(inifile.c_str());
-  } catch (PlowException &e) {
-    if(e.errn() == ENOENT) {
-      cout << "running setup ..." << endl;
-      mkdir_r(pdir);
-      ofstream fout(inifile.c_str());
-      fout << INI_FILE;
-      fout.close();
-      cout << "... created " << inifile << endl;
-      exe(DATABASE);
-      cout << "... created database " << gsDatabase << endl;
-      cout << "You have to edit " << inifile << " now." << endl;
-      return 0;
-    } else {
-      e.print();
-      return 1;
-    }
-  }
-
-  try {
-    gsMusicDirectory = gIniParser->get("[general]path");
-
-    if(!gIniParser->get("[general]playlist").empty()) {
-      gsPlaylist = gIniParser->get("[general]playlist");
-    }
-
     parseArgs(argc, argv);
 
-     //
-    // if we're still here we have to build a playlist ;-)
-    //
+    init();
 
-    if(!gbShuffle && !gIniParser->get("[general]order").empty()) {
+    if(gbShuffle) {
+      order = "ORDER BY\n\tRANDOM();";
+    } else if(!gIniParser->get("[general]order").empty()) {
       order  = "ORDER BY\n\t";
       order += gIniParser->get("[general]order");
       order += ";";
-    } else if(gbShuffle) {
-      order = "ORDER BY\n\tRANDOM();";
     }
 
     char select[strlen(SELECT) + gsMusicDirectory.size() + 1];
@@ -789,6 +821,9 @@ int main(int argc, char** argv)
 
 
 
+/**
+ * see above
+ */
 void add2Db(char *path, const char *dbPath, const char *musicPath)
 {
   Sqlite3Result *sr, *sr2;
@@ -809,7 +844,7 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
   char *result;
 
   TagReader *tag;
-  p_queue *fnames = new p_queue;
+  PrioQ *fnames = new PrioQ;
 
   ostringstream errmsg;
 

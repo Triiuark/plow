@@ -20,7 +20,8 @@
 #ifndef PLOW_ABSTRACT_READER_H
 #define PLOW_ABSTRACT_READER_H
 
-class AbstractReader {
+class AbstractReader
+{
   public:
     virtual ~AbstractReader() {}
 

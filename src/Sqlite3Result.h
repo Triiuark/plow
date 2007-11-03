@@ -27,30 +27,78 @@
 
 using namespace std;
 
-class Sqlite3Result {
-
+/**
+ * @brief handles sqlite 3 result
+ */
+class Sqlite3Result
+{
   public:
+    /**
+     * creates a new Sqlite3Result object
+     *
+     * @param sqlresult result value of sqlite3_get_table() function
+     * @param rows      number of rows in result
+     * @param cols      number of columns in result
+     */
     Sqlite3Result(char **sqlresult, int rows, int cols);
 
+    /**
+     * @param col column number
+     *
+     * @return the column name of column col,
+     *         or 0 if col not found
+     */
     const char *getHead(int col);
+
+    /**
+     * @param row    row number
+     * @param column column number
+     *
+     * @returns the value at row, col,
+     *          or 0 if row or col not found
+     */
     const char *get(int row, int col);
+
+    /**
+     * @param row    row number
+     * @param column column name
+     *
+     * @returns the value at row, column,
+     *          or 0 if row or column not found
+     */
     const char *get(int row, const char *column);
 
+    /**
+     * @returns number of rows
+     */
     int rows();
+
+    /**
+     * @returns number of columns
+     */
     int cols();
 
+    /**
+     * @param col column number
+     *
+     * @returns lenght (in utf-8 charcters, not bytes)
+     *          of longest string in column col
+     */
     int getWidth(int col);
 
+    /**
+     * destroys the Sqlite3Result (frees also m_result)
+     */
     ~Sqlite3Result();
 
   private:
-    char **result;
-    int    ncols;
-    int    nrows;
+    char **m_result;
+    int  mi_cols;
+    int  mi_rows;
 
-    vector<const char *> *head;
-    a_array_i            *columns;
-    map<int, int>        *colWidth;
+    vector<const char *> *m_head;
+    map<int, int>        *m_colWidth;
+    IntMap               *mIM_columns;
 };
 
 #endif

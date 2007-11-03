@@ -22,8 +22,8 @@
 //
 
 const char *USAGE = "\
-plow [-|+A|a|g|l|m|r|s|t|T[e] <str>]*[-0...9][-Q][-S][--add][--noplay]\n\
-     |[-L <tbl>]|[-q <sql>]|[-C]|[-I <dir>]|[--help]|[--version]";
+plow [-|+A|a|g|l|m|r|s|t|T[e] <str>]* [-0...9] [-Q] [-S] [--add] [--noplay]\n\
+      | [-L <tbl>] | [-q <sql>] | [-C] | [-I <dir>] | [--help] | [--version]";
 
 const char *HELP = "\
 -|+<c>[e] <str>   - search for fields containing <str>                \n\
@@ -103,53 +103,53 @@ const char *INI_FILE ="\
 # full path to your 'overall' music folder\n\
 # (the folder where all your music is in)\n\
 #\n\
-path=%s/music\n\
+path          = /path/to/music\n\
 \n\
 \n\
 #\n\
 # complete path to your playlist\n\
 #\n\
-playlist=/plow.m3u\n\
+#playlist      = /path/to/plow.m3u\n\
 \n\
 \n\
 #\n\
 # default output order (SQL 'ORDER BY' syntax)\n\
 #\n\
-order=album ASC, part ASC, track ASC\n\
+order         = album ASC, part ASC, track ASC\n\
 \n\
 \n\
 #\n\
 # the player you wish to use, at minimum player0 is required\n\
 # you can select a player with plow -1 ... -9\n\
 #\n\
-player0=mplayer -playlist\n\
-player1=audacious\n\
-player2=xmms\n\
-player3=amarok\n\
+player0       = mplayer -playlist\n\
+player1       = audacious\n\
+player2       = xmms\n\
+player3       = amarok\n\
 \n\
 #\n\
 # the player numbers that requires not to fork,\n\
 # as comma seperated list\n\
 #\n\
-playernofork=0\n\
+playernofork  = 0\n\
 \n\
 \n\
 #\n\
 # full path to your portable music player\n\
 #\n\
-#portable=\n\
+#portable      = /path/to/portable/player\n\
 \n\
 \n\
 #\n\
 # filename on portable\n\
 #\n\
-portable_name=%artistOrAlbum% / %albumOrEmpty% - %part0% - %track0% -\
- %emptyOrArtist% - %title% %fileext%\n\
+#portable_name = [artistOrAlbum] / [albumOrEmpty] - [part0] - [track0] -\
+ [emptyOrArtist] - [title] [fileext]\n\
 \n\
 #\n\
 # information string for m3u playlist\n\
 #\n\
-extinf=%lengths% ', ' %artist% ' - ' %title%\n\
+extinf        = [lengths] \", \" [artist] \" - \" [title]\n\
 \n\
 \n\
 ######################################################################\n\
@@ -164,10 +164,11 @@ extinf=%lengths% ', ' %artist% ' - ' %title%\n\
 [abbr]\n\
 # this one executes an sql statement, which selects all records\n\
 # with different artists - sampler\n\
-sampler=-q 'SELECT id_album, album FROM tbl_album WHERE album_id_artist=1;'\n\
+sampler = -q \"SELECT id_album, album FROM tbl_album WHERE\
+ album_id_artist=1;\"\n\
 \n\
 # select all files where genre contains rock\n\
-rock=-g rock\n";
+rock    = -g rock\n";
 
 
 

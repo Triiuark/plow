@@ -22,7 +22,8 @@
 
 #include "AbstractReader.h"
 
-class TagReader {
+class TagReader
+{
   public:
 
     static const enum {

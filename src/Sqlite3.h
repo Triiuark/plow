@@ -27,8 +27,8 @@ using namespace std;
 /**
  * @brief handles sqlite 3 connection
  */
-class Sqlite3 {
-
+class Sqlite3
+{
   public:
     /**
      * creates a new Sqlite3 object with the given @a databaseName
@@ -37,45 +37,32 @@ class Sqlite3 {
      */
     Sqlite3(const char *databaseName);
 
-
-
-    /**
-     *
-     */
-    ~Sqlite3();
-
-
-
     /**
      * executes a sql statement and returns the resulting table as a
      * Sqlite3Result object
      *
-     * @param query the statement to execute
+     * @param query the sql statement to execute
      *
-     * @return a new Sqlite3Result that has to be freed, using @a delete
+     * @throws PlowException on any error
+     *
+     * @returns a new Sqlite3Result that has to be freed,
+     *          using @a delete
      */
     Sqlite3Result *exe(const char *query);
 
-
-
     /**
-     *
-     * @return
+     * @returns a sqlite3 error code, SQLITE_OK means no error
      */
     int error();
 
-
-
     /**
-     *
-     * @return
+     * destroys the Sqlite3 object
      */
-    //const char *errmsg();
+    ~Sqlite3();
 
   private:
-    int         rc;
+    int         mi_error;
     const char *mcs_dbname;
-    char       *errstr;
 };
 
 #endif

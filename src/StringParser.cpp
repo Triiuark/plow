@@ -23,16 +23,17 @@
 
 using namespace std;
 
-StringParser::StringParser(const char *str, const char delim) {
-  string  mystring(str);
+StringParser::StringParser(const char *str, const char delim)
+{
+  m_argv   = NULL;
 
-  string *token = NULL;
-          argv  = NULL;
+  string  mystring(str);
+  string  *token = NULL;
   uint    pos;
 
   while(!mystring.empty()) {
     if(mystring.c_str()[0] != '"') {
-      // token goes from beginning of mystring up to first ' ' or
+      // token is from beginning of mystring up to first ' ' or
       // end of mystring
       pos = mystring.find_first_of(delim);
       token = new string(mystring);
@@ -60,7 +61,7 @@ StringParser::StringParser(const char *str, const char delim) {
       }
     }
     if(token && !token->empty()) {
-      tokens.push_back(token);
+      m_tokens.push_back(token);
     } else if(token) {
       // clear unaccessary ones
       delete token;
@@ -68,35 +69,44 @@ StringParser::StringParser(const char *str, const char delim) {
   }
 }
 
-vector <string *>StringParser::getTokens() {
-  return tokens;
+
+
+vector <string *>StringParser::getTokens()
+{
+  return m_tokens;
 }
 
 
-uint StringParser::getSize() {
-  return tokens.size();
+
+uint StringParser::getSize()
+{
+  return m_tokens.size();
 }
 
-/* returns a char ** like argv ;) of the tokens
- * but it is NULL terminated so we know where it ends
- * (for use in execvp)
- */
-char **StringParser::getArgv() {
-  uint size = tokens.size();
-       argv = new char*[size + 1];
 
-  memset(argv, 0, sizeof(char *) * (size + 1));
 
-  for(uint i = 0; i < size; i++) {
-    argv[i] = (char *)(tokens[i]->c_str());
+char **StringParser::getArgv()
+{
+  if(m_argv == 0) {
+    uint size = m_tokens.size();
+    m_argv = new char*[size + 1];
+
+    memset(m_argv, 0, sizeof(char *) * (size + 1));
+
+    for(uint i = 0; i < size; i++) {
+      m_argv[i] = (char *)(m_tokens[i]->c_str());
+    }
   }
 
-  return argv;
+  return m_argv;
 }
 
-StringParser::~StringParser() {
-  for(uint i = 0; i < tokens.size(); i++) {
-    delete tokens[i]; tokens[i] = NULL;
+
+
+StringParser::~StringParser()
+{
+  for(uint i = 0; i < m_tokens.size(); ++i) {
+    delete m_tokens[i];
   }
-  delete[] argv; argv = NULL;
+  delete[] m_argv;
 }

@@ -24,8 +24,6 @@
 
 using namespace std;
 
-
-
 /**
  * puts every regular file with access mode @a mode in @a path into
  * @a fnames, if @a recursive it does for subfolders, too
@@ -33,13 +31,14 @@ using namespace std;
  * @param fnames    a queue to put found files in
  *                  (in descending order)
  * @param path      to search for files
- * @param recursive if set search in subfolders
+ * @param recursive if set, search in subfolders
  * @param mode      access mode granted for files,
  *                  default: R_OK = readable @n
  *                  mode is a mask consisting of one or more of
- *                  R_OK, W_OK, X_OK and  F_OK. (see: @a man @a access )
+ *                  R_OK, W_OK, X_OK and  F_OK.
+ *                  (see: @a man @a access )
  */
-void getFiles(p_queue &fnames,
+void getFiles(PrioQ &fnames,
               char *path,
               const bool recursive,
               int mode = R_OK);
@@ -53,7 +52,7 @@ void getFiles(p_queue &fnames,
  * @param path to create
  * @param mode to use, default: 0755
  *
- * @throw PlowException thrown on any error
+ * @throws PlowException on any error
  */
 void mkdir_r(const string &path, int mode = 0755);
 
@@ -65,7 +64,7 @@ void mkdir_r(const string &path, int mode = 0755);
  * @param src source file name
  * @param dst destination file name
  *
- * @throw PlowException thrown on any error
+ * @throws PlowException on any error
  *
  * @return 0 on success, 1 if @a dst exists
  */
@@ -82,6 +81,8 @@ int copyfile(const string &src, const string &dst);
  * @return length in characters of utf8str
  */
 uint utf8strlen(const char *utf8str);
+
+
 
 /**
  * replaces every character listed in @a chars in @a in by @a by, but

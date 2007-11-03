@@ -31,20 +31,23 @@
 
 using namespace TagLib;
 
-ID3Reader::ID3Reader(const char* fname, a_array_cs &fields) {
-    values = new a_array_s;
+
+
+ID3Reader::ID3Reader(const char* fname, CStrMap &fields)
+{
+    mSM_values = new StrMap;
     ID3v2::Tag *tag;
     MPEG::File f(fname);
     if((tag = f.ID3v2Tag())) {
 
-      (*values)["artist" ] = tag->artist ().to8Bit(true);
-      (*values)["title"  ] = tag->title  ().to8Bit(true);
-      (*values)["album"  ] = tag->album  ().to8Bit(true);
-      (*values)["genre"  ] = tag->genre  ().to8Bit(true);
-      (*values)["comment"] = tag->comment().to8Bit(true);
+      (*mSM_values)["artist" ] = tag->artist ().to8Bit(true);
+      (*mSM_values)["title"  ] = tag->title  ().to8Bit(true);
+      (*mSM_values)["album"  ] = tag->album  ().to8Bit(true);
+      (*mSM_values)["genre"  ] = tag->genre  ().to8Bit(true);
+      (*mSM_values)["comment"] = tag->comment().to8Bit(true);
 
       if(tag->year() > 0) {
-        (*values)["year"] = "" + tag->year();
+        (*mSM_values)["year"] = "" + tag->year();
       }
 
       std::string s;
@@ -56,10 +59,10 @@ ID3Reader::ID3Reader(const char* fname, a_array_cs &fields) {
         s = tif->toString().to8Bit(true);
         pos = s.find('/', 0);
         if(pos == std::string::npos) {
-          (*values)["track"] = s;
+          (*mSM_values)["track"] = s;
         } else {
-          (*values)["track"]  = s.substr(0, pos);
-          (*values)["tracks"] = s.substr(++pos, s.size() - 1);
+          (*mSM_values)["track"]  = s.substr(0, pos);
+          (*mSM_values)["tracks"] = s.substr(++pos, s.size() - 1);
         }
       }
 
@@ -68,10 +71,10 @@ ID3Reader::ID3Reader(const char* fname, a_array_cs &fields) {
         s = tif->toString().to8Bit(true);
         pos = s.find('/', 0);
         if(pos == std::string::npos) {
-          (*values)["part"] = s;
+          (*mSM_values)["part"] = s;
         } else {
-          (*values)["part"]  = s.substr(0, pos);
-          (*values)["parts"] = s.substr(++pos, s.size() - 1);
+          (*mSM_values)["part"]  = s.substr(0, pos);
+          (*mSM_values)["parts"] = s.substr(++pos, s.size() - 1);
         }
       }
     }
@@ -81,62 +84,86 @@ ID3Reader::ID3Reader(const char* fname, a_array_cs &fields) {
       char buff[16];
       sprintf(buff, "%d", len);
       //buff[15] = 0;
-      (*values)["length"] = (buff);
+      (*mSM_values)["length"] = (buff);
   }
 }
 
-const char *ID3Reader::getId()      {
-  return (*values)["id"].c_str();
+
+
+
+const char *ID3Reader::getId()
+{
+  return (*mSM_values)["id"].c_str();
 }
 
-const char *ID3Reader::getArtist()  {
-  return (*values)["artist"].c_str();
+const char *ID3Reader::getArtist()
+{
+  return (*mSM_values)["artist"].c_str();
 }
 
-const char *ID3Reader::getTitle() {
-  return (*values)["title"].c_str();
+const char *ID3Reader::getTitle()
+{
+  return (*mSM_values)["title"].c_str();
 }
 
-const char *ID3Reader::getAlbum() {
-  return (*values)["album"].c_str();
+const char *ID3Reader::getAlbum()
+{
+  return (*mSM_values)["album"].c_str();
 }
 
-const char *ID3Reader::getPart() {
-  return (*values)["part"].c_str();
+const char *ID3Reader::getPart()
+{
+  return (*mSM_values)["part"].c_str();
 }
 
-const char *ID3Reader::getParts() {
-  return (*values)["parts"].c_str();
+const char *ID3Reader::getParts()
+{
+  return (*mSM_values)["parts"].c_str();
 }
 
-const char *ID3Reader::getTrack() {
-  return (*values)["track"].c_str();
+const char *ID3Reader::getTrack()
+{
+  return (*mSM_values)["track"].c_str();
 }
 
-const char *ID3Reader::getTracks() {
-  return (*values)["tracks"].c_str();
+const char *ID3Reader::getTracks()
+{
+  return (*mSM_values)["tracks"].c_str();
 }
 
-const char *ID3Reader::getGenre() {
-  return (*values)["genre"].c_str();
+const char *ID3Reader::getGenre()
+{
+  return (*mSM_values)["genre"].c_str();
 }
 
-const char *ID3Reader::getYear() {
-  return (*values)["year"].c_str();
+const char *ID3Reader::getYear()
+{
+  return (*mSM_values)["year"].c_str();
 }
 
-const char *ID3Reader::getRating()   {
-  return (*values)["rating"].c_str();
+const char *ID3Reader::getRating()
+{
+  return (*mSM_values)["rating"].c_str();
 }
 
-const char *ID3Reader::getComment() {
-  return (*values)["comment"].c_str();
+const char *ID3Reader::getComment()
+{
+  return (*mSM_values)["comment"].c_str();
 }
 
-const char *ID3Reader::getLength() {
-  return (*values)["length"].c_str();
+const char *ID3Reader::getLength()
+{
+  return (*mSM_values)["length"].c_str();
 }
 
-const char *ID3Reader::get(const char *field) {
-  return (*values)[field].c_str();
+const char *ID3Reader::get(const char *field)
+{
+  return (*mSM_values)[field].c_str();
+}
+
+
+
+ID3Reader::~ID3Reader()
+{
+  delete mSM_values;
 }

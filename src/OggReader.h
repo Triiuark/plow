@@ -28,15 +28,12 @@
 
 
 
-class OggReader : public AbstractReader {
-
+class OggReader : public AbstractReader
+{
   public:
-    OggReader(
-      const char* fname,
-      a_array_cs &fields
-    );
+    OggReader(const char* fname, CStrMap &fields);
 
-    ~OggReader() {delete values;}
+    ~OggReader();
 
     const char *getId();
     const char *getArtist();
@@ -59,7 +56,7 @@ class OggReader : public AbstractReader {
   private:
     int err;
 
-    a_array_s *values;
+    StrMap *mSM_values;
 };
 
 #endif

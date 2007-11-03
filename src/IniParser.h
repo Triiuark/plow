@@ -24,19 +24,38 @@
 
 using namespace std;
 
+/**
+ * @brief simple parser for INI like configuration files
+ */
 class IniParser
 {
   public:
+    /**
+     * creates a new IniParser of a given configuration file
+     *
+     * @param iniFile the configuration file name
+     *
+     * @throws PlowException on any error
+     */
     IniParser(const char *iniFile);
 
+    /**
+     * returns the value for the given @a option
+     *
+     * @param option the key you want to have the value for,
+     *               key has to be something like "[section]option"
+     *
+     * @returns the value, or an empty string if option not found
+     */
     string get(const char *option);
-    int   error();
 
+    /**
+     * destroys the IniParser
+     */
     ~IniParser();
 
   private:
-    int err;
-    a_array_s *options;
+    StrMap *mSM_options;
 };
 
 #endif

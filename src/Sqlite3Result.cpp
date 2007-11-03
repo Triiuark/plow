@@ -29,76 +29,99 @@
 #include "helper.h"
 
 using namespace std;
-/* Implemetations */
 
-Sqlite3Result::Sqlite3Result(char **sqlresult, int rows, int cols) {
-  result = sqlresult;
-  nrows  = rows;
-  ncols  = cols;
+Sqlite3Result::Sqlite3Result(char **sqlresult, int rows, int cols)
+{
+  m_result    = sqlresult;
+  mi_rows     = rows;
+  mi_cols     = cols;
+  mIM_columns = new IntMap;
+  m_head      = new vector<const char *>;
+  m_colWidth  = 0;
 
-  columns  = new a_array_i;
-  head     = new vector<const char *>;
-
-  colWidth = NULL;
-
-  for(int i = 0; i < ncols; i++) {
-    head->push_back(result[i]);
-    (*columns)[result[i]] = i + 1;
+  for(int i = 0; i < this->cols(); ++i) {
+    m_head->push_back(m_result[i]);
+    (*mIM_columns)[m_result[i]] = i + 1;
   }
 }
 
-const char *Sqlite3Result::getHead(int col) {
-  if(col >= 0 && col < ncols) {
-    return head->at(col);
+
+
+const char *Sqlite3Result::getHead(int col)
+{
+  if(col >= 0 && col < cols()) {
+    return m_head->at(col);
   }
-  return NULL;
+  return 0;
 }
 
-const char *Sqlite3Result::get(int row, int col) {
-  int field = ((row + 1) * ncols) + col;
-  if(field >= ncols && field < (nrows + 1)*ncols) {
-    return result[field];
+
+
+const char *Sqlite3Result::get(int row, int col)
+{
+  int field = ((row + 1) * cols()) + col;
+
+  if(field >= cols() && field < (rows() + 1) * cols()) {
+    return m_result[field];
   }
-  return NULL;
+  return 0;
 }
 
-const char *Sqlite3Result::get(int row, const char *column) {
-  return get(row, (*columns)[column] - 1);
+
+
+const char *Sqlite3Result::get(int row, const char *column)
+{
+  return get(row, (*mIM_columns)[column] - 1);
 }
 
-int Sqlite3Result::rows() {
-  return nrows;
+
+
+int Sqlite3Result::rows()
+{
+  return mi_rows;
 }
 
-int Sqlite3Result::cols() {
-  return ncols;
+
+
+int Sqlite3Result::cols()
+{
+  return mi_cols;
 }
 
-int Sqlite3Result::getWidth(int col) {
-  if(colWidth == NULL) {
-    colWidth = new map<int, int>;
-    uint len, tmp;
-    for(int i = 0; i < ncols; i++) {
+
+
+int Sqlite3Result::getWidth(int col)
+{
+  if(m_colWidth == 0) {
+    // m_colWidth is empty, so calculate it for all columns
+    m_colWidth = new map<int, int>;
+
+    uint len;
+    uint tmp;
+
+    for(int i = 0; i < cols(); ++i) {
       len = 0;
-      for(int j = 0; j < (nrows + 1); j++) {
-        tmp = utf8strlen(result[j * ncols + i]);
+      for(int j = 0; j < (rows() + 1); ++j) {
+        tmp = utf8strlen(m_result[j * cols() + i]);
         if(tmp > len) {
           len = tmp;
         }
       }
-      (*colWidth)[i] = len;
+      (*m_colWidth)[i] = len;
     }
   }
 
-  return (*colWidth)[col];
+  return (*m_colWidth)[col];
 }
 
 
-Sqlite3Result::~Sqlite3Result() {
-  sqlite3_free_table(result); result = NULL;
-  delete columns; columns = NULL;
-  delete head; head = NULL;
-  if(colWidth != NULL) {
-    delete colWidth; colWidth = NULL;
+
+Sqlite3Result::~Sqlite3Result()
+{
+  sqlite3_free_table(m_result);
+  delete mIM_columns;
+  delete m_head;
+  if(m_colWidth != 0) {
+    delete m_colWidth;
   }
 }

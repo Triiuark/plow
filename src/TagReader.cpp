@@ -25,7 +25,7 @@
 
 TagReader::TagReader(const char* fname) : t(0), type(UNKNOWN) {
 
-  a_array_cs oggFieldNames;
+  CStrMap oggFieldNames;
   oggFieldNames["id"     ] = "ID";
   oggFieldNames["artist" ] = "ARTIST";
   oggFieldNames["title"  ] = "TITLE";
@@ -40,7 +40,7 @@ TagReader::TagReader(const char* fname) : t(0), type(UNKNOWN) {
   oggFieldNames["year"   ] = "YEAR";
 
   /* not used */
-  a_array_cs ID3v2FieldNames;
+  CStrMap ID3v2FieldNames;
   ID3v2FieldNames["id"     ] = "UFID/reba";
   ID3v2FieldNames["artist" ] = "TPE1";
   ID3v2FieldNames["title"  ] = "TIT2";

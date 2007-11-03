@@ -25,23 +25,21 @@
 #include <queue>
 
 #include <cstring>
+#include <cerrno>
 
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <errno.h>
 
 #include "PlowException.h"
 
 using namespace std;
 
-
-
-void getFiles(p_queue &fnames,
+void getFiles(PrioQ &fnames,
               char *path,
               const bool recursive,
-              int mode) {
-
+              int mode)
+{
   struct dirent *dent;
   struct stat    st;
 
@@ -83,11 +81,11 @@ void getFiles(p_queue &fnames,
 
 
 
-void mkdir_r(const string &path, int mode) {
-
+void mkdir_r(const string &path, int mode)
+{
   struct stat st;
 
-  if(path.size() == 0 || stat(path.c_str(), &st) == 0) {
+  if(path.length() == 0 || stat(path.c_str(), &st) == 0) {
     if(!S_ISDIR(st.st_mode)) {
       throw PlowException("mkdir_r",
                           path.c_str(),
@@ -115,8 +113,8 @@ void mkdir_r(const string &path, int mode) {
 
 
 
-int copyfile(const string &src, const string &dst) {
-
+int copyfile(const string &src, const string &dst)
+{
   int err = 0;
 
   struct stat st;
@@ -174,7 +172,8 @@ int copyfile(const string &src, const string &dst) {
 
 
 
-uint utf8strlen(const char *utf8str) {
+uint utf8strlen(const char *utf8str)
+{
   uint len = strlen(utf8str);
   uint rl  = 0;
   uint i   = 0;
@@ -196,6 +195,7 @@ uint utf8strlen(const char *utf8str) {
       i += 6;
     }
   }
+
   return rl;
 }
 
