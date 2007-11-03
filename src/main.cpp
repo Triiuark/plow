@@ -106,6 +106,10 @@ Sqlite3Result *exe(const char *query)
 
 
 
+
+/**
+ *
+ */
 void init()
 {
   if(!gIniParser) {
@@ -914,7 +918,7 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
 
   sr = sql.exe(query.c_str());
   delete sr;
-  delete fnames; fnames = NULL;
+  delete fnames;
   cout << "\n ... done." << endl;
 
   //

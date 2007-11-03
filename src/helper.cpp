@@ -64,6 +64,7 @@ void getFiles(PrioQ &fnames,
       if(lstat(fname, &st) == 0) {
         if(recursive && S_ISDIR(st.st_mode)) {
           getFiles(fnames, fname, recursive, mode);
+          delete[] fname;
         } else if(S_ISREG(st.st_mode)) {
           if(access(fname, mode) == 0) {
             fnames.push(fname);
