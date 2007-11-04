@@ -33,7 +33,7 @@ using namespace TagLib;
 
 
 
-ID3Reader::ID3Reader(const char* fname, CStrMap &fields)
+ID3Reader::ID3Reader(const char* fname, CStrMap *fields)
 {
     mSM_values = new StrMap;
     ID3v2::Tag *tag;
@@ -47,7 +47,7 @@ ID3Reader::ID3Reader(const char* fname, CStrMap &fields)
       (*mSM_values)["comment"] = tag->comment().to8Bit(true);
 
       if(tag->year() > 0) {
-        (*mSM_values)["year"] = "" + tag->year();
+        (*mSM_values)["date"] = "" + tag->year();
       }
 
       std::string s;
@@ -136,14 +136,34 @@ const char *ID3Reader::getGenre()
   return (*mSM_values)["genre"].c_str();
 }
 
-const char *ID3Reader::getYear()
-{
-  return (*mSM_values)["year"].c_str();
-}
-
 const char *ID3Reader::getRating()
 {
   return (*mSM_values)["rating"].c_str();
+}
+
+const char *ID3Reader::getMood()
+{
+  return (*mSM_values)["mood"].c_str();
+}
+
+const char *ID3Reader::getSituation()
+{
+  return (*mSM_values)["situation"].c_str();
+}
+
+const char *ID3Reader::getTempo()
+{
+  return (*mSM_values)["tempo"].c_str();
+}
+
+const char *ID3Reader::getLanguage()
+{
+  return (*mSM_values)["language"].c_str();
+}
+
+const char *ID3Reader::getDate()
+{
+  return (*mSM_values)["date"].c_str();
 }
 
 const char *ID3Reader::getComment()
@@ -155,6 +175,8 @@ const char *ID3Reader::getLength()
 {
   return (*mSM_values)["length"].c_str();
 }
+
+
 
 const char *ID3Reader::get(const char *field)
 {

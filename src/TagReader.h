@@ -20,6 +20,9 @@
 #ifndef PLOW_TAG_READER_H
 #define PLOW_TAG_READER_H
 
+#include <map>
+
+#include "global.h"
 #include "AbstractReader.h"
 
 class TagReader
@@ -32,35 +35,35 @@ class TagReader
       MPEG
     } FILE_TYPE;
 
-    TagReader(const char* fname);
+    TagReader(const char* fname, std::map<int, CStrMap *> fieldNames);
 
-    ~TagReader() {
-      if(t) {
-        delete t; t = 0;
-      }
-    }
+    const char *id();
+    const char *artist();
+    const char *title();
+    const char *album();
+    const char *part();
+    const char *parts();
+    const char *track();
+    const char *tracks();
+    const char *genre();
+    const char *rating();
+    const char *mood();
+    const char *situation();
+    const char *tempo();
+    const char *language();
+    const char *date();
+    const char *comment();
+    const char *length();
 
-    const char *id()      {return t->getId();     }
-    const char *artist()  {return t->getArtist(); }
-    const char *title()   {return t->getTitle();  }
-    const char *album()   {return t->getAlbum();  }
-    const char *part()    {return t->getPart();   }
-    const char *parts()   {return t->getParts();  }
-    const char *track()   {return t->getTrack();  }
-    const char *tracks()  {return t->getTracks(); }
-    const char *genre()   {return t->getGenre();  }
-    const char *rating()  {return t->getRating(); }
-    const char *year()    {return t->getYear();   }
-    const char *comment() {return t->getComment();}
-    const char *length()  {return t->getLength(); }
+    int fileType();
 
-    int fileType() {return type;}
+    int error();
 
-    int error(){return 0;}
+    ~TagReader();
 
   private:
-    AbstractReader *t;
-    int type;
+    AbstractReader *mAR_reader;
+    int            mi_type;
 };
 
 #endif

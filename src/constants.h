@@ -168,24 +168,51 @@ sampler = -q \"SELECT id_album, album FROM tbl_album WHERE\
  album_id_artist=1;\"\n\
 \n\
 # select all files where genre contains rock\n\
-rock = -g rock\n";
-
+rock = -g rock\n\
+\n\
+\n\
+######################################################################\n\
+#\n\
+[vorbis]\n\
+# \"standard\" field names\n\
+title     = TITLE\n\
+artist    = ARTIST\n\
+album     = ALBUM\n\
+part      = DISCNUMBER\n\
+track     = TRACKNUMBER\n\
+genre     = GENRE\n\
+comment   = COMMENT\n\
+date      = DATE\n\
+# non standard field names\n\
+id        = ID\n\
+parts     = DISCS\n\
+tracks    = TRACKS\n\
+rating    = RATING\n\
+mood      = MOOD\n\
+situation = SITUATION\n\
+tempo     = TEMPO\n\
+language  = LANGUAGE\n\
+";
 
 
 const char *DATABASE ="\
+CREATE TABLE tbl_album (\n\
+  id_album        INTEGER NOT NULL PRIMARY KEY,\n\
+  album           TEXT    NOT NULL DEFAULT '',\n\
+  album_id_artist INTEGER NOT NULL DEFAULT 1,\n\
+  tracks          INTEGER NOT NULL DEFAULT 0,\n\
+  parts           INTEGER NOT NULL DEFAULT 1,\n\
+  album_release   TEXT    NOT NULL DEFAULT ''\n\
+);\n\
+INSERT INTO 'tbl_album' VALUES(1, '', 1, 0, 1, 0);\n\
+\n\
+\n\
+\n\
 CREATE TABLE tbl_artist (\n\
   id_artist INTEGER NOT NULL PRIMARY KEY,\n\
   artist    TEXT    NOT NULL UNIQUE\n\
 );\n\
 INSERT INTO 'tbl_artist' VALUES(1, '');\n\
-\n\
-\n\
-\n\
-CREATE TABLE tbl_rating (\n\
-  id_rating INTEGER NOT NULL PRIMARY KEY,\n\
-  rating    TEXT    NOT NULL UNIQUE\n\
-);\n\
-INSERT INTO 'tbl_rating' VALUES(1, '');\n\
 \n\
 \n\
 \n\
@@ -223,30 +250,25 @@ CREATE TABLE tbl_music (\n\
   part           INTEGER NOT NULL DEFAULT 1,\n\
   track          INTEGER NOT NULL DEFAULT 0,\n\
   length         INTEGER NOT NULL DEFAULT 0,\n\
-  _id_language   INTEGER NOT NULL DEFAULT 1,\n\
-  _id_rating     INTEGER NOT NULL DEFAULT 1,\n\
   _id_genre      INTEGER NOT NULL DEFAULT 1,\n\
+  _id_rating     INTEGER NOT NULL DEFAULT 1,\n\
   _id_mood       INTEGER NOT NULL DEFAULT 1,\n\
   _id_situation  INTEGER NOT NULL DEFAULT 1,\n\
   _id_tempo      INTEGER NOT NULL DEFAULT 1,\n\
-  release        INTEGER NOT NULL DEFAULT 0,\n\
+  _id_language   INTEGER NOT NULL DEFAULT 1,\n\
+  date           TEXT    NOT NULL DEFAULT '',\n\
   status         INTEGER NOT NULL DEFAULT 0,\n\
-  comments       INTEGER NOT NULL DEFAULT '',\n\
-  lyrics_type    TEXT    NOT NULL DEFAULT 'txt',\n\
+  comment        TEXT    NOT NULL DEFAULT '',\n\
   lyrics         TEXT    NOT NULL DEFAULT ''\n\
 );\n\
 \n\
 \n\
 \n\
-CREATE TABLE tbl_album (\n\
-  id_album        INTEGER NOT NULL PRIMARY KEY,\n\
-  album           TEXT    NOT NULL DEFAULT '',\n\
-  album_id_artist INTEGER NOT NULL DEFAULT 1,\n\
-  tracks          INTEGER NOT NULL DEFAULT 0,\n\
-  parts           INTEGER NOT NULL DEFAULT 1,\n\
-  album_release   INTEGER NOT NULL DEFAULT 0\n\
+CREATE TABLE tbl_rating (\n\
+  id_rating INTEGER NOT NULL PRIMARY KEY,\n\
+  rating    TEXT    NOT NULL UNIQUE\n\
 );\n\
-INSERT INTO 'tbl_album' VALUES(1, '', 1, 0, 1, 0);\n\
+INSERT INTO 'tbl_rating' VALUES(1, '');\n\
 \n\
 \n\
 \n\
@@ -278,7 +300,7 @@ CREATE TABLE tbl_tmp (\n\
    tmp_track        INTEGER NOT NULL DEFAULT 0,\n\
    tmp_tracks       INTEGER NOT NULL DEFAULT 0,\n\
    tmp_length       INTEGER NOT NULL DEFAULT 0,\n\
-   tmp_release      INTEGER NOT NULL DEFAULT 0,\n\
+   tmp_date         TEXT    NOT NULL DEFAULT '',\n\
    tmp_genre        TEXT    NOT NULL DEFAULT '',\n\
    tmp_rating       TEXT    NOT NULL DEFAULT '',\n\
    tmp_mood         TEXT    NOT NULL DEFAULT '',\n\
@@ -286,7 +308,7 @@ CREATE TABLE tbl_tmp (\n\
    tmp_tempo        TEXT    NOT NULL DEFAULT '',\n\
    tmp_language     TEXT    NOT NULL DEFAULT '',\n\
    tmp_lyrics       TEXT    NOT NULL DEFAULT '',\n\
-   tmp_comments     TEXT    NOT NULL DEFAULT '',\n\
+   tmp_comment      TEXT    NOT NULL DEFAULT '',\n\
    tmp_id_artist    INTEGER NOT NULL DEFAULT 1,\n\
    tmp_id_album     INTEGER NOT NULL DEFAULT 1,\n\
    tmp_id_genre     INTEGER NOT NULL DEFAULT 1,\n\

@@ -7,7 +7,7 @@ fileList=Split("""bin/main.cpp
                   bin/StringParser.cpp
                   bin/ID3Reader.cpp
                   bin/TagReader.cpp
-                  bin/OggReader.cpp
+                  bin/VorbisReader.cpp
                   bin/Sqlite3.cpp
                   bin/Sqlite3Result.cpp""")
 

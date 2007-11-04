@@ -20,39 +20,12 @@
 #include "TagReader.h"
 
 #include "global.h"
-#include "OggReader.h"
+#include "VorbisReader.h"
 #include "ID3Reader.h"
 
-TagReader::TagReader(const char* fname) : t(0), type(UNKNOWN) {
-
-  CStrMap oggFieldNames;
-  oggFieldNames["id"     ] = "ID";
-  oggFieldNames["artist" ] = "ARTIST";
-  oggFieldNames["title"  ] = "TITLE";
-  oggFieldNames["album"  ] = "ALBUM";
-  oggFieldNames["part"   ] = "PARTINSET";
-  oggFieldNames["parts"  ] = "PARTS";
-  oggFieldNames["track"  ] = "TRACKNUMBER";
-  oggFieldNames["tracks" ] = "TRACKS";
-  oggFieldNames["genre"  ] = "GENRE";
-  oggFieldNames["rating" ] = "RATING";
-  oggFieldNames["comment"] = "COMMENT";
-  oggFieldNames["year"   ] = "YEAR";
-
-  /* not used */
-  CStrMap ID3v2FieldNames;
-  ID3v2FieldNames["id"     ] = "UFID/reba";
-  ID3v2FieldNames["artist" ] = "TPE1";
-  ID3v2FieldNames["title"  ] = "TIT2";
-  ID3v2FieldNames["album"  ] = "TALB";
-  ID3v2FieldNames["part"   ] = "TPOS[0]";
-  ID3v2FieldNames["parts"  ] = "TPOS[]";
-  ID3v2FieldNames["track"  ] = "TRACKNUMBER";
-  ID3v2FieldNames["tracks" ] = "TRACKS";
-  ID3v2FieldNames["genre"  ] = "GENRE";
-  ID3v2FieldNames["year"   ] = "YEAR";
-  ID3v2FieldNames["comment"] = "COMMENT";
-
+TagReader::TagReader(const char *fname, map<int, CStrMap *> fieldNames)
+    : mAR_reader(0), mi_type(UNKNOWN)
+{
   char head[5];
   head[4] = 0;
   FILE *f = fopen(fname, "r");
@@ -60,10 +33,54 @@ TagReader::TagReader(const char* fname) : t(0), type(UNKNOWN) {
   fclose(f);
 
   if(strcmp("OggS", head) == 0) {
-    type = OGG_VORBIS;
-    t = new OggReader(fname, oggFieldNames);
+    mi_type    = OGG_VORBIS;
+    mAR_reader = new VorbisReader(fname,
+                                  fieldNames[TagReader::OGG_VORBIS]);
   } else if(strncmp("ID3", head, 3) == 0) {
-    type = MPEG;
-    t = new ID3Reader(fname, oggFieldNames);
+    mi_type    = MPEG;
+    mAR_reader = new ID3Reader(fname, fieldNames[TagReader::MPEG]);
+  }
+}
+
+
+
+const char *TagReader::id()        {return mAR_reader->getId();       }
+const char *TagReader::artist()    {return mAR_reader->getArtist();   }
+const char *TagReader::title()     {return mAR_reader->getTitle();    }
+const char *TagReader::album()     {return mAR_reader->getAlbum();    }
+const char *TagReader::part()      {return mAR_reader->getPart();     }
+const char *TagReader::parts()     {return mAR_reader->getParts();    }
+const char *TagReader::track()     {return mAR_reader->getTrack();    }
+const char *TagReader::tracks()    {return mAR_reader->getTracks();   }
+const char *TagReader::genre()     {return mAR_reader->getGenre();    }
+const char *TagReader::rating()    {return mAR_reader->getRating();   }
+const char *TagReader::mood()      {return mAR_reader->getMood();     }
+const char *TagReader::situation() {return mAR_reader->getSituation();}
+const char *TagReader::tempo()     {return mAR_reader->getTempo();    }
+const char *TagReader::language()  {return mAR_reader->getLanguage(); }
+const char *TagReader::date()      {return mAR_reader->getDate();     }
+const char *TagReader::comment()   {return mAR_reader->getComment();  }
+const char *TagReader::length()    {return mAR_reader->getLength();   }
+
+
+
+int TagReader::fileType()
+{
+  return mi_type;
+}
+
+
+
+int TagReader::error()
+{
+  return mAR_reader->error();
+}
+
+
+
+TagReader::~TagReader()
+{
+  if(mAR_reader) {
+    delete mAR_reader;
   }
 }

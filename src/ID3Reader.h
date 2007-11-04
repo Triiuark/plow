@@ -27,7 +27,7 @@
 class ID3Reader : public AbstractReader
 {
   public:
-    ID3Reader(const char* fname, CStrMap &fields);
+    ID3Reader(const char* fname, CStrMap *fields);
     ~ID3Reader();
 
     const char *getId();
@@ -39,8 +39,12 @@ class ID3Reader : public AbstractReader
     const char *getTrack();
     const char *getTracks();
     const char *getGenre();
-    const char *getYear();
     const char *getRating();
+    const char *getMood();
+    const char *getSituation();
+    const char *getTempo();
+    const char *getLanguage();
+    const char *getDate();
     const char *getComment();
     const char *getLength();
 

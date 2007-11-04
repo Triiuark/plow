@@ -17,8 +17,8 @@
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
 ***********************************************************************/
 
-#ifndef PLOW_OGG_READER_H
-#define PLOW_OGG_READER_H
+#ifndef PLOW_VORBIS_READER_H
+#define PLOW_VORBIS_READER_H
 
 #include "global.h"
 #include "AbstractReader.h"
@@ -26,36 +26,38 @@
 #include <string>
 #include <map>
 
-
-
-class OggReader : public AbstractReader
+class VorbisReader : public AbstractReader
 {
   public:
-    OggReader(const char* fname, CStrMap &fields);
-
-    ~OggReader();
+    VorbisReader(const char *fname, CStrMap *fields);
 
     const char *getId();
-    const char *getArtist();
     const char *getTitle();
+    const char *getArtist();
     const char *getAlbum();
     const char *getPart();
     const char *getParts();
     const char *getTrack();
     const char *getTracks();
     const char *getGenre();
-    const char *getYear();
     const char *getRating();
+    const char *getMood();
+    const char *getSituation();
+    const char *getTempo();
+    const char *getLanguage();
+    const char *getDate();
     const char *getComment();
     const char *getLength();
 
     const char *get(const char *field);
 
-    int error() {return err;}
+    int error();
+
+    ~VorbisReader();
 
   private:
-    int err;
-
+    int mi_err;
+    CStrMap mCSM_fields;
     StrMap *mSM_values;
 };
 

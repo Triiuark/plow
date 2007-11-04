@@ -36,6 +36,8 @@
 
 #include <sqlite3.h>
 
+#include <sys/stat.h>
+
 #include "constants.h"
 #include "global.h"
 #include "helper.h"
@@ -113,34 +115,45 @@ Sqlite3Result *exe(const char *query)
 void init()
 {
   if(!gIniParser) {
+    struct stat st;
+    if(stat(gsPlowHome.c_str(), &st) == -1) {
+      if(errno == ENOENT) {
+        mkdir_r(gsPlowHome);
+        cout << "> created directory:   " << gsPlowHome << "/" << endl;
+      }
+    }
+
     string inifile = gsPlowHome + "/plow.conf";
 
-    try {
-      gIniParser       = new IniParser(inifile.c_str());
-      gsMusicDirectory = gIniParser->get("[general]path");
-
-      if(!gIniParser->get("[general]playlist").empty()) {
-        gsPlaylist = gIniParser->get("[general]playlist");
+    if(stat(gsDatabase.c_str(), &st) == -1) {
+      if(errno == ENOENT) {
+        exe(DATABASE);
+        cout << "> created database:    " << gsDatabase << endl;
       }
-    } catch (PlowException &e) {
-      if(e.error() == ENOENT) {
-        cout << "running setup ..." << endl;
-        mkdir_r(gsPlowHome);
+    }
+
+    if(stat(inifile.c_str(), &st) == -1) {
+      if(errno == ENOENT) {
         ofstream fout(inifile.c_str());
         fout << INI_FILE;
         fout.close();
-        cout << "... created " << inifile << endl;
-        exe(DATABASE);
-        cout << "... created database " << gsDatabase << endl;
+
+        cout << "> created config file: " << inifile << endl;
+        cout << endl;
         cout << "You have to edit " << inifile << " now." << endl;
         exit(0);
-      } else {
-        e.print();
-        exit(1);
       }
     }
+
+    gIniParser       = new IniParser(inifile.c_str());
+    gsMusicDirectory = gIniParser->get("[general]path");
+
+    if(!gIniParser->get("[general]playlist").empty()) {
+      gsPlaylist = gIniParser->get("[general]playlist");
+    }
+
   }
-}
+} // init()
 
 
 
@@ -287,8 +300,10 @@ void copy2Portable()
   string portable = gIniParser->get("[general]portable");
 
   if(portable.empty()) {
-    cout << "no portable device set in config file" << endl;
-    exit(1);
+    delete files;
+    errno = 0;
+    throw PlowException("copy2Portable",
+                        "no portable device set in config file");
   }
 
   cout << "Copying " << flush;
@@ -432,7 +447,7 @@ void printResult(const char *query)
  * creates a playlist for the given query
  *
  * @param query a sql statement
- */
+*/
 void createList(const char *query)
 {
   Sqlite3Result *rs = exe(query);
@@ -560,7 +575,7 @@ int parseFilter(int argc, char **argv, int i)
   gsSelect.replace(gsSelect.length()-4, 4, ")\n");
 
   return i-1;
-} // parseField()
+} // parseFilter()
 
 
 
@@ -826,10 +841,56 @@ int main(int argc, char** argv)
 
 
 /**
+ *
+ */
+CStrMap *vorbisFields()
+{
+  CStrMap *fields = new CStrMap;
+
+  (*fields)["id"       ] = gIniParser->get("[vorbis]id").c_str();
+  (*fields)["title"    ] = gIniParser->get("[vorbis]title").c_str();
+  (*fields)["artist"   ] = gIniParser->get("[vorbis]artist").c_str();
+  (*fields)["album"    ] = gIniParser->get("[vorbis]album").c_str();
+  (*fields)["part"     ] = gIniParser->get("[vorbis]part").c_str();
+  (*fields)["parts"    ] = gIniParser->get("[vorbis]parts").c_str();
+  (*fields)["track"    ] = gIniParser->get("[vorbis]track").c_str();
+  (*fields)["tracks"   ] = gIniParser->get("[vorbis]tracks").c_str();
+  (*fields)["genre"    ] = gIniParser->get("[vorbis]genre").c_str();
+  (*fields)["rating"   ] = gIniParser->get("[vorbis]rating").c_str();
+  (*fields)["mood"     ] = gIniParser->get("[vorbis]mood").c_str();
+  (*fields)["situation"] = gIniParser->get("[vorbis]situation").c_str();
+  (*fields)["tempo"    ] = gIniParser->get("[vorbis]tempo").c_str();
+  (*fields)["language" ] = gIniParser->get("[vorbis]language").c_str();
+  (*fields)["date"     ] = gIniParser->get("[vorbis]date").c_str();
+  (*fields)["comment"  ] = gIniParser->get("[vorbis]comment").c_str();
+
+  return fields;
+}
+
+
+
+/**
+ *
+ */
+CStrMap *id3Fields()
+{
+  // TODO: implement
+  return 0;
+}
+
+
+
+/**
  * see above
  */
 void add2Db(char *path, const char *dbPath, const char *musicPath)
 {
+
+  map<int, CStrMap *> fieldNames;
+
+  fieldNames[TagReader::OGG_VORBIS] = vorbisFields();
+  fieldNames[TagReader::MPEG]       = id3Fields();
+
   Sqlite3Result *sr, *sr2;
   string query, query2, query3;
 
@@ -839,10 +900,10 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
   fields.push_back("album");
   fields.push_back("genre");
   fields.push_back("rating");
-  fields.push_back("language");
   fields.push_back("mood");
   fields.push_back("situation");
   fields.push_back("tempo");
+  fields.push_back("language");
 
   const char *format = "%q";
   char *result;
@@ -853,7 +914,7 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
   ostringstream errmsg;
 
   getFiles(*fnames, path, true);
-  cout << ">" << fnames->size() << " files found." << endl;
+  cout << "> " << fnames->size() << " files found." << endl;
   if(fnames->size() == 0) {
     delete fnames;
     return;
@@ -870,13 +931,13 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
   // read tags from files and insert it into tbl_tmp
   //
 
-  cout << ">read infos from files ... " << endl;
+  cout << "> read infos from files ... " << endl;
 
   query = "BEGIN TRANSACTION;";
   int removepos = strlen(musicPath);
   while(!fnames->empty()) {
     cout << "." << flush;
-    tag = new TagReader(fnames->top());
+    tag = new TagReader(fnames->top(), fieldNames);
 
     if(tag->fileType() != TagReader::UNKNOWN) {
 
@@ -886,7 +947,7 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
       query  += "INSERT INTO tbl_tmp (tmp_file_id, tmp_file, ";
       query  += "tmp_artist, tmp_title, tmp_album, tmp_part, ";
       query  += "tmp_parts, tmp_track, tmp_tracks, tmp_genre, ";
-      query  += "tmp_rating, tmp_release, tmp_comments, tmp_length";
+      query  += "tmp_rating, tmp_date, tmp_comment, tmp_length";
       query  += ") VALUES (";
 
       result = sqlite3_mprintf(
@@ -894,7 +955,7 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
             '%q','%q','%q');",
           tag->id(), query2.c_str(), tag->artist(), tag->title(),
           tag->album(), tag->part(), tag->parts(), tag->track(),
-          tag->tracks(), tag->genre(), tag->rating(), tag->year(),
+          tag->tracks(), tag->genre(), tag->rating(), tag->date(),
           tag->comment(), tag->length());
 
       query += result;
@@ -928,7 +989,7 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
   string fieldtmp, fieldid;
 
   for(uint i = 0; i < fields.size(); i++) {
-    cout << ">insert new " << fields.at(i) << "s ..." << flush;
+    cout << "> insert new " << fields.at(i) << "s ..." << flush;
 
     query = "BEGIN TRANSACTION;";
 
@@ -1013,7 +1074,7 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
 
   // set album_id_artist for album if it isn't a sampler
   // (more than 3 songs from one artist)
-  cout << ">add info to (new) albums ..." << endl;
+  cout << "> add info to (new) albums ..." << endl;
 
   query  = "SELECT tmp_id_album, tmp_id_artist FROM ";
   query += "tbl_tmp GROUP BY tmp_id_artist, tmp_id_album ";
@@ -1043,7 +1104,6 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
       "SELECT DISTINCT tmp_id_album, tmp_parts, tmp_tracks FROM tbl_tmp;");
 
   query = "BEGIN TRANSACTION;";
-  //if(sql.error()) cout << sql.errmsg() << endl;
   for(int i = 0; i < sr->rows(); i++) {
     query += "UPDATE tbl_album SET parts='";
     query += sr->get(i, "tmp_parts");
@@ -1085,19 +1145,22 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
     if(sr2->rows() == 0) {
       ++count;
 
-      query += "INSERT INTO tbl_music (file_id, file, _id_artist,";
-      query += " title, _id_album, part, track, _id_genre,";
-      query += " _id_rating, release, comments, length) VALUES (";
+      query += "INSERT INTO tbl_music (file_id, file, title, ";
+      query += " _id_artist, _id_album, part, track, _id_genre,";
+      query += " _id_rating, _id_mood, _id_situation, _id_tempo,";
+      query += "_id_language, date, comment, length) VALUES (";
 
       result = sqlite3_mprintf(
           "'%q','%q','%q','%q','%q','%q','%q','%q','%q','%q',\
-              '%q','%q');",
-          sr->get(i,"tmp_file_id"), sr->get(i,"tmp_file"),
-          sr->get(i,"tmp_id_artist"), sr->get(i,"tmp_title"),
-          sr->get(i,"tmp_id_album"), sr->get(i,"tmp_part"),
-          sr->get(i,"tmp_track"), sr->get(i,"tmp_id_genre"),
-          sr->get(i,"tmp_id_rating"), sr->get(i,"tmp_release"),
-          sr->get(i,"tmp_comments"), sr->get(i,"tmp_length"));
+              '%q','%q','%q','%q','%q','%q');",
+          sr->get(i,"tmp_file_id"),      sr->get(i,"tmp_file"),
+          sr->get(i,"tmp_title"),        sr->get(i,"tmp_id_artist"),
+          sr->get(i,"tmp_id_album"),     sr->get(i,"tmp_part"),
+          sr->get(i,"tmp_track"),        sr->get(i,"tmp_id_genre"),
+          sr->get(i,"tmp_id_rating"),    sr->get(i,"tmp_id_mood"),
+          sr->get(i,"tmp_id_situation"), sr->get(i,"tmp_id_tempo"),
+          sr->get(i,"tmp_id_language"),  sr->get(i,"tmp_date"),
+          sr->get(i,"tmp_comment"),      sr->get(i,"tmp_length"));
 
       query += result;
       sqlite3_free(result);
@@ -1113,5 +1176,8 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
 
   sr = sql.exe("DELETE FROM tbl_tmp; VACUUM;");
   delete sr;
-  cout << ">" << count << " new files inserted." << endl;
+  cout << "> " << count << " new files inserted." << endl;
+
+  delete fieldNames[TagReader::OGG_VORBIS];
+  delete fieldNames[TagReader::MPEG];
 } // add2Db()

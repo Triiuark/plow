@@ -17,7 +17,7 @@
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
 ***********************************************************************/
 
-#include "OggReader.h"
+#include "VorbisReader.h"
 
 #include <tag.h>
 #include <vorbisfile.h>
@@ -28,22 +28,48 @@
 
 using namespace TagLib;
 
-OggReader::OggReader(const char* fname, CStrMap &fields)
+VorbisReader::VorbisReader(const char *fname, CStrMap *fields)
 {
-  err    = 0;
+  mi_err    = 0;
+
+  mCSM_fields["id"       ] = "ID";
+  mCSM_fields["title"    ] = "TITLE";
+  mCSM_fields["artist"   ] = "ARTIST";
+  mCSM_fields["album"    ] = "ALBUM";
+  mCSM_fields["part"     ] = "DISCNUMBER";
+  mCSM_fields["parts"    ] = "DISCS";
+  mCSM_fields["track"    ] = "TRACKNUMBER";
+  mCSM_fields["tracks"   ] = "TRACKS";
+  mCSM_fields["genre"    ] = "GENRE";
+  mCSM_fields["rating"   ] = "RATING";
+  mCSM_fields["mood"     ] = "MOOD";
+  mCSM_fields["situation"] = "SITUATION";
+  mCSM_fields["tempo"    ] = "TEMPO";
+  mCSM_fields["language" ] = "LANGUAGE";
+  mCSM_fields["date"     ] = "DATE";
+  mCSM_fields["comment"  ] = "COMMENT";
+
+  CStrMapIt it = fields->begin();
+  while(it != fields->end()) {
+    if(strcmp(it->second, "") != 0) {
+      mCSM_fields[it->first] = it->second;
+    }
+    ++it;
+  }
+
   mSM_values = new StrMap;
   Ogg::Vorbis::File f(fname);
   Ogg::XiphComment *tag;
   if((tag = f.tag())) {
     const Ogg::FieldListMap *flm = &tag->fieldListMap();
 
-    CStrMapIt it = fields.begin();
+    CStrMapIt it = mCSM_fields.begin();
 
     const StringList *sl;
 
-    while(it != fields.end()) {
+    while(it != mCSM_fields.end()) {
 
-      sl = &(*flm)[fields[it->first]];
+      sl = &(*flm)[mCSM_fields[it->first]];
 
       if(!sl->isEmpty()) {
         (*mSM_values)[it->first] = (*sl)[0].to8Bit(true);
@@ -52,7 +78,7 @@ OggReader::OggReader(const char* fname, CStrMap &fields)
       ++it;
     }
   } else {
-    err = 1;
+    mi_err = 1;
   }
 
   if(f.audioProperties()) {
@@ -64,79 +90,107 @@ OggReader::OggReader(const char* fname, CStrMap &fields)
   }
 }
 
-const char *OggReader::getId()
+const char *VorbisReader::getId()
 {
   return (*mSM_values)["id"].c_str();
 }
 
-const char *OggReader::getArtist()
+const char *VorbisReader::getArtist()
 {
   return (*mSM_values)["artist"].c_str();
 }
 
-const char *OggReader::getTitle()
+const char *VorbisReader::getTitle()
 {
   return (*mSM_values)["title"].c_str();
 }
 
-const char *OggReader::getAlbum()
+const char *VorbisReader::getAlbum()
 {
   return (*mSM_values)["album"].c_str();
 }
 
-const char *OggReader::getPart()
+const char *VorbisReader::getPart()
 {
   return (*mSM_values)["part"].c_str();
 }
 
-const char *OggReader::getParts()
+const char *VorbisReader::getParts()
 {
   return (*mSM_values)["parts"].c_str();
 }
 
-const char *OggReader::getTrack()
+const char *VorbisReader::getTrack()
 {
   return (*mSM_values)["track"].c_str();
 }
 
-const char *OggReader::getTracks()
+const char *VorbisReader::getTracks()
 {
   return (*mSM_values)["tracks"].c_str();
 }
 
-const char *OggReader::getGenre()
+const char *VorbisReader::getGenre()
 {
   return (*mSM_values)["genre"].c_str();
 }
 
-const char *OggReader::getRating()
+const char *VorbisReader::getRating()
 {
   return (*mSM_values)["rating"].c_str();
 }
 
-const char *OggReader::getYear()
+const char *VorbisReader::getMood()
 {
-  return (*mSM_values)["year"].c_str();
+  return (*mSM_values)["mood"].c_str();
 }
 
-const char *OggReader::getComment()
+const char *VorbisReader::getSituation()
+{
+  return (*mSM_values)["situation"].c_str();
+}
+
+const char *VorbisReader::getTempo()
+{
+  return (*mSM_values)["tempo"].c_str();
+}
+
+const char *VorbisReader::getLanguage()
+{
+  return (*mSM_values)["language"].c_str();
+}
+
+const char *VorbisReader::getDate()
+{
+  return (*mSM_values)["date"].c_str();
+}
+
+const char *VorbisReader::getComment()
 {
   return (*mSM_values)["comment"].c_str();
 }
 
-const char *OggReader::getLength()
+const char *VorbisReader::getLength()
 {
   return (*mSM_values)["length"].c_str();
 }
 
-const char *OggReader::get(const char *field)
+
+
+const char *VorbisReader::get(const char *field)
 {
   return (*mSM_values)[field].c_str();
 }
 
 
 
-OggReader::~OggReader()
+int VorbisReader::error()
+{
+  return mi_err;
+}
+
+
+VorbisReader::~VorbisReader()
 {
   delete mSM_values;
 }
