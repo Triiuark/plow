@@ -64,6 +64,7 @@ class TagReader
   private:
     AbstractReader *mAR_reader;
     int            mi_type;
+    int            mi_err;
 };
 
 #endif

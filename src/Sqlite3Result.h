@@ -37,8 +37,8 @@ class Sqlite3Result
      * creates a new Sqlite3Result object
      *
      * @param sqlresult result value of sqlite3_get_table() function
-     * @param rows      number of rows in result
-     * @param cols      number of columns in result
+     * @param rows      number of rows in @a sqlresult
+     * @param cols      number of columns in @a sqlresult
      */
     Sqlite3Result(char **sqlresult, int rows, int cols);
 
@@ -52,7 +52,7 @@ class Sqlite3Result
 
     /**
      * @param row    row number
-     * @param column column number
+     * @param col column number
      *
      * @returns the value at row, col,
      *          or 0 if row or col not found

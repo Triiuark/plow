@@ -93,105 +93,128 @@ const char *WHERE   = "WHERE\n\tid_artist=_id_artist AND\
 
 const char *INI_FILE ="\
 ######################################################################\n\
-#\n\
-# general options you have to set\n\
-#\n\
+###\n\
+### general options you have to set\n\
+###\n\
 \n\
 [general]\n\
 \n\
-#\n\
-# full path to your 'overall' music folder\n\
-# (the folder where all your music is in)\n\
-#\n\
+###\n\
+### full path to your 'overall' music folder\n\
+### (the folder where all your music is in)\n\
+###\n\
 path = /path/to/music\n\
 \n\
 \n\
-#\n\
-# complete path to your playlist\n\
-#\n\
+###\n\
+### complete path to your playlist\n\
+###\n\
 #playlist = /path/to/plow.m3u\n\
 \n\
 \n\
-#\n\
-# default output order (SQL 'ORDER BY' syntax)\n\
-#\n\
+###\n\
+### default output order (SQL 'ORDER BY' syntax)\n\
+###\n\
 order = album ASC, part ASC, track ASC\n\
 \n\
 \n\
-#\n\
-# the player you wish to use, at minimum player0 is required\n\
-# you can select a player with plow -1 ... -9\n\
-#\n\
+###\n\
+### the player you wish to use, at minimum player0 is required\n\
+### you can select a player with plow -1 ... -9\n\
+###\n\
 player0 = mplayer -playlist\n\
 player1 = audacious\n\
 player2 = xmms\n\
 player3 = amarok\n\
 \n\
-#\n\
-# the player numbers that requires not to fork,\n\
-# as comma seperated list\n\
-#\n\
+###\n\
+### the player numbers that requires not to fork,\n\
+### as comma seperated list\n\
+###\n\
 playernofork = 0\n\
 \n\
 \n\
-#\n\
-# full path to your portable music player\n\
-#\n\
+###\n\
+### full path to your portable music player\n\
+###\n\
 #portable = /path/to/portable/player\n\
 \n\
 \n\
-#\n\
-# filename on portable\n\
-#\n\
+###\n\
+### filename on portable\n\
+###\n\
 #portable_name = [artistOrAlbum] / [albumOrEmpty] - [part0] - [track0] -\
  [emptyOrArtist] - [title] [fileext]\n\
 \n\
-#\n\
-# information string for m3u playlist\n\
-#\n\
+###\n\
+### information string for m3u playlist\n\
+###\n\
 extinf = [lengths] \", \" [artist] \" - \" [title]\n\
 \n\
 \n\
 ######################################################################\n\
-#\n\
-# in this section you can put abbrevations for often used\n\
-# command line options\n\
-# you can call these abbrevations using .NAME\n\
-# where NAME is your abbrevation\n\
-# you can use all command line options here\n\
-#\n\
+###\n\
+### in this section you can put abbrevations for often used\n\
+### command line options\n\
+### you can call these abbrevations using .NAME\n\
+### where NAME is your abbrevation\n\
+### you can use all command line options here\n\
+###\n\
 \n\
 [abbr]\n\
-# this one executes an sql statement, which selects all records\n\
-# with different artists - sampler\n\
+### this one executes an sql statement, which selects all records\n\
+### with different artists - sampler\n\
 sampler = -q \"SELECT id_album, album FROM tbl_album WHERE\
  album_id_artist=1;\"\n\
 \n\
-# select all files where genre contains rock\n\
+### select all files where genre contains rock\n\
 rock = -g rock\n\
 \n\
 \n\
 ######################################################################\n\
-#\n\
+###\n\
+### here you can set how your ogg/vorbis files are tagged\n\
+###\n\
 [vorbis]\n\
-# \"standard\" field names\n\
-title     = TITLE\n\
-artist    = ARTIST\n\
-album     = ALBUM\n\
-part      = DISCNUMBER\n\
-track     = TRACKNUMBER\n\
-genre     = GENRE\n\
-comment   = COMMENT\n\
-date      = DATE\n\
-# non standard field names\n\
-id        = ID\n\
-parts     = DISCS\n\
-tracks    = TRACKS\n\
-rating    = RATING\n\
-mood      = MOOD\n\
-situation = SITUATION\n\
-tempo     = TEMPO\n\
-language  = LANGUAGE\n\
+\n\
+### \"standard\" field names\n\
+\n\
+#title     = TITLE\n\
+#artist    = ARTIST\n\
+#album     = ALBUM\n\
+#part      = DISCNUMBER\n\
+#track     = TRACKNUMBER\n\
+#genre     = GENRE\n\
+#comment   = COMMENT\n\
+#date      = DATE\n\
+\n\
+\n\
+### non standard field names\n\
+\n\
+#id        = ID\n\
+#parts     = DISCS\n\
+#tracks    = TRACKS\n\
+#rating    = RATING\n\
+#mood      = MOOD\n\
+#situation = SITUATION\n\
+#tempo     = TEMPO\n\
+#language  = LANGUAGE\n\
+\n\
+######################################################################\n\
+###\n\
+### here you can set how your mp3 files are tagged\n\
+###\n\
+[id3v2]\n\
+\n\
+### non standard field names\n\
+\n\
+#id        = UFID/*\n\
+#comment   = COMM/\n\
+#rating    = POPM/*\n\
+#mood      = TXXX/MOOD\n\
+#situation = TXXX/SITUATION\n\
+#tempo     = TXXX/TEMPO\n\
+#language  = TXXX/LANGUAGE\n\
 ";
 
 
@@ -242,7 +265,7 @@ INSERT INTO 'tbl_mood' VALUES(1, '');\n\
 \n\
 CREATE TABLE tbl_music (\n\
   id_music       INTEGER NOT NULL PRIMARY KEY,\n\
-  file_id        INTEGER NOT NULL DEFAULT 0,\n\
+  file_id        TEXT    NOT NULL DEFAULT '',\n\
   file           TEXT    NOT NULL UNIQUE,\n\
   title          TEXT    NOT NULL DEFAULT '',\n\
   _id_artist     INTEGER NOT NULL DEFAULT 1,\n\
@@ -307,8 +330,8 @@ CREATE TABLE tbl_tmp (\n\
    tmp_situation    TEXT    NOT NULL DEFAULT '',\n\
    tmp_tempo        TEXT    NOT NULL DEFAULT '',\n\
    tmp_language     TEXT    NOT NULL DEFAULT '',\n\
-   tmp_lyrics       TEXT    NOT NULL DEFAULT '',\n\
    tmp_comment      TEXT    NOT NULL DEFAULT '',\n\
+   tmp_lyrics       TEXT    NOT NULL DEFAULT '',\n\
    tmp_id_artist    INTEGER NOT NULL DEFAULT 1,\n\
    tmp_id_album     INTEGER NOT NULL DEFAULT 1,\n\
    tmp_id_genre     INTEGER NOT NULL DEFAULT 1,\n\

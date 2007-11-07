@@ -48,38 +48,38 @@ struct _cstrcmp_r {
 
 
 /**
- * @brief associative array of C strings
+ * associative array of C strings
  */
 typedef map<const char*, const char*, _cstrcmp> CStrMap;
 
 /**
- * @brief iterator for associative array of C strings
+ * iterator for associative array of C strings
  */
 typedef map<const char*, const char*, _cstrcmp>::iterator CStrMapIt;
 
 
 
 /**
- * @brief associative array of C++ strings
+ * associative array of C++ strings
  */
 typedef map<const char*, string,      _cstrcmp> StrMap;
 
 /**
- * @brief iterator for associative array of C++ strings
+ * iterator for associative array of C++ strings
  */
 typedef map<const char*, string,      _cstrcmp>::iterator StrMapIt;
 
 
 
 /**
- * @brief associative array of integers
+ * associative array of integers
  */
 typedef map<const char*, int,         _cstrcmp> IntMap;
 
 
 
 /**
- * @brief priority queue of vector<char *> with descending order
+ * priority queue of vector<char *> with descending order
  */
 typedef priority_queue<char *, vector<char *>, _cstrcmp_r> PrioQ;
 

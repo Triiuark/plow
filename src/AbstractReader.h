@@ -20,31 +20,117 @@
 #ifndef PLOW_ABSTRACT_READER_H
 #define PLOW_ABSTRACT_READER_H
 
+/**
+ * @brief interface for all ...Reader classes
+ */
 class AbstractReader
 {
   public:
+    /**
+     * @returns a unique id of the file, an empty string if not found
+     */
     virtual const char *getId()        = 0;
+
+    /**
+     * @returns title, an empty string if not found
+     */
     virtual const char *getTitle()     = 0;
+
+    /**
+     * @returns artist, an empty string if not found
+     */
     virtual const char *getArtist()    = 0;
+
+    /**
+     * @returns album, an empty string if not found
+     */
     virtual const char *getAlbum()     = 0;
+
+    /**
+     * @returns part number, an empty string if not found
+     */
     virtual const char *getPart()      = 0;
+
+    /**
+     * @returns total number of parts, an empty string if not found
+     */
     virtual const char *getParts()     = 0;
+
+    /**
+     * @returns track number, an empty string if not found
+     */
     virtual const char *getTrack()     = 0;
+
+    /**
+     * @returns total number of tracks, an empty string if not found
+     */
     virtual const char *getTracks()    = 0;
+
+    /**
+     * @returns genre, an empty string if not found
+     */
     virtual const char *getGenre()     = 0;
+
+    /**
+     * @returns rating, an empty string if not found
+     */
     virtual const char *getRating()    = 0;
+
+    /**
+     * @returns mood, an empty string if not found
+     */
     virtual const char *getMood()      = 0;
+
+    /**
+     * @returns situation, an empty string if not found
+     */
     virtual const char *getSituation() = 0;
+
+    /**
+     * @returns tempo, an empty string if not found
+     */
     virtual const char *getTempo()     = 0;
+
+    /**
+     * @returns language, an empty string if not found
+     */
     virtual const char *getLanguage()  = 0;
+
+    /**
+     * @returns date, an empty string if not found
+     */
     virtual const char *getDate()      = 0;
+
+    /**
+     * @returns comment, an empty string if not found
+     */
     virtual const char *getComment()   = 0;
+
+    /**
+     * @returns length of song in ms
+     */
     virtual const char *getLength()    = 0;
 
+
+
+    /**
+     * @param field name of a field (e.g. "artist")
+     * @returns the value for @a field, an empty string if not found
+     */
     virtual const char *get(const char * field) = 0;
 
+
+
+    /**
+     * @returns 0 if no error occured
+     */
     virtual int error() = 0;
 
+
+
+    /**
+     * destroys AbstractReader
+     */
     virtual ~AbstractReader() {};
 };
 

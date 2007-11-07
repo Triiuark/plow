@@ -24,7 +24,7 @@
 #include "ID3Reader.h"
 
 TagReader::TagReader(const char *fname, map<int, CStrMap *> fieldNames)
-    : mAR_reader(0), mi_type(UNKNOWN)
+    : mAR_reader(0), mi_type(UNKNOWN), mi_err(0)
 {
   char head[5];
   head[4] = 0;
@@ -32,13 +32,15 @@ TagReader::TagReader(const char *fname, map<int, CStrMap *> fieldNames)
   fread(head, 1, 4, f);
   fclose(f);
 
-  if(strcmp("OggS", head) == 0) {
+  if(strncmp("OggS", head, 4) == 0) {
     mi_type    = OGG_VORBIS;
     mAR_reader = new VorbisReader(fname,
                                   fieldNames[TagReader::OGG_VORBIS]);
   } else if(strncmp("ID3", head, 3) == 0) {
     mi_type    = MPEG;
     mAR_reader = new ID3Reader(fname, fieldNames[TagReader::MPEG]);
+  } else {
+    mi_err = 0;
   }
 }
 
@@ -73,7 +75,10 @@ int TagReader::fileType()
 
 int TagReader::error()
 {
-  return mAR_reader->error();
+  if(mAR_reader) {
+    return mAR_reader->error();
+  }
+  return mi_err;
 }
 
 

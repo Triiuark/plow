@@ -749,7 +749,7 @@ int main(int argc, char** argv)
     gsDatabase = gsPlowHome + "/plow.sqlite";
     gsPlaylist = gsPlowHome + "/plow.m3u";
 
-    string order = ";";
+    string order(";");
 
   try {
     parseArgs(argc, argv);
@@ -874,8 +874,16 @@ CStrMap *vorbisFields()
  */
 CStrMap *id3Fields()
 {
-  // TODO: implement
-  return 0;
+  CStrMap *fields = new CStrMap;
+
+  (*fields)["id"       ] = gIniParser->get("[id3v2]id").c_str();
+  (*fields)["rating"   ] = gIniParser->get("[id3v2]rating").c_str();
+  (*fields)["mood"     ] = gIniParser->get("[id3v2]mood").c_str();
+  (*fields)["situation"] = gIniParser->get("[id3v2]situation").c_str();
+  (*fields)["tempo"    ] = gIniParser->get("[id3v2]tempo").c_str();
+  (*fields)["language" ] = gIniParser->get("[id3v2]language").c_str();
+
+  return fields;
 }
 
 
@@ -912,6 +920,7 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
   PrioQ *fnames = new PrioQ;
 
   ostringstream errmsg;
+  string unsupportedFiles;
 
   getFiles(*fnames, path, true);
   cout << "> " << fnames->size() << " files found." << endl;
@@ -960,6 +969,10 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
 
       query += result;
       sqlite3_free(result);
+    } else {
+      unsupportedFiles.append("\t");
+      unsupportedFiles.append(fnames->top());
+      unsupportedFiles.append("\n");
     }
 
     if(tag->error()) {
@@ -969,7 +982,7 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
                                  errmsg.str().c_str());
       e->print();
       delete e;
-      errmsg.flush();
+      errmsg.str("");
     }
     delete tag;
     delete[] fnames->top();
@@ -1180,4 +1193,9 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
 
   delete fieldNames[TagReader::OGG_VORBIS];
   delete fieldNames[TagReader::MPEG];
+
+  if(unsupportedFiles.length()) {
+    cout << "> The following files don't contain a supported tag:" << endl;
+    cout << unsupportedFiles.c_str() << flush;
+  }
 } // add2Db()

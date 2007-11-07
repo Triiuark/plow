@@ -51,7 +51,8 @@ class Sqlite3
     Sqlite3Result *exe(const char *query);
 
     /**
-     * @returns a sqlite3 error code, SQLITE_OK means no error
+     * @returns a sqlite3 error code (sqlite3.h),
+     *          SQLITE_OK means no error
      */
     int error();
 

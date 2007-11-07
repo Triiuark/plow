@@ -72,7 +72,7 @@ VorbisReader::VorbisReader(const char *fname, CStrMap *fields)
       sl = &(*flm)[mCSM_fields[it->first]];
 
       if(!sl->isEmpty()) {
-        (*mSM_values)[it->first] = (*sl)[0].to8Bit(true);
+        (*mSM_values)[it->first] = (*sl)[0].toCString(true);
       }
 
       ++it;
@@ -81,12 +81,12 @@ VorbisReader::VorbisReader(const char *fname, CStrMap *fields)
     mi_err = 1;
   }
 
+  int len;
+  char buff[16];
   if(f.audioProperties()) {
-    int len = f.audioProperties()->length() * 1000;
-    char *buff = new char[16];
+    len = f.audioProperties()->length() * 1000;
     sprintf(buff, "%d", len);
-    (*mSM_values)["length"] = (buff);
-    delete[] buff;
+    (*mSM_values)["length"] = buff;
   }
 }
 

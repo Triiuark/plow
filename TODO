@@ -1,6 +1,9 @@
-Important
+important
 =========
 
-* improve error handling
 * code documentation
-* own key for tags support
+
+later
+=====
+
+* command line options to edit database

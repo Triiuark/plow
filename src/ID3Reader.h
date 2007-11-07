@@ -20,6 +20,8 @@
 #ifndef PLOW_ID3_READER_H
 #define PLOW_ID3_READER_H
 
+#include <id3v2tag.h>
+
 #include "global.h"
 
 #include "AbstractReader.h"
@@ -28,7 +30,6 @@ class ID3Reader : public AbstractReader
 {
   public:
     ID3Reader(const char* fname, CStrMap *fields);
-    ~ID3Reader();
 
     const char *getId();
     const char *getArtist();
@@ -48,14 +49,38 @@ class ID3Reader : public AbstractReader
     const char *getComment();
     const char *getLength();
 
+
+
     const char *get(const char *field);
 
-    int error() {return err;}
+
+
+    int error();
+
+
+
+    ~ID3Reader();
 
   private:
-    int err;
-
+    int mi_err;
     StrMap *mSM_values;
+    CStrMap mCSM_fields;
+
+    void getTxxxFrame(const char *field,
+                      const char *description,
+                      TagLib::ID3v2::FrameList *fl);
+
+    void getCommFrame(const char *field,
+                      const char *description,
+                      TagLib::ID3v2::FrameList *fl);
+
+    void getUfidFrame(const char *field,
+                      const char *description,
+                      TagLib::ID3v2::FrameList *fl);
+
+    void getPopmFrame(const char *field,
+                      const char *description,
+                      TagLib::ID3v2::FrameList *fl);
 };
 
 #endif

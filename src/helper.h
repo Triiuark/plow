@@ -78,7 +78,7 @@ int copyfile(const string &src, const string &dst);
  *
  * @param utf8str utf-8 encoded string
  *
- * @return length in characters of utf8str
+ * @return length in characters of @a utf8str
  */
 uint utf8strlen(const char *utf8str);
 
@@ -91,7 +91,7 @@ uint utf8strlen(const char *utf8str);
  *
  * @param chars a string containing all characters to replace
  * @param in the string where characters should be replaced
- * @param by
+ * @param by charcter to split on
  */
 void replaceChars(const string &chars, string &in, char by='_');
 

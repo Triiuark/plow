@@ -2,9 +2,9 @@ Overview
 ========
 
 plow is a powerfull command-line tool for putting songs from your
-music collection into a playlist. Most id3v2/ogg tag information
+music collection into a playlist. Most id3v2/vorbis tag information
 is used by plow to create a (sqlite3) database for filtering.
-Additionaly plow supports fields like mood, tempo, language, etc.
+Additionaly plow supports fields like mood, language, etc.
 
 
 How to compile and install
@@ -16,27 +16,19 @@ Requirements:
 
 Download source code, then:
   $ tar zxvf plow-x.y.z.tar.gz
-  $ cd plow-x.y.z.tar.gz
-  $ ./configure
-  $ make
-  $ make install
+  $ cd plow-x.y.z
+  $ scons [cxxflags="<cxxflags>"]
 
 
 Setting up and using plow
 =========================
 
-If you use plow for the first time you have to run setup.sh. You will
-find it in the installation directory, usally /usr/local/share/plow or
-/usr/share/plow.
-  $ source /usr/local/share/plow/setup.sh
+If you use plow for the first time, plow creates
+~/.plow/plow.conf and ~/.plow/plow.sqlite.
 
-You can also do this without setup.sh:
-  $ mkdir ~/.plow
-  $ cp /usr/local/share/plow/plowrc ~/.plow
-  $ sqlite3 ~/.plow/plow.db < /usr/local/share/plow/plow.struct.no_id.sql
-
-Then edit ~/.plow/plowrc and change at least path, playlist and player0
-settings under [general] section.
+Then edit ~/.plow/plow.conf and change at least path and player0
+settings under [general] section. If you use Ogg/Vorbis files it is
+recommanded to change also the field names under [vorbis] section.
 
 Run:
   $ plow -I /path/to/music
