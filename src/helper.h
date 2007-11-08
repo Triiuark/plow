@@ -28,19 +28,24 @@ using namespace std;
  * puts every regular file with access mode @a mode in @a path into
  * @a fnames, if @a recursive it does for subfolders, too
  *
- * @param fnames    a queue to put found files in
- *                  (in descending order)
- * @param path      to search for files
- * @param recursive if set, search in subfolders
- * @param mode      access mode granted for files,
- *                  default: R_OK = readable @n
- *                  mode is a mask consisting of one or more of
- *                  R_OK, W_OK, X_OK and  F_OK.
- *                  (see: @a man @a access )
+ * @param fnames     a queue to put found files in
+ *                   (in descending order)
+ * @param path       to search for files
+ * @param recursive  if set, search in subfolders
+ * @param extensions a list of file extensions (e.g. txt, ogg, mp3)
+ *                   if not 0, only files with an extension that is in
+ *                   @a extensions will be added
+ *                   NOTE: @a extensions has to be 0 terminated
+ * @param mode       access mode granted for files,
+ *                   default: R_OK = readable @n
+ *                   mode is a mask consisting of one or more of
+ *                   R_OK, W_OK, X_OK and  F_OK.
+ *                   (see: @a man @a access )
  */
 void getFiles(PrioQ &fnames,
               char *path,
               const bool recursive,
+              char **extensions = 0,
               int mode = R_OK);
 
 

@@ -149,9 +149,12 @@ playernofork = 0\n\
 ###\n\
 ### information string for m3u playlist\n\
 ###\n\
-extinf = [lengths] \", \" [artist] \" - \" [title]\n\
+extinf = [length] \", \" [artist] \" - \" [title]\n\
 \n\
-\n\
+###\n\
+### search only for files with an extension in this list\n\
+###\n\
+#extensions = mp3 MP3 ogg OGG\n\
 ######################################################################\n\
 ###\n\
 ### in this section you can put abbrevations for often used\n\

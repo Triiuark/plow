@@ -38,12 +38,15 @@ using namespace std;
 void getFiles(PrioQ &fnames,
               char *path,
               const bool recursive,
+              char **extensions,
               int mode)
 {
   struct dirent *dent;
   struct stat    st;
 
   char *fname;
+  char *extension;
+  int  i;
   DIR  *dir = opendir(path);
 
   if(!dir) {
@@ -63,11 +66,25 @@ void getFiles(PrioQ &fnames,
 
       if(lstat(fname, &st) == 0) {
         if(recursive && S_ISDIR(st.st_mode)) {
-          getFiles(fnames, fname, recursive, mode);
+          getFiles(fnames, fname, recursive, extensions, mode);
           delete[] fname;
         } else if(S_ISREG(st.st_mode)) {
           if(access(fname, mode) == 0) {
-            fnames.push(fname);
+            if(extensions && extensions[0] != 0) {
+              i = 0;
+              extension = strrchr(fname, '.');
+              if(extension) {
+                while(extensions[i] != 0 && i < 9999) {
+                  cout << extension << ": " << extensions[i] << endl;
+                  if(strcmp(&extension[1], extensions[i]) == 0) {
+                    fnames.push(fname);
+                  }
+                  ++i;
+                }
+              }
+            } else {
+              fnames.push(fname);
+            }
           }
         } else {
           delete[] fname;

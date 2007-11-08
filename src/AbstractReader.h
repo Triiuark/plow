@@ -107,7 +107,7 @@ class AbstractReader
     virtual const char *getComment()   = 0;
 
     /**
-     * @returns length of song in ms
+     * @returns length of song in seconds
      */
     virtual const char *getLength()    = 0;
 
@@ -115,6 +115,7 @@ class AbstractReader
 
     /**
      * @param field name of a field (e.g. "artist")
+     *
      * @returns the value for @a field, an empty string if not found
      */
     virtual const char *get(const char * field) = 0;

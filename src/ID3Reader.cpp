@@ -63,9 +63,9 @@ ID3Reader::ID3Reader(const char* fname, CStrMap *fields)
   }
 
   ID3v2::Tag *tag;
-  MPEG::File *f = new MPEG::File(fname);
+  MPEG::File f(fname);
 
-  if((tag = f->ID3v2Tag())) {
+  if((tag = f.ID3v2Tag())) {
 
     (*mSM_values)["artist"] = tag->artist().toCString(true);
     (*mSM_values)["title" ] = tag->title().toCString(true);
@@ -139,21 +139,19 @@ ID3Reader::ID3Reader(const char* fname, CStrMap *fields)
   }
   int len;
   char buff[16];
-  if(f->audioProperties()) {
-    len = f->audioProperties()->length() * 1000;
+  if(f.audioProperties()) {
+    len = f.audioProperties()->length();
     sprintf(buff, "%d", len);
     (*mSM_values)["length"] = (buff);
   }
 
-  delete f;
-/*
   StrMapIt valuesIt = mSM_values->begin();
   while(valuesIt != mSM_values->end()) {
     std::cout << valuesIt->first << ": " << valuesIt->second << std::endl;
     ++valuesIt;
   }
-  exit(0);
-*/
+//  exit(0);
+
   //exit(0);
 }
 

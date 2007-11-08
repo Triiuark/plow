@@ -105,8 +105,15 @@ char **StringParser::getArgv()
 
 StringParser::~StringParser()
 {
+
+  if(m_argv) {
+    for(uint i = 0; i < m_tokens.size(); ++i) {
+      delete m_argv[i];
+    }
+    delete[] m_argv;
+  }
+
   for(uint i = 0; i < m_tokens.size(); ++i) {
     delete m_tokens[i];
   }
-  delete[] m_argv;
 }

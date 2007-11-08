@@ -49,6 +49,8 @@
 #include "StringParser.h"
 #include "TagReader.h"
 
+#include <iconv.h>
+
 using namespace std;
 
 IniParser *gIniParser = 0;
@@ -170,7 +172,6 @@ string infoString(Sqlite3Result &rs,
   string        out;
   string        tmp;
   string        tmp2;
-  ostringstream tmp3;
 
   uint strsize = 0;
 
@@ -214,10 +215,6 @@ string infoString(Sqlite3Result &rs,
         if(pos != string::npos) {
           tmp += tmp2.substr(pos);
         }
-      } else if(*tokens[i] == "[lengths]") {
-        tmp3.str("");
-        tmp3 << (uint)(atof(rs.get(row, "length"))/1000.0);
-        tmp += tmp3.str();
       } else if(*tokens[i] == "[artistOrAlbum]") {
         if(strcmp(rs.get(row, "album_id_artist"), "1") != 0) {
           tmp += rs.get(row, "artist");
@@ -485,7 +482,7 @@ void createList(const char *query)
   }
 
   for(int i = 0; i < rs->rows(); ++i) {
-    playtime = (uint)(atof(rs->get(i, "length")) / 1000.0);
+    playtime = (uint)(atof(rs->get(i, "length")));
     total_playtime += playtime;
     if(extinf) {
       m3u << "#EXTINF:" << infoString(*rs, i, sp.getTokens()) << endl;
@@ -894,6 +891,9 @@ CStrMap *id3Fields()
 void add2Db(char *path, const char *dbPath, const char *musicPath)
 {
 
+
+
+
   map<int, CStrMap *> fieldNames;
 
   fieldNames[TagReader::OGG_VORBIS] = vorbisFields();
@@ -922,7 +922,12 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
   ostringstream errmsg;
   string unsupportedFiles;
 
-  getFiles(*fnames, path, true);
+  StringParser *sp = new StringParser(gIniParser->get(
+                              "[general]extensions").c_str());
+  char **extensions  = sp->getArgv();
+  getFiles(*fnames, path, true, extensions);
+  delete sp;
+
   cout << "> " << fnames->size() << " files found." << endl;
   if(fnames->size() == 0) {
     delete fnames;

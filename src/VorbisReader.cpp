@@ -84,7 +84,7 @@ VorbisReader::VorbisReader(const char *fname, CStrMap *fields)
   int len;
   char buff[16];
   if(f.audioProperties()) {
-    len = f.audioProperties()->length() * 1000;
+    len = f.audioProperties()->length();
     sprintf(buff, "%d", len);
     (*mSM_values)["length"] = buff;
   }
