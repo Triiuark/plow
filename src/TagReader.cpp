@@ -46,23 +46,141 @@ TagReader::TagReader(const char *fname, map<int, CStrMap *> fieldNames)
 
 
 
-const char *TagReader::id()        {return mAR_reader->getId();       }
-const char *TagReader::artist()    {return mAR_reader->getArtist();   }
-const char *TagReader::title()     {return mAR_reader->getTitle();    }
-const char *TagReader::album()     {return mAR_reader->getAlbum();    }
-const char *TagReader::part()      {return mAR_reader->getPart();     }
-const char *TagReader::parts()     {return mAR_reader->getParts();    }
-const char *TagReader::track()     {return mAR_reader->getTrack();    }
-const char *TagReader::tracks()    {return mAR_reader->getTracks();   }
-const char *TagReader::genre()     {return mAR_reader->getGenre();    }
-const char *TagReader::rating()    {return mAR_reader->getRating();   }
-const char *TagReader::mood()      {return mAR_reader->getMood();     }
-const char *TagReader::situation() {return mAR_reader->getSituation();}
-const char *TagReader::tempo()     {return mAR_reader->getTempo();    }
-const char *TagReader::language()  {return mAR_reader->getLanguage(); }
-const char *TagReader::date()      {return mAR_reader->getDate();     }
-const char *TagReader::comment()   {return mAR_reader->getComment();  }
-const char *TagReader::length()    {return mAR_reader->getLength();   }
+const char *TagReader::id()
+{
+  if(mAR_reader) {
+    return mAR_reader->getId();
+  }
+  return 0;
+}
+
+const char *TagReader::artist()
+{
+  if(mAR_reader) {
+    return mAR_reader->getArtist();
+  }
+  return 0;
+}
+
+const char *TagReader::title()
+{
+  if(mAR_reader) {
+    return mAR_reader->getTitle();
+  }
+  return 0;
+}
+
+const char *TagReader::album()
+{
+  if(mAR_reader) {
+    return mAR_reader->getAlbum();
+  }
+  return 0;
+}
+
+const char *TagReader::part()
+{
+  if(mAR_reader) {
+    return mAR_reader->getPart();
+  }
+  return 0;
+}
+
+const char *TagReader::parts()
+{
+  if(mAR_reader) {
+    return mAR_reader->getParts();
+  }
+  return 0;
+}
+
+const char *TagReader::track()
+{
+  if(mAR_reader) {
+    return mAR_reader->getTrack();
+  }
+  return 0;
+}
+
+const char *TagReader::tracks()
+{
+  if(mAR_reader) {
+    return mAR_reader->getTracks();
+  }
+  return 0;
+}
+
+const char *TagReader::genre()
+{
+  if(mAR_reader) {
+    return mAR_reader->getGenre();
+  }
+  return 0;
+}
+
+const char *TagReader::rating()
+{
+  if(mAR_reader) {
+    return mAR_reader->getRating();
+  }
+  return 0;
+}
+
+const char *TagReader::mood()
+{
+  if(mAR_reader) {
+    return mAR_reader->getMood();
+  }
+  return 0;
+}
+
+const char *TagReader::situation()
+{
+  if(mAR_reader) {
+    return mAR_reader->getSituation();
+  }
+  return 0;
+}
+
+const char *TagReader::tempo()
+{
+  if(mAR_reader) {
+    return mAR_reader->getTempo();
+  }
+  return 0;
+}
+
+const char *TagReader::language()
+{
+  if(mAR_reader) {
+    return mAR_reader->getLanguage();
+  }
+  return 0;
+}
+
+const char *TagReader::date()
+{
+  if(mAR_reader) {
+    return mAR_reader->getDate();
+  }
+  return 0;
+}
+
+const char *TagReader::comment()
+{
+  if(mAR_reader) {
+    return mAR_reader->getComment();
+  }
+  return 0;
+}
+
+const char *TagReader::length()
+{
+  if(mAR_reader) {
+    return mAR_reader->getLength();
+  }
+  return 0;
+}
 
 
 
