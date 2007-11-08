@@ -17,8 +17,8 @@
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
 ***********************************************************************/
 
-#ifndef PLOW_ID3_READER_H
-#define PLOW_ID3_READER_H
+#ifndef PLOW_ID3V2_READER_H
+#define PLOW_ID3V2_READER_H
 
 #include <id3v2tag.h>
 
@@ -26,10 +26,10 @@
 
 #include "AbstractReader.h"
 
-class ID3Reader : public AbstractReader
+class ID3v2Reader : public AbstractReader
 {
   public:
-    ID3Reader(const char* fname, CStrMap *fields);
+    ID3v2Reader(const char* fname, CStrMap *fields = 0);
 
     const char *getId();
     const char *getArtist();
@@ -59,7 +59,7 @@ class ID3Reader : public AbstractReader
 
 
 
-    ~ID3Reader();
+    ~ID3v2Reader();
 
   private:
     int mi_err;

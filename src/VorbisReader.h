@@ -29,7 +29,7 @@
 class VorbisReader : public AbstractReader
 {
   public:
-    VorbisReader(const char *fname, CStrMap *fields);
+    VorbisReader(const char *fname, CStrMap *fields = 0);
 
     const char *getId();
     const char *getTitle();

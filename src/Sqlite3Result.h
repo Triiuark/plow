@@ -81,7 +81,7 @@ class Sqlite3Result
     /**
      * @param col column number
      *
-     * @returns lenght (in utf-8 charcters, not bytes)
+     * @returns length (in utf-8 charcters, not bytes)
      *          of longest string in column col
      */
     int getWidth(int col);

@@ -17,7 +17,7 @@
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
 ***********************************************************************/
 
-#include "ID3Reader.h"
+#include "ID3v2Reader.h"
 
 #include <string>
 #include <sstream>
@@ -41,7 +41,7 @@ using namespace TagLib;
 
 
 
-ID3Reader::ID3Reader(const char* fname, CStrMap *fields)
+ID3v2Reader::ID3v2Reader(const char* fname, CStrMap *fields)
 {
   mi_err = 0;
   mSM_values = new StrMap;
@@ -158,108 +158,108 @@ ID3Reader::ID3Reader(const char* fname, CStrMap *fields)
 
 
 
-const char *ID3Reader::getId()
+const char *ID3v2Reader::getId()
 {
   return (*mSM_values)["id"].c_str();
 }
 
-const char *ID3Reader::getArtist()
+const char *ID3v2Reader::getArtist()
 {
   return (*mSM_values)["artist"].c_str();
 }
 
-const char *ID3Reader::getTitle()
+const char *ID3v2Reader::getTitle()
 {
   return (*mSM_values)["title"].c_str();
 }
 
-const char *ID3Reader::getAlbum()
+const char *ID3v2Reader::getAlbum()
 {
   return (*mSM_values)["album"].c_str();
 }
 
-const char *ID3Reader::getPart()
+const char *ID3v2Reader::getPart()
 {
   return (*mSM_values)["part"].c_str();
 }
 
-const char *ID3Reader::getParts()
+const char *ID3v2Reader::getParts()
 {
   return (*mSM_values)["parts"].c_str();
 }
 
-const char *ID3Reader::getTrack()
+const char *ID3v2Reader::getTrack()
 {
   return (*mSM_values)["track"].c_str();
 }
 
-const char *ID3Reader::getTracks()
+const char *ID3v2Reader::getTracks()
 {
   return (*mSM_values)["tracks"].c_str();
 }
 
-const char *ID3Reader::getGenre()
+const char *ID3v2Reader::getGenre()
 {
   return (*mSM_values)["genre"].c_str();
 }
 
-const char *ID3Reader::getRating()
+const char *ID3v2Reader::getRating()
 {
   return (*mSM_values)["rating"].c_str();
 }
 
-const char *ID3Reader::getMood()
+const char *ID3v2Reader::getMood()
 {
   return (*mSM_values)["mood"].c_str();
 }
 
-const char *ID3Reader::getSituation()
+const char *ID3v2Reader::getSituation()
 {
   return (*mSM_values)["situation"].c_str();
 }
 
-const char *ID3Reader::getTempo()
+const char *ID3v2Reader::getTempo()
 {
   return (*mSM_values)["tempo"].c_str();
 }
 
-const char *ID3Reader::getLanguage()
+const char *ID3v2Reader::getLanguage()
 {
   return (*mSM_values)["language"].c_str();
 }
 
-const char *ID3Reader::getDate()
+const char *ID3v2Reader::getDate()
 {
   return (*mSM_values)["date"].c_str();
 }
 
-const char *ID3Reader::getComment()
+const char *ID3v2Reader::getComment()
 {
   return (*mSM_values)["comment"].c_str();
 }
 
-const char *ID3Reader::getLength()
+const char *ID3v2Reader::getLength()
 {
   return (*mSM_values)["length"].c_str();
 }
 
 
 
-const char *ID3Reader::get(const char *field)
+const char *ID3v2Reader::get(const char *field)
 {
   return (*mSM_values)[field].c_str();
 }
 
 
 
-int ID3Reader::error()
+int ID3v2Reader::error()
 {
   return mi_err;
 }
 
 
 
-void ID3Reader::getTxxxFrame(const char *field,
+void ID3v2Reader::getTxxxFrame(const char *field,
                   const char *description,
                   ID3v2::FrameList *fl)
 {
@@ -290,7 +290,7 @@ void ID3Reader::getTxxxFrame(const char *field,
 
 
 
-void ID3Reader::getCommFrame(const char *field,
+void ID3v2Reader::getCommFrame(const char *field,
                      const char *description,
                      ID3v2::FrameList *fl)
 {
@@ -311,7 +311,7 @@ void ID3Reader::getCommFrame(const char *field,
 
 
 
-void ID3Reader::getUfidFrame(const char *field,
+void ID3v2Reader::getUfidFrame(const char *field,
                   const char *description,
                   ID3v2::FrameList *fl)
 {
@@ -347,7 +347,7 @@ void ID3Reader::getUfidFrame(const char *field,
 
 
 
-void ID3Reader::getPopmFrame(const char *field,
+void ID3v2Reader::getPopmFrame(const char *field,
                         const char *description,
                         ID3v2::FrameList *fl)
 {
@@ -377,7 +377,7 @@ void ID3Reader::getPopmFrame(const char *field,
 
 
 
-ID3Reader::~ID3Reader()
+ID3v2Reader::~ID3v2Reader()
 {
   delete mSM_values;
 }

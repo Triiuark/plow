@@ -33,7 +33,7 @@ class Sqlite3
     /**
      * creates a new Sqlite3 object with the given @a databaseName
      *
-     * @param databaseName
+     * @param databaseName the database file name
      */
     Sqlite3(const char *databaseName);
 

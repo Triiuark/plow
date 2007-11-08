@@ -30,8 +30,9 @@ class PlowException
   public:
     /**
      * creates a new PlowException with the given messages
+     *
      * @param where    the function name, where the error occurs
-     * @param what     what exactly is the problem
+     * @param what     what "exactly" is the problem
      * @param solution a hint to solve the problem, if there is one
      */
     PlowException(const char *where,

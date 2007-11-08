@@ -21,7 +21,7 @@
 
 #include "global.h"
 #include "VorbisReader.h"
-#include "ID3Reader.h"
+#include "ID3v2Reader.h"
 
 TagReader::TagReader(const char *fname, map<int, CStrMap *> fieldNames)
     : mAR_reader(0), mi_type(UNKNOWN), mi_err(0)
@@ -33,12 +33,12 @@ TagReader::TagReader(const char *fname, map<int, CStrMap *> fieldNames)
   fclose(f);
 
   if(strncmp("OggS", head, 4) == 0) {
-    mi_type    = OGG_VORBIS;
+    mi_type    = VORBIS;
     mAR_reader = new VorbisReader(fname,
-                                  fieldNames[TagReader::OGG_VORBIS]);
+                                  fieldNames[TagReader::VORBIS]);
   } else if(strncmp("ID3", head, 3) == 0) {
-    mi_type    = MPEG;
-    mAR_reader = new ID3Reader(fname, fieldNames[TagReader::MPEG]);
+    mi_type    = ID3V2;
+    mAR_reader = new ID3v2Reader(fname, fieldNames[TagReader::ID3V2]);
   } else {
     mi_err = 0;
   }

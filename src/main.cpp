@@ -896,8 +896,8 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
 
   map<int, CStrMap *> fieldNames;
 
-  fieldNames[TagReader::OGG_VORBIS] = vorbisFields();
-  fieldNames[TagReader::MPEG]       = id3Fields();
+  fieldNames[TagReader::VORBIS] = vorbisFields();
+  fieldNames[TagReader::ID3V2]  = id3Fields();
 
   Sqlite3Result *sr, *sr2;
   string query, query2, query3;
@@ -1196,8 +1196,8 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
   delete sr;
   cout << "> " << count << " new files inserted." << endl;
 
-  delete fieldNames[TagReader::OGG_VORBIS];
-  delete fieldNames[TagReader::MPEG];
+  delete fieldNames[TagReader::VORBIS];
+  delete fieldNames[TagReader::ID3V2];
 
   if(unsupportedFiles.length()) {
     cout << "> The following files don't contain a supported tag:" << endl;

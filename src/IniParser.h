@@ -45,7 +45,7 @@ class IniParser
      * @param option the key you want to have the value for,
      *               key has to be something like "[section]option"
      *
-     * @returns the value, or an empty string if option not found
+     * @returns the value, or an empty string if @a option not found
      */
     string get(const char *option);
 

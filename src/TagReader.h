@@ -31,9 +31,9 @@ class TagReader
 
     static const enum {
       UNKNOWN = -1,
-      OGG_VORBIS,
-      MPEG
-    } FILE_TYPE;
+      VORBIS,
+      ID3V2
+    } TAG_TYPE;
 
     TagReader(const char* fname, std::map<int, CStrMap *> fieldNames);
 
