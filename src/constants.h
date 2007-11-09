@@ -23,6 +23,7 @@
 
 const char *USAGE = "\
 plow [-|+A|a|g|l|m|r|s|t|T[e] <str>]* [-0...9] [-Q] [-S] [--add] [--noplay]\n\
+     [--set (A|a|g|l|m|r|s|t <str>)+]\n\
      | [-L <tbl>] | [-q <sql>] | [-C] | [-I <dir>] | [--help] | [--version]";
 
 const char *HELP = "\
@@ -37,6 +38,9 @@ const char *HELP = "\
 -S                shuffle playlist                                    \n\
 --add             append to playlist                                  \n\
 --noplay          don't start a player                                \n\
+--set <c> <str>   set field <c> to value <str> using actual filter,   \n\
+                  <c> is the same as above, except T is not supported \n\
+                  (you can change more than one field at a time)      \n\
                                                                       \n\
 -L <tbl>          print out values for <tbl>                          \n\
                   <tbl> is one of album, artist, genre,     language, \n\
@@ -63,7 +67,12 @@ plow +a queen                - artist NOT contains queen              \n\
 plow +ae Queen               - artist IS NOT Queen                    \n\
 plow -a queen beatles        - artist contains queen OR beatles       \n\
 plow -a queen +a queens      - artist contains queen AND NOT queens   \n\
-plow -a queen -a 'stone age' - artist contains queen AND stone age";
+plow -a queen -a 'stone age' - artist contains queen AND stone age    \n\
+                                                                      \n\
+plow -a queen --set l english r 'best music ever'                     \n\
+  - sets language = english and rating = 'best music ever'            \n\
+    for all songs where artist contains queen                         \n\
+";
 
 //
 // constants for sql stuff
@@ -79,6 +88,11 @@ const char *SELECT_ALL  = "SELECT\n\t*\
  \nFROM\n\ttbl_music, tbl_artist, tbl_album,\
  tbl_genre, tbl_rating,\n\ttbl_language,tbl_mood, tbl_situation,\
  tbl_tempo\n";
+
+const char *SELECT_ID = "SELECT\n\tid_music\
+ \n  FROM\n\ttbl_music, tbl_artist, tbl_album,\
+ tbl_genre, tbl_rating,\n\ttbl_language,tbl_mood, tbl_situation,\
+ tbl_tempo\n  ";
 
 const char *WHERE   = "WHERE\n\tid_artist=_id_artist AND\
  id_album=_id_album\n\tAND id_genre=_id_genre AND\

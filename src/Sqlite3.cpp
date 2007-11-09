@@ -59,11 +59,11 @@ Sqlite3Result *Sqlite3::exe(const char *query)
     }
 
     if(zErrMsg) {
-      throw PlowException("Sqlite3::exe", zErrMsg);
+      throw PlowException("Sqlite3::exe", zErrMsg, query);
     }
 
   } else {
-    throw PlowException("Sqlite3::exe", sqlite3_errmsg(db));
+    throw PlowException("Sqlite3::exe", sqlite3_errmsg(db), query);
   }
   sqlite3_close(db);
 
@@ -76,7 +76,6 @@ int Sqlite3::error()
 {
   return mi_err;
 }
-
 
 
 

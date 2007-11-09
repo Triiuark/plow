@@ -57,6 +57,7 @@ IniParser *gIniParser = 0;
 
 string gsPlowHome;
 string gsSelect;
+string gsUpdate;
 string gsSet;
 string gsDatabase;
 string gsMusicDirectory;
@@ -96,6 +97,8 @@ void printusage()
 
 
 /**
+ *
+ * executes a sql query
  * @param query a sql statement
  *
  * @returns a new Sqlite3Result object for @a query
@@ -112,7 +115,7 @@ Sqlite3Result *exe(const char *query)
 
 
 /**
- *
+ * create missing files and gIniParser
  */
 void init()
 {
@@ -502,7 +505,111 @@ void createList(const char *query)
 
 
 /**
- * parses the command-line arguments for the filtering
+ * parses the command-line arguments for the set options
+ * (creates gsUpdate)
+ *
+ * @param argc number of arguments
+ * @param argv arguments
+ * @param i    number of the argument to parse
+ *
+ * @throws PlowException on any error
+ *
+ * @return number of the next argument to parse
+ */
+int parseSetOptions(int argc, char **argv, int i)
+{
+  map<char, string> fieldNames;
+
+  fieldNames['a'] = "artist";
+  fieldNames['r'] = "rating";
+  fieldNames['g'] = "genre";
+  fieldNames['l'] = "language";
+  fieldNames['m'] = "mood";
+  fieldNames['A'] = "album";
+  fieldNames['s'] = "situation";
+  fieldNames['t'] = "tempo";
+
+  ostringstream errmsg;
+
+  string select;
+  string insert;
+  string in;
+
+  char       f      = 0;
+  char       *value = 0;
+  const char *id    = 0;
+
+  Sqlite3Result *result = 0;
+
+  while( i < argc && argv[i][0] != '-') {
+    f = argv[i][0];
+
+    if(fieldNames[f] == "") {
+      errmsg << "Missing option near '" << argv[i] << "'";
+      throw PlowException("parseSetOptions", errmsg.str().c_str(), USAGE);
+    }
+    if(argc < i + 2) {
+      errmsg << "Missing argument for option '" << f << "'";
+      throw PlowException("parseSetOptions", errmsg.str().c_str(), USAGE);
+    }
+
+    value = sqlite3_mprintf("'%q'", argv[i+1]);
+
+    select  = "SELECT * ";
+    select += "FROM tbl_";
+    select += fieldNames[f];
+    select += " WHERE ";
+    select += fieldNames[f];
+    select += "=";
+    select += value;
+    select += ";";
+
+
+    result = exe(select.c_str());
+
+    if(!result->rows()) {
+      delete result;
+      cout << "> There is no " << fieldNames[f];
+      cout << " '" << argv[i+1] << "'" << endl;
+      cout << "> Do you want to create it? y/[n] ";
+      cin >> in;
+      if(in[0] == 'y') {
+        insert  = "INSERT INTO tbl_";
+        insert += fieldNames[f];
+        insert += " (";
+        insert += fieldNames[f];
+        insert += ") VALUES (";
+        insert += value;
+        insert += ");";
+        result = exe(insert.c_str());
+        delete result;
+        result = exe(select.c_str());
+      } else {
+        cout << "> aborted ..." << endl;
+        return i+1;
+      }
+
+    }
+
+    id = result->get(0, 0);
+
+    gsUpdate += ", _id_";
+    gsUpdate += fieldNames[f];
+    gsUpdate += "=";
+    gsUpdate += id;
+
+    delete result;
+
+    i+=2;
+  }
+
+  return i-1;
+} // parseSetOptions()
+
+
+
+/**
+ * parses the command-line arguments for filtering
  * (creates gsSelect)
  *
  * @param argc number of arguments
@@ -561,14 +668,20 @@ int parseFilter(int argc, char **argv, int i)
     gsSelect.append("\tAND (");
   }
 
-  i++;
+  int pos = ++i;
   while(i < argc && (argv[i][0]!='-' && argv[i][0]!='+')){
     gsSelect.append(fieldNames[f]);
     gsSelect.append(pre);
     gsSelect.append(argv[i]);
     gsSelect.append(post);
-    i++;
+    ++i;
   }
+
+  if(pos == i) {
+    errmsg << "Missing argument for option '" << f << "'";
+    throw PlowException("parseFilter", errmsg.str().c_str(), USAGE);
+  }
+
   gsSelect.replace(gsSelect.length()-4, 4, ")\n");
 
   return i-1;
@@ -577,7 +690,7 @@ int parseFilter(int argc, char **argv, int i)
 
 
 /**
- * parses the command-line arguments
+ * parses command-line arguments
  *
  * @param argc number of arguments
  * @param argv arguments
@@ -610,6 +723,8 @@ void parseArgs(int argc, char** argv)
               cout << PACKAGE << " " << VERSION << endl;
               delete gIniParser;
               exit(0);
+            } else if (strcmp(argv[i], "--set") == 0) {
+              i = parseSetOptions(argc, argv, i + 1);
             } else {
               throw PlowException("parseArgs",
                         "Wrong syntax near '--'",
@@ -740,8 +855,8 @@ int main(int argc, char** argv)
 
     ostringstream errmsg;
 
-    gsPlowHome = getenv("HOME");
-    gsPlowHome.append("/.plow");
+    gsPlowHome  = getenv("HOME");
+    gsPlowHome += "/.plow";
 
     gsDatabase = gsPlowHome + "/plow.sqlite";
     gsPlaylist = gsPlowHome + "/plow.m3u";
@@ -769,6 +884,33 @@ int main(int argc, char** argv)
 
     sprintf(buffer, "%s%s%s%s", select, WHERE,
             gsSelect.c_str(), order.c_str());
+
+    if(!gsUpdate.empty()) {
+      string in;
+      string update("UPDATE\n\ttbl_music\nSET\n\t");
+      update += &(gsUpdate.c_str()[2]);
+      update += "\nWHERE\n\tid_music IN\n(\n  ";
+      update += SELECT_ID;
+      update += WHERE;
+      update += gsSelect;
+      update += ");";
+      Sqlite3Result *rs = exe(buffer);
+      cout << "> Do you really want to update " << rs->rows();
+      cout << " rows? y/[n] ";
+      cin >> in;
+      if(in[0] == 'y') {
+        delete rs;
+        rs = exe(update.c_str());
+      } else {
+        cout << "> aborted ..." << endl;
+      }
+      delete rs;
+      if(gbShowquery) {
+        cout << update << endl;
+      }
+      delete gIniParser;
+      exit(0);
+    }
 
 
     if(gbShowquery) {
