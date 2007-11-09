@@ -5,7 +5,7 @@ fileList=Split("""bin/main.cpp
                   bin/PlowException.cpp
                   bin/IniParser.cpp
                   bin/StringParser.cpp
-		  bin/AbstractReader.cpp
+                  bin/AbstractReader.cpp
                   bin/ID3v2Reader.cpp
                   bin/TagReader.cpp
                   bin/VorbisReader.cpp
