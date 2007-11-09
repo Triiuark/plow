@@ -25,7 +25,8 @@ using namespace std;
 
 StringParser::StringParser(const char *str, const char delim)
 {
-  m_argv   = NULL;
+  mb_remove = true;
+  m_argv    = NULL;
 
   string  mystring(str);
   string  *token = NULL;
@@ -85,8 +86,9 @@ uint StringParser::getSize()
 
 
 
-char **StringParser::getArgv()
+char **StringParser::getArgv(bool remove)
 {
+  mb_remove = remove;
   if(m_argv == 0) {
     uint size = m_tokens.size();
     m_argv = new char*[size + 1];
@@ -106,7 +108,7 @@ char **StringParser::getArgv()
 StringParser::~StringParser()
 {
 
-  if(m_argv) {
+  if(m_argv && mb_remove) {
     for(uint i = 0; i < m_tokens.size(); ++i) {
       delete m_argv[i];
     }

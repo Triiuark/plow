@@ -939,11 +939,12 @@ int main(int argc, char** argv)
           string::npos) {
         forkplayer = false;
       }
-      delete gIniParser; gIniParser = NULL;
+      delete gIniParser;
       player << " \"" << gsPlaylist << "\"";
+
       StringParser sp(player.str().c_str());
 
-      char **playerArgs = sp.getArgv();
+      char **playerArgs = sp.getArgv(false);
 
       int child_pid = 0;
 

@@ -59,8 +59,10 @@ void getFiles(PrioQ &fnames,
   }
 
   while((dent = readdir(dir))) {
+
     if(strcmp(dent->d_name, ".") != 0
         && strcmp(dent->d_name, "..") != 0 ) {
+
       fname = new char[strlen(path) + 1 + strlen(dent->d_name) + 1];
       sprintf(fname, "%s/%s", path, dent->d_name);
 

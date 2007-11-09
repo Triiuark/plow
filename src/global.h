@@ -63,19 +63,19 @@ typedef map<const char*, const char*, _cstrcmp>::iterator CStrMapIt;
 /**
  * associative array of C++ strings
  */
-typedef map<const char*, string,      _cstrcmp> StrMap;
+typedef map<const char*, string, _cstrcmp> StrMap;
 
 /**
  * iterator for associative array of C++ strings
  */
-typedef map<const char*, string,      _cstrcmp>::iterator StrMapIt;
+typedef map<const char*, string, _cstrcmp>::iterator StrMapIt;
 
 
 
 /**
  * associative array of integers
  */
-typedef map<const char*, int,         _cstrcmp> IntMap;
+typedef map<const char*, int, _cstrcmp> IntMap;
 
 
 
