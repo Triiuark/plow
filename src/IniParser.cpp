@@ -32,8 +32,8 @@ using namespace std;
 
 
 
-IniParser::IniParser(const char *iniFile) {
-  mSM_options = 0;
+IniParser::IniParser(const char *iniFile)
+{
   ostringstream errmsg;
 
   ifstream ini(iniFile);

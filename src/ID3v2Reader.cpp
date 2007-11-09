@@ -19,11 +19,8 @@
 
 #include "ID3v2Reader.h"
 
-#include <string>
 #include <sstream>
-#include <map>
 
-#include <cstring>
 
 #include <tag.h>
 #include <audioproperties.h>
@@ -35,17 +32,11 @@
 #include <unknownframe.h>
 #include <tlist.h>
 
-#include "global.h"
-
 using namespace TagLib;
 
-
-
 ID3v2Reader::ID3v2Reader(const char* fname, CStrMap *fields)
+    : AbstractReader(fname, fields)
 {
-  mi_err = 0;
-  mSM_values = new StrMap;
-
   mCSM_fields["comment"  ] = "COMM/";
   mCSM_fields["id"       ] = "UFID/*";
   mCSM_fields["rating"   ] = "POPM/*";
@@ -62,8 +53,9 @@ ID3v2Reader::ID3v2Reader(const char* fname, CStrMap *fields)
     ++it;
   }
 
+  mSM_values = new StrMap;
   ID3v2::Tag *tag;
-  MPEG::File f(fname);
+  MPEG::File f(mcs_fname);
 
   if((tag = f.ID3v2Tag())) {
 
@@ -144,124 +136,13 @@ ID3v2Reader::ID3v2Reader(const char* fname, CStrMap *fields)
     sprintf(buff, "%d", len);
     (*mSM_values)["length"] = (buff);
   }
-
-  StrMapIt valuesIt = mSM_values->begin();
-  while(valuesIt != mSM_values->end()) {
-    std::cout << valuesIt->first << ": " << valuesIt->second << std::endl;
-    ++valuesIt;
-  }
-//  exit(0);
-
-  //exit(0);
-}
-
-
-
-
-const char *ID3v2Reader::getId()
-{
-  return (*mSM_values)["id"].c_str();
-}
-
-const char *ID3v2Reader::getArtist()
-{
-  return (*mSM_values)["artist"].c_str();
-}
-
-const char *ID3v2Reader::getTitle()
-{
-  return (*mSM_values)["title"].c_str();
-}
-
-const char *ID3v2Reader::getAlbum()
-{
-  return (*mSM_values)["album"].c_str();
-}
-
-const char *ID3v2Reader::getPart()
-{
-  return (*mSM_values)["part"].c_str();
-}
-
-const char *ID3v2Reader::getParts()
-{
-  return (*mSM_values)["parts"].c_str();
-}
-
-const char *ID3v2Reader::getTrack()
-{
-  return (*mSM_values)["track"].c_str();
-}
-
-const char *ID3v2Reader::getTracks()
-{
-  return (*mSM_values)["tracks"].c_str();
-}
-
-const char *ID3v2Reader::getGenre()
-{
-  return (*mSM_values)["genre"].c_str();
-}
-
-const char *ID3v2Reader::getRating()
-{
-  return (*mSM_values)["rating"].c_str();
-}
-
-const char *ID3v2Reader::getMood()
-{
-  return (*mSM_values)["mood"].c_str();
-}
-
-const char *ID3v2Reader::getSituation()
-{
-  return (*mSM_values)["situation"].c_str();
-}
-
-const char *ID3v2Reader::getTempo()
-{
-  return (*mSM_values)["tempo"].c_str();
-}
-
-const char *ID3v2Reader::getLanguage()
-{
-  return (*mSM_values)["language"].c_str();
-}
-
-const char *ID3v2Reader::getDate()
-{
-  return (*mSM_values)["date"].c_str();
-}
-
-const char *ID3v2Reader::getComment()
-{
-  return (*mSM_values)["comment"].c_str();
-}
-
-const char *ID3v2Reader::getLength()
-{
-  return (*mSM_values)["length"].c_str();
-}
-
-
-
-const char *ID3v2Reader::get(const char *field)
-{
-  return (*mSM_values)[field].c_str();
-}
-
-
-
-int ID3v2Reader::error()
-{
-  return mi_err;
 }
 
 
 
 void ID3v2Reader::getTxxxFrame(const char *field,
-                  const char *description,
-                  ID3v2::FrameList *fl)
+                               const char *description,
+                               ID3v2::FrameList *fl)
 {
   char *tmp;
 
@@ -291,8 +172,8 @@ void ID3v2Reader::getTxxxFrame(const char *field,
 
 
 void ID3v2Reader::getCommFrame(const char *field,
-                     const char *description,
-                     ID3v2::FrameList *fl)
+                               const char *description,
+                               ID3v2::FrameList *fl)
 {
   ID3v2::CommentsFrame *comf;
   for(TagLib::uint i = 0; i < fl->size(); ++i) {
@@ -312,8 +193,8 @@ void ID3v2Reader::getCommFrame(const char *field,
 
 
 void ID3v2Reader::getUfidFrame(const char *field,
-                  const char *description,
-                  ID3v2::FrameList *fl)
+                               const char *description,
+                               ID3v2::FrameList *fl)
 {
   char tmp[2];
   bool isBinary = false;
@@ -348,8 +229,8 @@ void ID3v2Reader::getUfidFrame(const char *field,
 
 
 void ID3v2Reader::getPopmFrame(const char *field,
-                        const char *description,
-                        ID3v2::FrameList *fl)
+                               const char *description,
+                               ID3v2::FrameList *fl)
 {
   char tmp[2];
   ID3v2::UnknownFrame *uf;
@@ -373,11 +254,4 @@ void ID3v2Reader::getPopmFrame(const char *field,
       return;
     }
   }
-}
-
-
-
-ID3v2Reader::~ID3v2Reader()
-{
-  delete mSM_values;
 }

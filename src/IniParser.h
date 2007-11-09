@@ -26,6 +26,14 @@ using namespace std;
 
 /**
  * @brief simple parser for INI like configuration files
+ *
+ * a configuration file is structured like this:
+ * <pre>
+ *   # comment
+ *   [section]
+ *   option  = value
+ *   option2 = " a value containing spaces "
+ * </pre>
  */
 class IniParser
 {

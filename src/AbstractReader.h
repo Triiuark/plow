@@ -20,96 +20,110 @@
 #ifndef PLOW_ABSTRACT_READER_H
 #define PLOW_ABSTRACT_READER_H
 
+#include "global.h"
+
 /**
  * @brief interface for all ...Reader classes
  */
 class AbstractReader
 {
   public:
+
+    /**
+     * creates a new AbstractReader
+     *
+     * @param fname  file to read tag from
+     * @param fields if given the values of mCSM_fields
+     *               are overwritten by the values of @a fields
+     */
+    AbstractReader(const char *fname, CStrMap *fields = 0);
+
+
+
     /**
      * @returns a unique id of the file, an empty string if not found
      */
-    virtual const char *getId()        = 0;
+    virtual const char *getId();
 
     /**
      * @returns title, an empty string if not found
      */
-    virtual const char *getTitle()     = 0;
+    virtual const char *getTitle();
 
     /**
      * @returns artist, an empty string if not found
      */
-    virtual const char *getArtist()    = 0;
+    virtual const char *getArtist();
 
     /**
      * @returns album, an empty string if not found
      */
-    virtual const char *getAlbum()     = 0;
+    virtual const char *getAlbum();
 
     /**
      * @returns part number, an empty string if not found
      */
-    virtual const char *getPart()      = 0;
+    virtual const char *getPart();
 
     /**
      * @returns total number of parts, an empty string if not found
      */
-    virtual const char *getParts()     = 0;
+    virtual const char *getParts();
 
     /**
      * @returns track number, an empty string if not found
      */
-    virtual const char *getTrack()     = 0;
+    virtual const char *getTrack();
 
     /**
      * @returns total number of tracks, an empty string if not found
      */
-    virtual const char *getTracks()    = 0;
+    virtual const char *getTracks();
 
     /**
      * @returns genre, an empty string if not found
      */
-    virtual const char *getGenre()     = 0;
+    virtual const char *getGenre();
 
     /**
      * @returns rating, an empty string if not found
      */
-    virtual const char *getRating()    = 0;
+    virtual const char *getRating();
 
     /**
      * @returns mood, an empty string if not found
      */
-    virtual const char *getMood()      = 0;
+    virtual const char *getMood();
 
     /**
      * @returns situation, an empty string if not found
      */
-    virtual const char *getSituation() = 0;
+    virtual const char *getSituation();
 
     /**
      * @returns tempo, an empty string if not found
      */
-    virtual const char *getTempo()     = 0;
+    virtual const char *getTempo();
 
     /**
      * @returns language, an empty string if not found
      */
-    virtual const char *getLanguage()  = 0;
+    virtual const char *getLanguage();
 
     /**
      * @returns date, an empty string if not found
      */
-    virtual const char *getDate()      = 0;
+    virtual const char *getDate();
 
     /**
      * @returns comment, an empty string if not found
      */
-    virtual const char *getComment()   = 0;
+    virtual const char *getComment();
 
     /**
      * @returns length of song in seconds
      */
-    virtual const char *getLength()    = 0;
+    virtual const char *getLength();
 
 
 
@@ -118,21 +132,27 @@ class AbstractReader
      *
      * @returns the value for @a field, an empty string if not found
      */
-    virtual const char *get(const char * field) = 0;
+    virtual const char *get(const char * field);
 
 
 
     /**
      * @returns 0 if no error occured
      */
-    virtual int error() = 0;
+    virtual int error();
 
 
 
     /**
      * destroys AbstractReader
      */
-    virtual ~AbstractReader() {};
+    virtual ~AbstractReader();
+
+  protected:
+    int        mi_err;
+    const char *mcs_fname;
+    StrMap     *mSM_values;
+    CStrMap    mCSM_fields;
 };
 
 #endif

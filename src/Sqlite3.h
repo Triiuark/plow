@@ -62,7 +62,7 @@ class Sqlite3
     ~Sqlite3();
 
   private:
-    int         mi_error;
+    int        mi_err;
     const char *mcs_dbname;
 };
 

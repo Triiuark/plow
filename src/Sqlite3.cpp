@@ -30,8 +30,8 @@ using namespace std;
 
 Sqlite3::Sqlite3(const char *databaseName)
 {
+  mi_err = 0;
   mcs_dbname = databaseName;
-  mi_error   = 0;
 }
 
 
@@ -45,16 +45,16 @@ Sqlite3Result *Sqlite3::exe(const char *query)
   int           nrow;
   int           ncol;
 
-  mi_error = sqlite3_open(mcs_dbname, &db);
+  mi_err = sqlite3_open(mcs_dbname, &db);
 
-  if(mi_error == SQLITE_OK) {
-    mi_error = sqlite3_get_table(db,
+  if(mi_err == SQLITE_OK) {
+    mi_err = sqlite3_get_table(db,
                                  query,
                                  &result,
                                  &nrow,
                                  &ncol,
                                  &zErrMsg);
-    if(mi_error == SQLITE_OK) {
+    if(mi_err == SQLITE_OK) {
       rs = new Sqlite3Result(result, nrow, ncol);
     }
 
@@ -74,7 +74,7 @@ Sqlite3Result *Sqlite3::exe(const char *query)
 
 int Sqlite3::error()
 {
-  return mi_error;
+  return mi_err;
 }
 
 

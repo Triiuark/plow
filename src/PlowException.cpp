@@ -45,13 +45,6 @@ PlowException::PlowException(const char *where,
 
 
 
-PlowException::~PlowException()
-{
-  // empty
-}
-
-
-
 void PlowException::print()
 {
   cout << endl;
@@ -87,4 +80,11 @@ string PlowException::message()
 int PlowException::error()
 {
   return mi_err;
+}
+
+
+
+PlowException::~PlowException()
+{
+  // empty
 }

@@ -24,8 +24,11 @@
 #include "ID3v2Reader.h"
 
 TagReader::TagReader(const char *fname, map<int, CStrMap *> fieldNames)
-    : mAR_reader(0), mi_type(UNKNOWN), mi_err(0)
 {
+  mAR_reader = 0;
+  mi_type    = UNKNOWN;
+  mi_err     = 0;
+
   char head[5];
   head[4] = 0;
   FILE *f = fopen(fname, "r");

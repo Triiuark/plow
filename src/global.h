@@ -20,6 +20,7 @@
 #ifndef PLOW_GLOBAL_H
 #define PLOW_GLOBAL_H
 
+#include <string>
 #include <cstring>
 #include <map>
 #include <queue>

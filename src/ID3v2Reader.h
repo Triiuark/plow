@@ -22,50 +22,17 @@
 
 #include <id3v2tag.h>
 
-#include "global.h"
-
 #include "AbstractReader.h"
 
+/**
+ * @see AbstractReader.h
+ */
 class ID3v2Reader : public AbstractReader
 {
   public:
     ID3v2Reader(const char* fname, CStrMap *fields = 0);
 
-    const char *getId();
-    const char *getArtist();
-    const char *getTitle();
-    const char *getAlbum();
-    const char *getPart();
-    const char *getParts();
-    const char *getTrack();
-    const char *getTracks();
-    const char *getGenre();
-    const char *getRating();
-    const char *getMood();
-    const char *getSituation();
-    const char *getTempo();
-    const char *getLanguage();
-    const char *getDate();
-    const char *getComment();
-    const char *getLength();
-
-
-
-    const char *get(const char *field);
-
-
-
-    int error();
-
-
-
-    ~ID3v2Reader();
-
   private:
-    int mi_err;
-    StrMap *mSM_values;
-    CStrMap mCSM_fields;
-
     void getTxxxFrame(const char *field,
                       const char *description,
                       TagLib::ID3v2::FrameList *fl);

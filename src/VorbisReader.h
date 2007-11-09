@@ -20,45 +20,15 @@
 #ifndef PLOW_VORBIS_READER_H
 #define PLOW_VORBIS_READER_H
 
-#include "global.h"
 #include "AbstractReader.h"
 
-#include <string>
-#include <map>
-
+/**
+ * @see AbstractReader.h
+ */
 class VorbisReader : public AbstractReader
 {
   public:
     VorbisReader(const char *fname, CStrMap *fields = 0);
-
-    const char *getId();
-    const char *getTitle();
-    const char *getArtist();
-    const char *getAlbum();
-    const char *getPart();
-    const char *getParts();
-    const char *getTrack();
-    const char *getTracks();
-    const char *getGenre();
-    const char *getRating();
-    const char *getMood();
-    const char *getSituation();
-    const char *getTempo();
-    const char *getLanguage();
-    const char *getDate();
-    const char *getComment();
-    const char *getLength();
-
-    const char *get(const char *field);
-
-    int error();
-
-    ~VorbisReader();
-
-  private:
-    int mi_err;
-    CStrMap mCSM_fields;
-    StrMap *mSM_values;
 };
 
 #endif

@@ -844,22 +844,22 @@ CStrMap *vorbisFields()
 {
   CStrMap *fields = new CStrMap;
 
-  (*fields)["id"       ] = gIniParser->get("[vorbis]id").c_str();
-  (*fields)["title"    ] = gIniParser->get("[vorbis]title").c_str();
-  (*fields)["artist"   ] = gIniParser->get("[vorbis]artist").c_str();
-  (*fields)["album"    ] = gIniParser->get("[vorbis]album").c_str();
-  (*fields)["part"     ] = gIniParser->get("[vorbis]part").c_str();
-  (*fields)["parts"    ] = gIniParser->get("[vorbis]parts").c_str();
-  (*fields)["track"    ] = gIniParser->get("[vorbis]track").c_str();
-  (*fields)["tracks"   ] = gIniParser->get("[vorbis]tracks").c_str();
-  (*fields)["genre"    ] = gIniParser->get("[vorbis]genre").c_str();
-  (*fields)["rating"   ] = gIniParser->get("[vorbis]rating").c_str();
-  (*fields)["mood"     ] = gIniParser->get("[vorbis]mood").c_str();
+  (*fields)["id"       ] = gIniParser->get("[vorbis]id"       ).c_str();
+  (*fields)["title"    ] = gIniParser->get("[vorbis]title"    ).c_str();
+  (*fields)["artist"   ] = gIniParser->get("[vorbis]artist"   ).c_str();
+  (*fields)["album"    ] = gIniParser->get("[vorbis]album"    ).c_str();
+  (*fields)["part"     ] = gIniParser->get("[vorbis]part"     ).c_str();
+  (*fields)["parts"    ] = gIniParser->get("[vorbis]parts"    ).c_str();
+  (*fields)["track"    ] = gIniParser->get("[vorbis]track"    ).c_str();
+  (*fields)["tracks"   ] = gIniParser->get("[vorbis]tracks"   ).c_str();
+  (*fields)["genre"    ] = gIniParser->get("[vorbis]genre"    ).c_str();
+  (*fields)["rating"   ] = gIniParser->get("[vorbis]rating"   ).c_str();
+  (*fields)["mood"     ] = gIniParser->get("[vorbis]mood"     ).c_str();
   (*fields)["situation"] = gIniParser->get("[vorbis]situation").c_str();
-  (*fields)["tempo"    ] = gIniParser->get("[vorbis]tempo").c_str();
-  (*fields)["language" ] = gIniParser->get("[vorbis]language").c_str();
-  (*fields)["date"     ] = gIniParser->get("[vorbis]date").c_str();
-  (*fields)["comment"  ] = gIniParser->get("[vorbis]comment").c_str();
+  (*fields)["tempo"    ] = gIniParser->get("[vorbis]tempo"    ).c_str();
+  (*fields)["language" ] = gIniParser->get("[vorbis]language" ).c_str();
+  (*fields)["date"     ] = gIniParser->get("[vorbis]date"     ).c_str();
+  (*fields)["comment"  ] = gIniParser->get("[vorbis]comment"  ).c_str();
 
   return fields;
 }
@@ -873,12 +873,12 @@ CStrMap *id3Fields()
 {
   CStrMap *fields = new CStrMap;
 
-  (*fields)["id"       ] = gIniParser->get("[id3v2]id").c_str();
-  (*fields)["rating"   ] = gIniParser->get("[id3v2]rating").c_str();
-  (*fields)["mood"     ] = gIniParser->get("[id3v2]mood").c_str();
+  (*fields)["id"       ] = gIniParser->get("[id3v2]id"       ).c_str();
+  (*fields)["rating"   ] = gIniParser->get("[id3v2]rating"   ).c_str();
+  (*fields)["mood"     ] = gIniParser->get("[id3v2]mood"     ).c_str();
   (*fields)["situation"] = gIniParser->get("[id3v2]situation").c_str();
-  (*fields)["tempo"    ] = gIniParser->get("[id3v2]tempo").c_str();
-  (*fields)["language" ] = gIniParser->get("[id3v2]language").c_str();
+  (*fields)["tempo"    ] = gIniParser->get("[id3v2]tempo"    ).c_str();
+  (*fields)["language" ] = gIniParser->get("[id3v2]language" ).c_str();
 
   return fields;
 }
@@ -890,10 +890,6 @@ CStrMap *id3Fields()
  */
 void add2Db(char *path, const char *dbPath, const char *musicPath)
 {
-
-
-
-
   map<int, CStrMap *> fieldNames;
 
   fieldNames[TagReader::VORBIS] = vorbisFields();
