@@ -45,13 +45,11 @@ class StringParser
     vector<string *> getTokens();
 
     /**
-     * @param remove if set the char** will be deleted in destructor
-     *
      * @returns a char ** like argv of the tokens,
      *          but it is 0 terminated so we know where it ends
      *          (e.g. for use in execvp)
      */
-    char **getArgv(bool remove = true);
+    char **getArgv();
 
     /**
      * @returns the number of tokens

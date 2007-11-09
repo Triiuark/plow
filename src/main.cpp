@@ -944,7 +944,7 @@ int main(int argc, char** argv)
 
       StringParser sp(player.str().c_str());
 
-      char **playerArgs = sp.getArgv(false);
+      char **playerArgs = sp.getArgv();
 
       int child_pid = 0;
 
