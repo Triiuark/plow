@@ -861,7 +861,7 @@ int main(int argc, char** argv)
     gsDatabase = gsPlowHome + "/plow.sqlite";
     gsPlaylist = gsPlowHome + "/plow.m3u";
 
-    string order(";");
+    string order("ORDER BY\n\talbum ASC, part ASC, track ASC");
 
   try {
     parseArgs(argc, argv);

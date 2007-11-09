@@ -117,7 +117,7 @@ const char *INI_FILE ="\
 ### full path to your 'overall' music folder\n\
 ### (the folder where all your music is in)\n\
 ###\n\
-path = /path/to/music\n\
+#path = /path/to/music\n\
 \n\
 \n\
 ###\n\
@@ -129,7 +129,7 @@ path = /path/to/music\n\
 ###\n\
 ### default output order (SQL 'ORDER BY' syntax)\n\
 ###\n\
-order = album ASC, part ASC, track ASC\n\
+#order = album ASC, part ASC, track ASC\n\
 \n\
 \n\
 ###\n\
@@ -142,8 +142,7 @@ player2 = xmms\n\
 player3 = amarok\n\
 \n\
 ###\n\
-### the player numbers that requires not to fork,\n\
-### as comma seperated list\n\
+### the player numbers that requires not to fork\n\
 ###\n\
 playernofork = 0\n\
 \n\
@@ -169,6 +168,8 @@ extinf = [length] \", \" [artist] \" - \" [title]\n\
 ### search only for files with an extension in this list\n\
 ###\n\
 #extensions = mp3 MP3 ogg OGG\n\
+\n\
+\n\
 ######################################################################\n\
 ###\n\
 ### in this section you can put abbrevations for often used\n\
@@ -180,7 +181,7 @@ extinf = [length] \", \" [artist] \" - \" [title]\n\
 \n\
 [abbr]\n\
 ### this one executes an sql statement, which selects all records\n\
-### with different artists - sampler\n\
+### with different artists = sampler\n\
 sampler = -q \"SELECT id_album, album FROM tbl_album WHERE\
  album_id_artist=1;\"\n\
 \n\
@@ -216,6 +217,7 @@ rock = -g rock\n\
 #situation = SITUATION\n\
 #tempo     = TEMPO\n\
 #language  = LANGUAGE\n\
+\n\
 \n\
 ######################################################################\n\
 ###\n\
