@@ -49,36 +49,45 @@ void getFiles(PrioQ &fnames,
   int  i;
   DIR  *dir = opendir(path);
 
-  if(!dir) {
+  if(!dir)
+  {
     closedir(dir);
     return;
   }
 
-  if(path[strlen(path) - 1] == '/') {
+  if(path[strlen(path) - 1] == '/')
+  {
     path[strlen(path) - 1] = 0;
   }
 
-  while((dent = readdir(dir))) {
-
+  while((dent = readdir(dir)))
+  {
     if(strcmp(dent->d_name, ".") != 0
-        && strcmp(dent->d_name, "..") != 0 ) {
-
+        && strcmp(dent->d_name, "..") != 0 )
+    {
       fname = new char[strlen(path) + 1 + strlen(dent->d_name) + 1];
       sprintf(fname, "%s/%s", path, dent->d_name);
 
-      if(lstat(fname, &st) == 0) {
-        if(recursive && S_ISDIR(st.st_mode)) {
+      if(lstat(fname, &st) == 0)
+      {
+        if(recursive && S_ISDIR(st.st_mode))
+        {
           getFiles(fnames, fname, recursive, extensions, mode);
           delete[] fname;
-        } else if(S_ISREG(st.st_mode)) {
-          if(access(fname, mode) == 0) {
-            if(extensions && extensions[0] != 0) {
+        }
+        else if(S_ISREG(st.st_mode))
+        {
+          if(access(fname, mode) == 0)
+          {
+            if(extensions && extensions[0] != 0)
+            {
               i = 0;
               extension = strrchr(fname, '.');
               if(extension) {
-                while(extensions[i] != 0 && i < 9999) {
-                  cout << extension << ": " << extensions[i] << endl;
-                  if(strcmp(&extension[1], extensions[i]) == 0) {
+                while(extensions[i] != 0 && i < 100)
+                {
+                  if(strcmp(&extension[1], extensions[i]) == 0)
+                  {
                     fnames.push(fname);
                   }
                   ++i;
@@ -105,8 +114,10 @@ void mkdir_r(const string &path, int mode)
 {
   struct stat st;
 
-  if(path.length() == 0 || stat(path.c_str(), &st) == 0) {
-    if(!S_ISDIR(st.st_mode)) {
+  if(path.length() == 0 || stat(path.c_str(), &st) == 0)
+  {
+    if(!S_ISDIR(st.st_mode))
+    {
       throw PlowException("mkdir_r",
                           path.c_str(),
                           "(Re)moving this file may help.");
@@ -118,14 +129,16 @@ void mkdir_r(const string &path, int mode)
 
   uint pos = path.find_last_of('/');
 
-  if(pos != string::npos && pos != 0) {
+  if(pos != string::npos && pos != 0)
+  {
     string parentpath(path);
     parentpath.resize(pos);
 
-    mkdir_r(parentpath);
+    mkdir_r(parentpath, mode);
   }
 
-  if(mkdir(path.c_str(), mode) == -1) {
+  if(mkdir(path.c_str(), mode) == -1)
+  {
     // EEXIST never happens, its caught above
     throw PlowException("mkdir_r", path.c_str());
   }
@@ -139,7 +152,8 @@ int copyfile(const string &src, const string &dst)
 
   struct stat st;
 
-  if(stat(dst.c_str(), &st) == 0) {
+  if(stat(dst.c_str(), &st) == 0)
+  {
     // file exists
     return 1;
   }
@@ -150,24 +164,29 @@ int copyfile(const string &src, const string &dst)
 
   ifstream source;
   ofstream destination;
+
   source.open(src.c_str(), ios::binary|ios::in);
-  if(!source) {
+  if(!source)
+  {
     throw PlowException("copyfile", src.c_str());
   }
 
   destination.open(dst.c_str(), ios::binary|ios::out);
 
   err = errno;
-  if(!destination) {
+  if(!destination)
+  {
     source.close();
     errno = err;
     throw PlowException("copyfile", dst.c_str());
   }
   char c;
   errno = 0;
-  while(source.get(c)) {
+  while(source.get(c))
+  {
     destination.put(c);
-    if(errno != 0) {
+    if(errno != 0)
+    {
       err = errno;
       source.close();
       destination.close();
@@ -181,7 +200,8 @@ int copyfile(const string &src, const string &dst)
   source.close();
   destination.close();
 
-  if(err != 0) {
+  if(err != 0)
+  {
     unlink(dst.c_str());
     errno = err;
     throw PlowException("copyfile", src.c_str());
@@ -198,20 +218,32 @@ uint utf8strlen(const char *utf8str)
   uint rl  = 0;
   uint i   = 0;
 
-  while(i < len){
-    rl++;
+  while(i < len)
+  {
+    ++rl;
 
-    if(utf8str[i] > 0) {
+    if(utf8str[i] > 0)
+    {
       i += 1;
-    } else if(utf8str[i] < -32) {
+    }
+    else if(utf8str[i] < -32)
+    {
       i += 2;
-    } else if(utf8str[i] < -16) {
+    }
+    else if(utf8str[i] < -16)
+    {
       i += 3;
-    } else if(utf8str[i] <  -8) {
+    }
+    else if(utf8str[i] <  -8)
+    {
       i += 4;
-    } else if(utf8str[i] <  -4) {
+    }
+    else if(utf8str[i] <  -4)
+    {
       i += 5;
-    } else if(utf8str[i] <  -2) {
+    }
+    else if(utf8str[i] <  -2)
+    {
       i += 6;
     }
   }
@@ -221,21 +253,26 @@ uint utf8strlen(const char *utf8str)
 
 
 
-void replaceChars(const string &chars, string &in, char by) {
+void replaceChars(const string &chars, string &in, char by)
+{
   char out[in.length() + 1];
   bool replaced = false;
   uint i        = 0;
   uint j        = 0;
 
-  while(in.c_str()[i] != 0) {
-    if(chars.find(in.c_str()[i]) == string::npos) {
+  while(in.c_str()[i] != 0)
+  {
+    if(chars.find(in.c_str()[i]) == string::npos)
+    {
       replaced = false;
       out[j++] = in.c_str()[i];
-    } else if(!replaced) {
+    }
+    else if(!replaced)
+    {
       replaced = true;
       out[j++] = by;
     }
-    i++;
+    ++i;
   }
 
   out[j] = 0;

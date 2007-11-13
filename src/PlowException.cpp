@@ -32,13 +32,15 @@ PlowException::PlowException(const char *where,
                              const char *solution)
 {
   mi_err = errno;
-  if(errno != 0) {
+  if(errno != 0)
+  {
     errno = 0;
   }
   mcs_where = where;
   mcs_what  = what;
 
-  if(solution != 0) {
+  if(solution != 0)
+  {
     mcs_solution = solution;
   }
 }
@@ -62,12 +64,14 @@ string PlowException::message()
   out.append(":\n  >");
   out.append(mcs_what);
 
-  if(mi_err != 0) {
+  if(mi_err != 0)
+  {
     out.append(":\n  >");
     out.append(strerror(mi_err));
   }
 
-  if(!mcs_solution.empty()) {
+  if(!mcs_solution.empty())
+  {
     out.append("\n  >");
     out.append(mcs_solution);
   }

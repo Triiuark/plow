@@ -46,7 +46,8 @@ ID3v2Reader::ID3v2Reader(const char* fname, CStrMap *fields)
   mCSM_fields["language" ] = "TXXX/LANGUAGE";
 
   CStrMapIt it = fields->begin();
-  while(it != fields->end()) {
+  while(it != fields->end())
+  {
     if(strcmp(it->second, "") != 0) {
       mCSM_fields[it->first] = it->second;
     }
@@ -57,14 +58,15 @@ ID3v2Reader::ID3v2Reader(const char* fname, CStrMap *fields)
   ID3v2::Tag *tag;
   MPEG::File f(mcs_fname);
 
-  if((tag = f.ID3v2Tag())) {
-
+  if((tag = f.ID3v2Tag()))
+  {
     (*mSM_values)["artist"] = tag->artist().toCString(true);
     (*mSM_values)["title" ] = tag->title().toCString(true);
     (*mSM_values)["album" ] = tag->album().toCString(true);
     (*mSM_values)["genre" ] = tag->genre().toCString(true);
 
-    if(tag->year() > 0) {
+    if(tag->year() > 0)
+    {
       char tmp[24];
       sprintf(tmp, "%d", tag->year());
       (*mSM_values)["date"] = tmp;
@@ -74,11 +76,13 @@ ID3v2Reader::ID3v2Reader(const char* fname, CStrMap *fields)
     ID3v2::TextIdentificationFrame *tif;
     unsigned int pos;
 
-    if(!(tag->frameListMap()["TRCK"]).isEmpty()) {
+    if(!(tag->frameListMap()["TRCK"]).isEmpty())
+    {
       tif = (ID3v2::TextIdentificationFrame *)tag->frameListMap()["TRCK"][0];
       s = tif->toString().toCString(true);
       pos = s.find('/', 0);
-      if(pos == std::string::npos) {
+      if(pos == std::string::npos)
+      {
         (*mSM_values)["track"] = s;
       } else {
         (*mSM_values)["track"]  = s.substr(0, pos);
@@ -86,11 +90,13 @@ ID3v2Reader::ID3v2Reader(const char* fname, CStrMap *fields)
       }
     }
 
-    if(!(tag->frameListMap()["TPOS"]).isEmpty()) {
+    if(!(tag->frameListMap()["TPOS"]).isEmpty())
+    {
       tif = (ID3v2::TextIdentificationFrame *)tag->frameListMap()["TPOS"][0];
       s = tif->toString().toCString(true);
       pos = s.find('/', 0);
-      if(pos == std::string::npos) {
+      if(pos == std::string::npos)
+      {
         (*mSM_values)["part"] = s;
       } else {
         (*mSM_values)["part"]  = s.substr(0, pos);
@@ -101,27 +107,36 @@ ID3v2Reader::ID3v2Reader(const char* fname, CStrMap *fields)
     CStrMapIt fieldsIt = mCSM_fields.begin();
     const char *description;
     char frameName[5] = { 0, 0, 0, 0, 0 };
-    while(fieldsIt != mCSM_fields.end()) {
+    while(fieldsIt != mCSM_fields.end())
+    {
       strncpy(frameName, fieldsIt->second, 4);
       description = strchr(fieldsIt->second, '/');
-      if(description) {
+
+      if(description)
+      {
         description = &description[1];
       } else {
         continue;
       }
+
       ID3v2::FrameList fl =
             (ID3v2::FrameList)(tag->frameListMap()[frameName]);
-      if(!fl.isEmpty()) {
-        if(strcmp(frameName, "TXXX") == 0) {
+      if(!fl.isEmpty())
+      {
+        if(strcmp(frameName, "TXXX") == 0)
+        {
           getTxxxFrame(fieldsIt->first, description, &fl);
         }
-        else if(strcmp(frameName, "COMM") == 0) {
+        else if(strcmp(frameName, "COMM") == 0)
+        {
           getCommFrame(fieldsIt->first, description, &fl);
         }
-        else if(strcmp(frameName, "UFID") == 0) {
+        else if(strcmp(frameName, "UFID") == 0)
+        {
           getUfidFrame(fieldsIt->first, description, &fl);
         }
-        else if(strncmp(fieldsIt->second, "POPM", 4) == 0) {
+        else if(strcmp(frameName, "POPM") == 0)
+        {
           getPopmFrame(fieldsIt->first, description, &fl);
         }
       }
@@ -129,9 +144,11 @@ ID3v2Reader::ID3v2Reader(const char* fname, CStrMap *fields)
     }
 
   }
+
   int len;
   char buff[16];
-  if(f.audioProperties()) {
+  if(f.audioProperties())
+  {
     len = f.audioProperties()->length();
     sprintf(buff, "%d", len);
     (*mSM_values)["length"] = (buff);
@@ -148,18 +165,19 @@ void ID3v2Reader::getTxxxFrame(const char *field,
 
   ID3v2::UserTextIdentificationFrame *utif;
 
-  for(TagLib::uint i = 0; i < fl->size(); ++i) {
-
+  for(TagLib::uint i = 0; i < fl->size(); ++i)
+  {
     utif = (ID3v2::UserTextIdentificationFrame *)(*fl)[i];
 
-    if(strcmp(utif->description().toCString(true), description) == 0) {
-
+    if(strcmp(utif->description().toCString(true), description) == 0)
+    {
       char tmp2[strlen(utif->toString().toCString(true)) + 1];
       sprintf(tmp2, "%s", utif->toString().toCString(true));
 
       tmp = strchr(tmp2, ']');
-      if(tmp && strlen(tmp) > 2) {
-        (*mSM_values)[field] = &tmp[2];
+      if(tmp && strlen(tmp) > 2)
+      {
+        (*mSM_values)[field] = &tmp[2]; // remove '[description]'
       } else {
         (*mSM_values)[field] = tmp2;
       }
@@ -176,11 +194,13 @@ void ID3v2Reader::getCommFrame(const char *field,
                                ID3v2::FrameList *fl)
 {
   ID3v2::CommentsFrame *comf;
-  for(TagLib::uint i = 0; i < fl->size(); ++i) {
+
+  for(TagLib::uint i = 0; i < fl->size(); ++i)
+  {
     comf = (ID3v2::CommentsFrame *)(*fl)[i];
 
-    if(strcmp(comf->description().toCString(true), description) == 0) {
-
+    if(strcmp(comf->description().toCString(true), description) == 0)
+    {
       char tmp[strlen(comf->toString().toCString(true)) + 1];
       sprintf(tmp, "%s", comf->toString().toCString(true));
 
@@ -198,28 +218,28 @@ void ID3v2Reader::getUfidFrame(const char *field,
 {
   char tmp[2];
   bool isBinary = false;
-  std::ostringstream oss;
+
   ID3v2::UniqueFileIdentifierFrame *ufif;
 
-
-
-  for(TagLib::uint i = 0; i < fl->size(); ++i) {
+  for(TagLib::uint i = 0; i < fl->size(); ++i)
+  {
     ufif = (ID3v2::UniqueFileIdentifierFrame *)(*fl)[i];
 
     if(strcmp(ufif->owner().toCString(true), description) == 0
-        || description[0] == '*') {
-      oss.setf(std::ios::hex);
-
-      for(TagLib::uint i = 0; i < ufif->identifier().size(); ++i) {
-        if(isBinary) {
+        || description[0] == '*')
+    {
+      for(TagLib::uint i = 0; i < ufif->identifier().size(); ++i)
+      {
+        if(isBinary)
+        {
           sprintf(tmp, "%x", ufif->identifier()[i]);
-          oss << tmp;
+          (*mSM_values)[field] += tmp;
         } else {
-          oss << ufif->identifier()[i];
+          (*mSM_values)[field] += ufif->identifier()[i];
         }
       }
 
-      (*mSM_values)[field] = oss.str().c_str();
+      //(*mSM_values)[field] = oss.str().c_str();
 
       return;
     }
@@ -233,17 +253,21 @@ void ID3v2Reader::getPopmFrame(const char *field,
                                ID3v2::FrameList *fl)
 {
   char tmp[2];
+  TagLib::uint j;
   ID3v2::UnknownFrame *uf;
 
-  for(TagLib::uint i = 0; i < fl->size(); ++i) {
+  for(TagLib::uint i = 0; i < fl->size(); ++i)
+  {
     uf = (ID3v2::UnknownFrame *)(*fl)[i];
 
     if(strcmp(uf->data().data(), description) == 0
-        || description[0] == '*') {
-
-      TagLib::uint j = 0;
-      while(uf->data()[j] != 0) {
-        if(++j >= uf->data().size()){
+        || description[0] == '*')
+    {
+      j = 0;
+      while(uf->data()[j] != 0)
+      {
+        if(++j >= uf->data().size())
+        {
            return;
         }
       }

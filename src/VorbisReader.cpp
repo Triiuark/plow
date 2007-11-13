@@ -47,8 +47,10 @@ VorbisReader::VorbisReader(const char *fname, CStrMap *fields)
   mCSM_fields["comment"  ] = "COMMENT";
 
   CStrMapIt it = fields->begin();
-  while(it != fields->end()) {
-    if(strcmp(it->second, "") != 0) {
+  while(it != fields->end())
+  {
+    if(strcmp(it->second, "") != 0)
+    {
       mCSM_fields[it->first] = it->second;
     }
     ++it;
@@ -56,18 +58,21 @@ VorbisReader::VorbisReader(const char *fname, CStrMap *fields)
 
   Ogg::Vorbis::File f(mcs_fname);
   Ogg::XiphComment *tag;
-  if((tag = f.tag())) {
+  if((tag = f.tag()))
+  {
     const Ogg::FieldListMap *flm = &tag->fieldListMap();
 
     CStrMapIt it = mCSM_fields.begin();
 
     const StringList *sl;
 
-    while(it != mCSM_fields.end()) {
+    while(it != mCSM_fields.end())
+    {
 
       sl = &(*flm)[mCSM_fields[it->first]];
 
-      if(!sl->isEmpty()) {
+      if(!sl->isEmpty())
+      {
         (*mSM_values)[it->first] = (*sl)[0].toCString(true);
       }
 
@@ -79,7 +84,8 @@ VorbisReader::VorbisReader(const char *fname, CStrMap *fields)
 
   int len;
   char buff[16];
-  if(f.audioProperties()) {
+  if(f.audioProperties())
+  {
     len = f.audioProperties()->length();
     sprintf(buff, "%d", len);
     (*mSM_values)["length"] = buff;

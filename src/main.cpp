@@ -170,7 +170,7 @@ string infoString(Sqlite3Result &rs,
                   const vector<string *> &tokens,
                   bool removeslash = false)
 {
-  const string  forbidden = "\\\n\r\" '$@*{}[]()/:;&?";
+  const string  forbidden = "\\\n\r\t\" '$@*{}[]()/:;&?";
 
   string        out;
   string        tmp;
@@ -212,7 +212,7 @@ string infoString(Sqlite3Result &rs,
           tmp += "0";
         }
         tmp += rs.get(row, "parts");
-      } else if(*tokens[i] == "[fileext]") {
+      } else if(*tokens[i] == "[extension]") {
         tmp2 = rs.get(row, "file");
         uint pos = tmp2.rfind('.');
         if(pos != string::npos) {
@@ -342,9 +342,10 @@ void copy2Portable()
 
   string portableName = gIniParser->get("[general]portable_name");
 
-  string query(SELECT_ALL);
-  query.append(WHERE);
-  query.append(" AND file='");
+  string query("SELECT *\n");
+  query += FROM;
+  query += WHERE;
+  query += " AND file='";
 
   string q;
 
@@ -820,6 +821,7 @@ void parseArgs(int argc, char** argv)
       // and call this function again
       case '.':  // .?
         if(argv[i][1] != 0) {
+          init();
           char buf[strlen(argv[i]) + 6];
           sprintf(buf, "[abbr]%s", &argv[i][1]);
 
@@ -879,18 +881,19 @@ int main(int argc, char** argv)
     char select[strlen(SELECT) + gsMusicDirectory.size() + 1];
     sprintf(select, SELECT, gsMusicDirectory.c_str());
 
-    char buffer[strlen(select) + strlen(WHERE) +\
+    char buffer[strlen(select) + strlen(FROM) + strlen(WHERE) +\
                 strlen(gsSelect.c_str()) + strlen(order.c_str()) + 1];
 
-    sprintf(buffer, "%s%s%s%s", select, WHERE,
+    sprintf(buffer, "%s%s%s%s%s", select, FROM, WHERE,
             gsSelect.c_str(), order.c_str());
 
     if(!gsUpdate.empty()) {
       string in;
-      string update("UPDATE\n\ttbl_music\nSET\n\t");
+      string update("UPDATE tbl_music SET ");
       update += &(gsUpdate.c_str()[2]);
-      update += "\nWHERE\n\tid_music IN\n(\n  ";
-      update += SELECT_ID;
+      update += " WHERE id_music IN (\n  SELECT\n\t id_music\n  ";
+      update += FROM;
+      update += "  ";
       update += WHERE;
       update += gsSelect;
       update += ");";
@@ -898,7 +901,8 @@ int main(int argc, char** argv)
       cout << "> Do you really want to update " << rs->rows();
       cout << " rows? y/[n] ";
       cin >> in;
-      if(in[0] == 'y') {
+      if(in[0] == 'y')
+      {
         delete rs;
         rs = exe(update.c_str());
       } else {
@@ -1233,9 +1237,14 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
   // (more than 3 songs from one artist)
   cout << "> add info to (new) albums ..." << endl;
 
-  query  = "SELECT tmp_id_album, tmp_id_artist FROM ";
-  query += "tbl_tmp GROUP BY tmp_id_artist, tmp_id_album ";
-  query += "HAVING COUNT(*) > 3;";
+  //query  = "SELECT tmp_id_album, tmp_id_artist FROM ";
+  //query += "tbl_tmp GROUP BY tmp_id_artist, tmp_id_album ";
+  //query += "HAVING COUNT(*) > 3;";
+  query  = "SELECT DISTINCT(tmp_id_artist), tmp_id_album FROM tbl_tmp ";
+  query += "WHERE tmp_id_album NOT IN (";
+  query += "SELECT DISTINCT(tmp_id_album) FROM tbl_tmp ";
+  query += "GROUP BY tmp_id_artist, tmp_id_album HAVING COUNT() < 3);";
+
 
   sr = sql.exe(query.c_str());
 
@@ -1331,8 +1340,8 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
   delete sr2;
   delete sr;
 
-  sr = sql.exe("DELETE FROM tbl_tmp; VACUUM;");
-  delete sr;
+  //sr = sql.exe("DELETE FROM tbl_tmp; VACUUM;");
+  //delete sr;
   cout << "> " << count << " new files inserted." << endl;
 
   delete fieldNames[TagReader::VORBIS];

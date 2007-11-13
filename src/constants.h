@@ -21,10 +21,10 @@
 // constants for help stuff
 //
 
-const char *USAGE = "\
-plow [-|+A|a|g|l|m|r|s|t|T[e] <str>]* [-0...9] [-Q] [-S] [--add] [--noplay]\n\
-     [--set (A|a|g|l|m|r|s|t <str>)+]\n\
-     | [-L <tbl>] | [-q <sql>] | [-C] | [-I <dir>] | [--help] | [--version]";
+const char *USAGE = "plow\
+ [-|+A|a|g|l|m|r|s|t|T[e] <str> [<str>]*]* [-Q]\n\
+ ([-0...9] [-S] [--add] [--noplay] | [--set (A|a|g|l|m|r|s|t <str>)+])\n\
+ | [-L <tbl>] | [-q <sql>] | [-C] | [-I <dir>] | [--help] | [--version]";
 
 const char *HELP = "\
 -|+<c>[e] <str>   - search for fields containing <str>                \n\
@@ -33,14 +33,14 @@ const char *HELP = "\
                   <c> is one of A (album),     a (artist), g (genre), \n\
                                 l (language),  m (mood),   r (rating),\n\
                                 s (situation), t (tempo),  T (title)  \n\
--0...9            select player number set in configuration file      \n\
--Q                print out the sql statement                         \n\
--S                shuffle playlist                                    \n\
---add             append to playlist                                  \n\
---noplay          don't start a player                                \n\
 --set <c> <str>   set field <c> to value <str> using actual filter,   \n\
                   <c> is the same as above, except T is not supported \n\
                   (you can change more than one field at a time)      \n\
+-0...9            select player number set in configuration file      \n\
+-S                shuffle playlist                                    \n\
+--add             append to playlist                                  \n\
+--noplay          don't start a player                                \n\
+-Q                print out the sql statement                         \n\
                                                                       \n\
 -L <tbl>          print out values for <tbl>                          \n\
                   <tbl> is one of album, artist, genre,     language, \n\
@@ -57,6 +57,8 @@ const char *HELP = "\
 --help            print this message                                  \n\
 --version         print version                                       \n\
                                                                       \n\
+See man plow for some detailed information.";
+/*
 EXAMPLES                                                              \n\
 ----------------------------------------------------------------------\n\
 plow -a queen                - artist contains queen                  \n\
@@ -73,33 +75,25 @@ plow -a queen --set l english r 'best music ever'                     \n\
   - sets language = english and rating = 'best music ever'            \n\
     for all songs where artist contains queen                         \n\
 ";
+*/
 
 //
 // constants for sql stuff
 //
 
-const char *SELECT  = "SELECT\n\t'%s' || file as file, artist, title,\
+const char *SELECT = "SELECT\n\t'%s' || file as file, artist, title,\
  length, album, genre,\n\tlanguage, mood, tempo, rating, situation,\
- part, track,\n\tparts, tracks\nFROM\n\ttbl_music, tbl_artist,\
- tbl_album, tbl_genre, tbl_rating,\n\ttbl_language,tbl_mood,\
- tbl_situation, tbl_tempo\n";
+ part, track,\n\tparts, tracks\n";
 
-const char *SELECT_ALL  = "SELECT\n\t*\
- \nFROM\n\ttbl_music, tbl_artist, tbl_album,\
+const char *FROM = "FROM\n\ttbl_music, tbl_artist, tbl_album,\
  tbl_genre, tbl_rating,\n\ttbl_language,tbl_mood, tbl_situation,\
  tbl_tempo\n";
 
-const char *SELECT_ID = "SELECT\n\tid_music\
- \n  FROM\n\ttbl_music, tbl_artist, tbl_album,\
- tbl_genre, tbl_rating,\n\ttbl_language,tbl_mood, tbl_situation,\
- tbl_tempo\n  ";
-
-const char *WHERE   = "WHERE\n\tid_artist=_id_artist AND\
+const char *WHERE = "WHERE\n\tid_artist=_id_artist AND\
  id_album=_id_album\n\tAND id_genre=_id_genre AND\
  id_rating=_id_rating\n\tAND id_language=_id_language AND\
  id_mood=_id_mood\n\tAND id_situation=_id_situation AND\
  id_tempo=_id_tempo\n";
-
 
 //
 // constants for the first run setup
@@ -129,7 +123,7 @@ const char *INI_FILE ="\
 ###\n\
 ### default output order (SQL 'ORDER BY' syntax)\n\
 ###\n\
-#order = album ASC, part ASC, track ASC\n\
+#order = \"album ASC, part ASC, track ASC\"\n\
 \n\
 \n\
 ###\n\
@@ -157,7 +151,7 @@ playernofork = 0\n\
 ### filename on portable\n\
 ###\n\
 #portable_name = [artistOrAlbum] / [albumOrEmpty] - [part0] - [track0] -\
- [emptyOrArtist] - [title] [fileext]\n\
+ [emptyOrArtist] - [title] [extension]\n\
 \n\
 ###\n\
 ### information string for m3u playlist\n\
@@ -182,7 +176,7 @@ extinf = [length] \", \" [artist] \" - \" [title]\n\
 [abbr]\n\
 ### this one executes an sql statement, which selects all records\n\
 ### with different artists = sampler\n\
-sampler = -q \"SELECT id_album, album FROM tbl_album WHERE\
+compilation = -q \"SELECT id_album, album FROM tbl_album WHERE\
  album_id_artist=1;\"\n\
 \n\
 ### select all files where genre contains rock\n\

@@ -47,18 +47,21 @@ Sqlite3Result *Sqlite3::exe(const char *query)
 
   mi_err = sqlite3_open(mcs_dbname, &db);
 
-  if(mi_err == SQLITE_OK) {
+  if(mi_err == SQLITE_OK)
+  {
     mi_err = sqlite3_get_table(db,
-                                 query,
-                                 &result,
-                                 &nrow,
-                                 &ncol,
-                                 &zErrMsg);
-    if(mi_err == SQLITE_OK) {
+                               query,
+                               &result,
+                               &nrow,
+                               &ncol,
+                               &zErrMsg);
+    if(mi_err == SQLITE_OK)
+    {
       rs = new Sqlite3Result(result, nrow, ncol);
     }
 
-    if(zErrMsg) {
+    if(zErrMsg)
+    {
       throw PlowException("Sqlite3::exe", zErrMsg, query);
     }
 

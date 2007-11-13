@@ -28,19 +28,23 @@
 using namespace std;
 
 /**
- * @brief for ascending sorting of STL containers with char* keys
+ * for ascending sorting of STL containers with char* keys
  */
-struct _cstrcmp {
-  bool operator() (const char *a, const char *b) {
+struct _cstrcmp
+{
+  bool operator() (const char *a, const char *b)
+  {
     return strcmp(a, b) < 0 ? true : false;
   }
 };
 
 /**
- * @brief for descending sorting of STL containers with char* keys
+ * for descending sorting of STL containers with char* keys
  */
-struct _cstrcmp_r {
-  bool operator() (const char *a, const char *b) {
+struct _cstrcmp_r
+{
+  bool operator() (const char *a, const char *b)
+  {
     return strcmp(b, a) < 0 ? true : false;
   }
 };
