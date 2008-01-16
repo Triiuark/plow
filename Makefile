@@ -2,11 +2,11 @@ PREFIX        = /usr/local
 INSTALLBINDIR = ${PREFIX}/bin
 INSTALLMANDIR = ${PREFIX}/man/man1
 
-PLOW_VERSION  = unknown
+#PLOW_VERSION  = unknown
 
 CPP       = g++
-CPPFLAGS  = ${CXXFLAGS} -Wall -ansi `taglib-config --cflags`\
-            -DVERSION=\"${PLOW_VERSION}\"
+CPPFLAGS  = ${CXXFLAGS} -Wall -ansi `taglib-config --cflags`
+#            -DVERSION=\"${PLOW_VERSION}\"
 
 LIBS      = -lsqlite3
 LIBDIRS   =
