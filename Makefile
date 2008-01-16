@@ -13,15 +13,13 @@ OBJS = bin/helper.o bin/PlowException.o \
        bin/TagReader.o bin/AbstractReader.o \
        bin/VorbisReader.o bin/ID3v2Reader.o
 
-all: plow
+all: bin/plow
 
-plow: bin ${OBJS} src/main.cpp
-	${CPP} ${CPPFLAGS} -o bin/$@ ${OBJS} src/main.cpp ${LDFLAGS}
+bin/plow:  ${OBJS} src/main.cpp
+	${CPP} ${CPPFLAGS} -o $@ ${OBJS} src/main.cpp ${LDFLAGS}
 
-bin:
+bin/%.o: src/%.h src/%.cpp
 	mkdir -p ./bin/
-
-bin/%.o: bin src/%.h src/%.cpp
 	${CPP} ${CPPFLAGS} -c -o $@ src/$*.cpp
 
 install: plow
