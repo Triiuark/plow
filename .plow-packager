@@ -27,9 +27,9 @@ fi
 
 mfile="/tmp/${package}/Makefile"
 
-echo "VERSION        = ${version}" > ${mfile}
+echo "VERSION        = ${version}"                     > ${mfile}
 echo "CXXFLAGS      += -DVERSION=\\\"\${VERSION}\\\"" >> ${mfile}
-cat Makefile >> ${mfile}
+cat Makefile                                          >> ${mfile}
 
 mkdir /tmp/${package}/src
 cp src/*.cpp /tmp/${package}/src
@@ -40,6 +40,6 @@ cd /tmp
 tar czf ${package}.tar.gz ${package}
 cd ${dir}
 mv /tmp/${package}.tar.gz ./
-#rm -rf /tmp/${package}
+rm -rf /tmp/${package}
 echo "${dir}/${package}.tar.gz created ..."
 
