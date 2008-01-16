@@ -23,7 +23,7 @@
 #include <vector>
 #include <map>
 
-#include "global.h"
+#include "types.h"
 
 using namespace std;
 

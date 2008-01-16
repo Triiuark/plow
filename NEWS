@@ -1,4 +1,8 @@
+plow svn (2008-01-16)
+ * plow now uses a Makefile again
+
 plow svn (2007-11-02)
+
  * plow now uses scons
  * new package structure: removed data/
 

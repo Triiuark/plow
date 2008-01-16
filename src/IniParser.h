@@ -20,7 +20,7 @@
 #ifndef PLOW_INI_PARSER_H
 #define PLOW_INI_PARSER_H
 
-#include "global.h"
+#include "types.h"
 
 using namespace std;
 

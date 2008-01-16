@@ -22,8 +22,8 @@
 //
 
 const char *USAGE = "plow\
- [-|+A|a|g|l|m|r|s|t|T[e] <str> [<str>]*]* [-Q]\n\
- ([-0...9] [-S] [--add] [--noplay] | [--set (A|a|g|l|m|r|s|t <str>)+])\n\
+ [-|+<c>[e] <str> [<str>]*]* [-Q]\n\
+ ([-0...9] [-S] [--add] [--noplay] | [--set (<c> <str>)+])\n\
  | [-L <tbl>] | [-q <sql>] | [-C] | [-I <dir>] | [--help] | [--version]";
 
 const char *HELP = "\

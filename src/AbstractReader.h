@@ -20,7 +20,7 @@
 #ifndef PLOW_ABSTRACT_READER_H
 #define PLOW_ABSTRACT_READER_H
 
-#include "global.h"
+#include "types.h"
 
 /**
  * @brief interface for all ...Reader classes

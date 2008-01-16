@@ -15,12 +15,15 @@ OBJS = bin/helper.o bin/PlowException.o \
 
 all: bin/plow
 
-bin/plow:  ${OBJS} src/main.cpp
+bin/plow: bin/ ${OBJS} src/main.cpp
 	${CPP} ${CPPFLAGS} -o $@ ${OBJS} src/main.cpp ${LDFLAGS}
 
 bin/%.o: src/%.h src/%.cpp
-	mkdir -p ./bin/
 	${CPP} ${CPPFLAGS} -c -o $@ src/$*.cpp
+
+bin/:
+	mkdir -p ./bin/
+
 
 install: plow
 	install -d ${INSTALLBINDIR}
@@ -29,7 +32,7 @@ install: plow
 	install plow.1 ${INSTALLMANDIR}
 
 uninstall:
-	rm -f ${INSTALLBINDIR}/plow
+	-rm -f ${INSTALLBINDIR}/plow
 
 clean:
 	-rm -f  ./bin/*
@@ -43,3 +46,4 @@ cleanbak:
 
 cleanall: cleanbak clean
 	-rm -rf ./bin/
+

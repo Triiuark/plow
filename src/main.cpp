@@ -21,10 +21,6 @@
 #ifndef VERSION
 #define VERSION "(version not set)"
 #endif
-//#ifdef VERSION
-//#undef VERSION
-//#define VERSION 0.1
-//#endif
 
 #include <iostream>
 #include <iomanip>
@@ -43,7 +39,7 @@
 #include <sys/stat.h>
 
 #include "constants.h"
-#include "global.h"
+#include "types.h"
 #include "helper.h"
 
 #include "PlowException.h"

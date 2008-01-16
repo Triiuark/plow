@@ -17,8 +17,8 @@
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
 ***********************************************************************/
 
-#ifndef PLOW_GLOBAL_H
-#define PLOW_GLOBAL_H
+#ifndef PLOW_TYPES_H
+#define PLOW_TYPES_H
 
 #include <string>
 #include <cstring>

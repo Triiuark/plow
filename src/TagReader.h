@@ -22,7 +22,7 @@
 
 #include <map>
 
-#include "global.h"
+#include "types.h"
 #include "AbstractReader.h"
 
 class TagReader

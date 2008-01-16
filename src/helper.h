@@ -20,7 +20,7 @@
 #ifndef PLOW_HELPER_H
 #define PLOW_HELPER_H
 
-#include "global.h"
+#include "types.h"
 
 using namespace std;
 
