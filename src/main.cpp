@@ -21,6 +21,10 @@
 #ifndef VERSION
 #define VERSION "unknown version"
 #endif
+//#ifdef VERSION
+//#undef VERSION
+//#define VERSION 0.1
+//#endif
 
 #include <iostream>
 #include <iomanip>
@@ -177,6 +181,8 @@ string infoString(Sqlite3Result &rs,
   string        tmp2;
 
   uint strsize = 0;
+  uint pos;
+
 
   bool isField   = true;
   bool lastEmpty = false;
@@ -214,7 +220,7 @@ string infoString(Sqlite3Result &rs,
         tmp += rs.get(row, "parts");
       } else if(*tokens[i] == "[extension]") {
         tmp2 = rs.get(row, "file");
-        uint pos = tmp2.rfind('.');
+        pos = tmp2.rfind('.');
         if(pos != string::npos) {
           tmp += tmp2.substr(pos);
         }
@@ -1009,7 +1015,7 @@ CStrMap *vorbisFields()
   (*fields)["comment"  ] = gIniParser->get("[vorbis]comment"  ).c_str();
 
   return fields;
-}
+} // vorbisFields()
 
 
 
@@ -1028,7 +1034,7 @@ CStrMap *id3Fields()
   (*fields)["language" ] = gIniParser->get("[id3v2]language" ).c_str();
 
   return fields;
-}
+} // id3Fields()
 
 
 
@@ -1340,8 +1346,8 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
   delete sr2;
   delete sr;
 
-  //sr = sql.exe("DELETE FROM tbl_tmp; VACUUM;");
-  //delete sr;
+  sr = sql.exe("DELETE FROM tbl_tmp; VACUUM;");
+  delete sr;
   cout << "> " << count << " new files inserted." << endl;
 
   delete fieldNames[TagReader::VORBIS];

@@ -26,6 +26,7 @@ if ARGUMENTS.get("debug", 0):
   CXXFLAGS.append("-g")
 
 CXXFLAGS.append("-Wall")
+CXXFLAGS.append("-ansi")
 CXXFLAGS.append("`taglib-config --cflags`")
 
 env = Environment(CC        = "g++",

@@ -107,61 +107,41 @@ const char *INI_FILE ="\
 \n\
 [general]\n\
 \n\
-###\n\
 ### full path to your 'overall' music folder\n\
-### (the folder where all your music is in)\n\
-###\n\
 #path = /path/to/music\n\
 \n\
 \n\
-###\n\
 ### complete path to your playlist\n\
-###\n\
 #playlist = /path/to/plow.m3u\n\
 \n\
 \n\
-###\n\
 ### default output order (SQL 'ORDER BY' syntax)\n\
-###\n\
 #order = \"album ASC, part ASC, track ASC\"\n\
 \n\
 \n\
-###\n\
 ### the player you wish to use, at minimum player0 is required\n\
-### you can select a player with plow -1 ... -9\n\
-###\n\
 player0 = mplayer -playlist\n\
 player1 = audacious\n\
 player2 = xmms\n\
 player3 = amarok\n\
 \n\
-###\n\
 ### the player numbers that requires not to fork\n\
-###\n\
 playernofork = 0\n\
 \n\
 \n\
-###\n\
 ### full path to your portable music player\n\
-###\n\
 #portable = /path/to/portable/player\n\
 \n\
 \n\
-###\n\
 ### filename on portable\n\
-###\n\
 #portable_name = [artistOrAlbum] / [albumOrEmpty] - [part0] - [track0] -\
  [emptyOrArtist] - [title] [extension]\n\
 \n\
-###\n\
 ### information string for m3u playlist\n\
-###\n\
 extinf = [length] \", \" [artist] \" - \" [title]\n\
 \n\
-###\n\
 ### search only for files with an extension in this list\n\
-###\n\
-#extensions = mp3 MP3 ogg OGG\n\
+extensions = mp3 MP3 ogg OGG\n\
 \n\
 \n\
 ######################################################################\n\
@@ -189,8 +169,6 @@ rock = -g rock\n\
 ###\n\
 [vorbis]\n\
 \n\
-### \"standard\" field names\n\
-\n\
 #title     = TITLE\n\
 #artist    = ARTIST\n\
 #album     = ALBUM\n\
@@ -199,9 +177,6 @@ rock = -g rock\n\
 #genre     = GENRE\n\
 #comment   = COMMENT\n\
 #date      = DATE\n\
-\n\
-\n\
-### non standard field names\n\
 \n\
 #id        = ID\n\
 #parts     = DISCS\n\
@@ -218,8 +193,6 @@ rock = -g rock\n\
 ### here you can set how your mp3 files are tagged\n\
 ###\n\
 [id3v2]\n\
-\n\
-### non standard field names\n\
 \n\
 #id        = UFID/*\n\
 #comment   = COMM/\n\
