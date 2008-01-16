@@ -19,23 +19,27 @@ plow_dir=`dirname $0`
 
 cd ${plow_dir}
 
-cp AUTHORS ChangeLog COPYING NEWS README TODO SConstruct /tmp/${package}
+cp AUTHORS ChangeLog COPYING NEWS README TODO SConstruct plow.1 /tmp/${package}
 if test "$?" -eq 1; then
 	echo  "You have to change to trunk directory."
 	exit 1
 fi
 
+mfile="/tmp/${package}/Makefile"
+
+echo "VERSION        = ${version}" > ${mfile}
+echo "CXXFLAGS      += -DVERSION=\\\"\${VERSION}\\\"" >> ${mfile}
+cat Makefile >> ${mfile}
+
 mkdir /tmp/${package}/src
 cp src/*.cpp /tmp/${package}/src
 cp src/*.h /tmp/${package}/src
-mkdir /tmp/${package}/data
-cp data/* /tmp/${package}/data
 mkdir /tmp/${package}/bin
 
 cd /tmp
 tar czf ${package}.tar.gz ${package}
 cd ${dir}
 mv /tmp/${package}.tar.gz ./
-rm -rf /tmp/${package}
+#rm -rf /tmp/${package}
 echo "${dir}/${package}.tar.gz created ..."
 

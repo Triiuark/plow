@@ -1,19 +1,17 @@
-PREFIX        = /usr/local
-INSTALLBINDIR = ${PREFIX}/bin
-INSTALLMANDIR = ${PREFIX}/man/man1
+PREFIX         = /usr/local
+INSTALLBINDIR  = ${PREFIX}/bin
+INSTALLMANDIR  = ${PREFIX}/man/man1
+CPP            = g++
+CPPFLAGS       = -Wall -ansi `taglib-config --cflags` ${CXXFLAGS}
+LIBS           = -lsqlite3
+LIBDIRS        =
+LDFLAGS        = ${LIBDIRS} ${LIBS} `taglib-config --libs`
 
-CPP       = g++
-CPPFLAGS  = -Wall -ansi `taglib-config --cflags` ${CXXFLAGS}
-
-LIBS      = -lsqlite3
-LIBDIRS   =
-LDFLAGS   = $(LIBDIRS) $(LIBS) `taglib-config --libs`
-
-OBJS      = bin/helper.o bin/PlowException.o \
-            bin/Sqlite3Result.o bin/Sqlite3.o \
-            bin/IniParser.o bin/StringParser.o \
-            bin/TagReader.o bin/AbstractReader.o \
-            bin/VorbisReader.o bin/ID3v2Reader.o
+OBJS = bin/helper.o bin/PlowException.o \
+       bin/Sqlite3Result.o bin/Sqlite3.o \
+       bin/IniParser.o bin/StringParser.o \
+       bin/TagReader.o bin/AbstractReader.o \
+       bin/VorbisReader.o bin/ID3v2Reader.o
 
 all: plow
 
@@ -24,7 +22,7 @@ bin:
 	mkdir -p ./bin/
 
 bin/%.o: bin src/%.h src/%.cpp
-	$(CPP) $(CPPFLAGS) -c -o $@ src/$*.cpp
+	${CPP} ${CPPFLAGS} -c -o $@ src/$*.cpp
 
 install: plow
 	install -d ${INSTALLBINDIR}
