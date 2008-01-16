@@ -17,8 +17,15 @@ Requirements:
 Download source code, then:
   $ tar zxvf plow-x.y.z.tar.gz
   $ cd plow-x.y.z
-  $ scons [cxxflags="<cxxflags>"]
+  $ make
+  $ make install
 
+Notes:
+  * If you want to optimize your build of plow use
+    CXXFLAGS, e.g.
+    	$ CXXFLAGS="-O2 -march=pentium4" make
+  * You may want to change PREFIX in Makefile to 
+    install plow into another directory.
 
 Setting up and using plow
 =========================
