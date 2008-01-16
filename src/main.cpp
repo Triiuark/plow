@@ -19,7 +19,7 @@
 
 #define PACKAGE "plow"
 #ifndef VERSION
-#define VERSION "unknown version"
+#define VERSION "(version not set)"
 #endif
 //#ifdef VERSION
 //#undef VERSION

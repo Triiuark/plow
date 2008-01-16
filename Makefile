@@ -2,11 +2,8 @@ PREFIX        = /usr/local
 INSTALLBINDIR = ${PREFIX}/bin
 INSTALLMANDIR = ${PREFIX}/man/man1
 
-#PLOW_VERSION  = unknown
-
 CPP       = g++
-CPPFLAGS  = ${CXXFLAGS} -Wall -ansi `taglib-config --cflags`
-#            -DVERSION=\"${PLOW_VERSION}\"
+CPPFLAGS  = -Wall -ansi `taglib-config --cflags` ${CXXFLAGS}
 
 LIBS      = -lsqlite3
 LIBDIRS   =
@@ -17,6 +14,8 @@ OBJS      = bin/helper.o bin/PlowException.o \
             bin/IniParser.o bin/StringParser.o \
             bin/TagReader.o bin/AbstractReader.o \
             bin/VorbisReader.o bin/ID3v2Reader.o
+
+all: plow
 
 plow: bin ${OBJS} src/main.cpp
 	${CPP} ${CPPFLAGS} -o bin/$@ ${OBJS} src/main.cpp ${LDFLAGS}
