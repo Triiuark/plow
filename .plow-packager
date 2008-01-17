@@ -19,17 +19,18 @@ plow_dir=`dirname $0`
 
 cd ${plow_dir}
 
-cp AUTHORS ChangeLog COPYING NEWS README TODO SConstruct plow.1 /tmp/${package}
+cp AUTHORS ChangeLog COPYING NEWS README TODO plow.1 Makefile /tmp/${package}
 if test "$?" -eq 1; then
 	echo  "You have to change to trunk directory."
 	exit 1
 fi
 
-mfile="/tmp/${package}/Makefile"
-
-echo "VERSION        = ${version}"                     > ${mfile}
-echo "CXXFLAGS      += -DVERSION=\\\"\${VERSION}\\\"" >> ${mfile}
-cat Makefile                                          >> ${mfile}
+patchfile="/tmp/${package}/Makefile.patch"
+echo "10a11,12"                                         >> ${patchfile}
+echo "> VERSION        = ${version}"                    >> ${patchfile}
+echo "> CXXFLAGS      += -DVERSION=\\\"\${VERSION}\\\"" >> ${patchfile}
+patch /tmp/${package}/Makefile <${patchfile}
+rm -f ${patchfile}
 
 mkdir /tmp/${package}/src
 cp src/*.cpp /tmp/${package}/src

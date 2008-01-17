@@ -1,7 +1,13 @@
+# change installation directories below ###################################
 PREFIX         = /usr/local
 INSTALLBINDIR  = ${PREFIX}/bin
 INSTALLMANDIR  = ${PREFIX}/man/man1
+# #########################################################################
 CPP            = g++
+INSTALL        = install
+RM             = -rm -f
+RMDIR          = -rmdir
+MKDIR          = mkdir -p
 CPPFLAGS       = -Wall -ansi `taglib-config --cflags` ${CXXFLAGS}
 LIBS           = -lsqlite3
 LIBDIRS        =
@@ -22,28 +28,30 @@ bin/%.o: src/%.h src/%.cpp
 	${CPP} ${CPPFLAGS} -c -o $@ src/$*.cpp
 
 bin/:
-	mkdir -p ./bin/
+	${MKDIR} ./bin/
 
-
-install: plow
-	install -d ${INSTALLBINDIR}
-	install bin/plow ${INSTALLBINDIR}
-	install -d ${INSTALLMANDIR}
-	install plow.1 ${INSTALLMANDIR}
+install: bin/plow
+	${INSTALL} -d ${INSTALLBINDIR}
+	${INSTALL} bin/plow ${INSTALLBINDIR}
+	${INSTALL} -d ${INSTALLMANDIR}
+	${INSTALL} plow.1 ${INSTALLMANDIR}
 
 uninstall:
-	-rm -f ${INSTALLBINDIR}/plow
-
+	${RM} ${INSTALLBINDIR}/plow
+	${RMDIR} ${INSTALLBINDIR}
+	${RM} ${INSTALLMANDIR}/plow.1
+	${RMDIR} ${INSTALLMANDIR}
+	
 clean:
-	-rm -f  ./bin/*
+	${RM} ./bin/*
 
 # remove editor backup files
 cleanbak:
-	-rm -f   ./*~
-	-rm -f   ./*.bak
-	-rm -f ./src/*~
-	-rm -f ./src/*.bak
+	${RM} ./*~
+	${RM} ./*.bak
+	${RM} ./src/*~
+	${RM} ./src/*.bak
 
 cleanall: cleanbak clean
-	-rm -rf ./bin/
+	${RMDIR} ./bin/
 
