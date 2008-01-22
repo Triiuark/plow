@@ -19,6 +19,8 @@ plow_dir=`dirname $0`
 
 cd ${plow_dir}
 
+revision=$(svn info | grep "Revision" | tr -d "[:alpha:][:space:]:")
+
 cp AUTHORS ChangeLog COPYING NEWS README TODO plow.1 Makefile /tmp/${package}
 if test "$?" -eq 1; then
 	echo  "You have to change to trunk directory."
@@ -31,6 +33,12 @@ echo "> VERSION        = ${version}"                    >> ${patchfile}
 echo "> CXXFLAGS      += -DVERSION=\\\"\${VERSION}\\\"" >> ${patchfile}
 patch /tmp/${package}/Makefile <${patchfile}
 rm -f ${patchfile}
+
+readme="/tmp/${package}/README"
+echo ""                                                        >> ${readme}
+echo "REVISION"                                                >> ${readme}
+echo "========"                                                >> ${readme}
+echo "This package was created from svn revision ${revision}." >> ${readme}
 
 mkdir /tmp/${package}/src
 cp src/*.cpp /tmp/${package}/src
