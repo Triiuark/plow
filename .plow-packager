@@ -10,18 +10,20 @@ dir=$(pwd)
 pdir="/tmp/plow-packager"
 mkdir -p ${pdir}                            || exit 1
 cd ${pdir}                                  || exit 1
-svn checkout svn://svn.berlios.de/plow/tags || exit 1
-cd tags/                                    || exit 1
+_versions=$(svn ls --verbose svn://svn.berlios.de/plow/tags |\
+           grep "version-" |\
+           sort -nr |\
+	   awk -F' ' '{print $6}')
+_version=$(echo ${_versions} | awk -F' ' '{print $1}' | tr -d '/')
+svn checkout svn://svn.berlios.de/plow/tags/${_version} || exit 1
+cd ${_version}                                          || exit 1
 
 name='plow'
-version=$(echo `ls -c` | awk -F' ' '{print $1}' | awk -F'version-' '{print $2}')
+version=$(echo ${_version} | awk -F'version-' '{print $2}')
 if [[ -z "${version}" ]]; then
 	echo "Something went wrong."
 	exit 1
 fi
-
-cd version-${version}/   || exit 1
-
 package="${name}-${version}"
 rm -rf   /tmp/${package}
 mkdir -p /tmp/${package} || exit 1
