@@ -1239,13 +1239,16 @@ void add2Db(char *path, const char *dbPath, const char *musicPath)
   // (more than 3 songs from one artist)
   cout << "> add info to (new) albums ..." << endl;
 
-  //query  = "SELECT tmp_id_album, tmp_id_artist FROM ";
-  //query += "tbl_tmp GROUP BY tmp_id_artist, tmp_id_album ";
-  //query += "HAVING COUNT(*) > 3;";
+  query  = "SELECT tmp_id_album, tmp_id_artist FROM ";
+  query += "tbl_tmp GROUP BY tmp_id_artist, tmp_id_album ";
+  query += "HAVING COUNT(*) > 3;";
+
+  /*
   query  = "SELECT DISTINCT(tmp_id_artist), tmp_id_album FROM tbl_tmp ";
   query += "WHERE tmp_id_album NOT IN (";
   query += "SELECT DISTINCT(tmp_id_album) FROM tbl_tmp ";
   query += "GROUP BY tmp_id_artist, tmp_id_album HAVING COUNT() < 3);";
+  */
 
 
   sr = sql.exe(query.c_str());
