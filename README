@@ -11,21 +11,23 @@ How to compile and install
 ==========================
 
 Requirements:
-  * sqlite3 libs and excecutable (best is >= 3.3)
+  * sqlite3 libs (best is >= 3.3)
   * KDE taglib (1.4)
 
 Download source code, then:
   $ tar zxvf plow-x.y.z.tar.gz
   $ cd plow-x.y.z
   $ make
+  (and as root):
   $ make install
 
 Notes:
   * If you want to optimize your build of plow use
     CXXFLAGS, e.g.
     	$ CXXFLAGS="-O2 -march=pentium4" make
-  * You may want to change PREFIX in Makefile to 
-    install plow into another directory.
+  * If you want to install plow into another directory
+    than /usr/local/ change PREFIX in Makefile.
+
 
 Setting up and using plow
 =========================
@@ -45,4 +47,15 @@ Thats it now you can try:
   $ plow --help
 or just create a playlist containing all files
   $ plow
+
+
+Documentation
+=============
+
+You will find actual documentation on http://plow.projekt182.de
+or take a look at the man page:
+  $ man ./plow.1
+or
+  $ man plow
+if you already installed plow.
 

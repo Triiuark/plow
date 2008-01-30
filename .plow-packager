@@ -1,29 +1,34 @@
 #!/bin/bash
 
-name='plow'
-version=''
+#
+# This script creates a plow source tar.gz package
+# from the latest svn tags/version-x.y.z directory.
+#
 
-if test $1; then
-	version=$1
-else
-   echo "You have to set a version."
-   exit 1
+dir=$(pwd)
+
+pdir="/tmp/plow-packager"
+mkdir -p ${pdir}                            || exit 1
+cd ${pdir}                                  || exit 1
+svn checkout svn://svn.berlios.de/plow/tags || exit 1
+cd tags/                                    || exit 1
+
+name='plow'
+version=$(echo `ls -c` | awk -F' ' '{print $1}' | awk -F'version-' '{print $2}')
+if [[ -z "${version}" ]]; then
+	echo "Something went wrong."
+	exit 1
 fi
 
+cd version-${version}/   || exit 1
+
 package="${name}-${version}"
-
-mkdir -p /tmp/${package}
-
-dir=`pwd`
-plow_dir=`dirname $0`
-
-cd ${plow_dir}
-
-revision=$(svn info | grep "Revision" | tr -d "[:alpha:][:space:]:")
+rm -rf   /tmp/${package}
+mkdir -p /tmp/${package} || exit 1
 
 cp AUTHORS ChangeLog COPYING NEWS README TODO plow.1 Makefile /tmp/${package}
 if test "$?" -eq 1; then
-	echo  "You have to change to trunk directory."
+	echo  "There are some files missing."
 	exit 1
 fi
 
@@ -33,12 +38,6 @@ echo "> VERSION        = ${version}"                    >> ${patchfile}
 echo "> CXXFLAGS      += -DVERSION=\\\"\${VERSION}\\\"" >> ${patchfile}
 patch /tmp/${package}/Makefile <${patchfile}
 rm -f ${patchfile}
-
-readme="/tmp/${package}/README"
-echo ""                                                        >> ${readme}
-echo "REVISION"                                                >> ${readme}
-echo "========"                                                >> ${readme}
-echo "This package was created from svn revision ${revision}." >> ${readme}
 
 mkdir /tmp/${package}/src
 cp src/*.cpp /tmp/${package}/src
@@ -50,5 +49,6 @@ tar czf ${package}.tar.gz ${package}
 cd ${dir}
 mv /tmp/${package}.tar.gz ./
 rm -rf /tmp/${package}
+rm -rf /tmp/plow-packager
 echo "${dir}/${package}.tar.gz created ..."
 
