@@ -55,7 +55,7 @@ class IniParser
      *
      * @returns the value, or an empty string if @a option not found
      */
-    string get(const char *option);
+    string get(const char *option) const;
 
     /**
      * destroys the IniParser

@@ -37,27 +37,27 @@ class TagReader
 
     TagReader(const char* fname, std::map<int, CStrMap *> fieldNames);
 
-    const char *id();
-    const char *artist();
-    const char *title();
-    const char *album();
-    const char *part();
-    const char *parts();
-    const char *track();
-    const char *tracks();
-    const char *genre();
-    const char *rating();
-    const char *mood();
-    const char *situation();
-    const char *tempo();
-    const char *language();
-    const char *date();
-    const char *comment();
-    const char *length();
+    const char *id()        const;
+    const char *artist()    const;
+    const char *title()     const;
+    const char *album()     const;
+    const char *part()      const;
+    const char *parts()     const;
+    const char *track()     const;
+    const char *tracks()    const;
+    const char *genre()     const;
+    const char *rating()    const;
+    const char *mood()      const;
+    const char *situation() const;
+    const char *tempo()     const;
+    const char *language()  const;
+    const char *date()      const;
+    const char *comment()   const;
+    const char *length()    const;
 
-    int fileType();
+    int fileType() const;
 
-    int error();
+    int error()    const;
 
     ~TagReader();
 

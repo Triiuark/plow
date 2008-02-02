@@ -29,7 +29,7 @@ TagReader::TagReader(const char *fname, map<int, CStrMap *> fieldNames)
 
 
 
-const char *TagReader::id()
+const char *TagReader::id() const
 {
   if(mAR_reader) {
     return mAR_reader->getId();
@@ -37,7 +37,7 @@ const char *TagReader::id()
   return 0;
 }
 
-const char *TagReader::artist()
+const char *TagReader::artist() const
 {
   if(mAR_reader) {
     return mAR_reader->getArtist();
@@ -45,7 +45,7 @@ const char *TagReader::artist()
   return 0;
 }
 
-const char *TagReader::title()
+const char *TagReader::title() const
 {
   if(mAR_reader) {
     return mAR_reader->getTitle();
@@ -53,7 +53,7 @@ const char *TagReader::title()
   return 0;
 }
 
-const char *TagReader::album()
+const char *TagReader::album() const
 {
   if(mAR_reader) {
     return mAR_reader->getAlbum();
@@ -61,7 +61,7 @@ const char *TagReader::album()
   return 0;
 }
 
-const char *TagReader::part()
+const char *TagReader::part() const
 {
   if(mAR_reader) {
     return mAR_reader->getPart();
@@ -69,7 +69,7 @@ const char *TagReader::part()
   return 0;
 }
 
-const char *TagReader::parts()
+const char *TagReader::parts() const
 {
   if(mAR_reader) {
     return mAR_reader->getParts();
@@ -77,7 +77,7 @@ const char *TagReader::parts()
   return 0;
 }
 
-const char *TagReader::track()
+const char *TagReader::track() const
 {
   if(mAR_reader) {
     return mAR_reader->getTrack();
@@ -85,7 +85,7 @@ const char *TagReader::track()
   return 0;
 }
 
-const char *TagReader::tracks()
+const char *TagReader::tracks() const
 {
   if(mAR_reader) {
     return mAR_reader->getTracks();
@@ -93,7 +93,7 @@ const char *TagReader::tracks()
   return 0;
 }
 
-const char *TagReader::genre()
+const char *TagReader::genre() const
 {
   if(mAR_reader) {
     return mAR_reader->getGenre();
@@ -101,7 +101,7 @@ const char *TagReader::genre()
   return 0;
 }
 
-const char *TagReader::rating()
+const char *TagReader::rating() const
 {
   if(mAR_reader) {
     return mAR_reader->getRating();
@@ -109,7 +109,7 @@ const char *TagReader::rating()
   return 0;
 }
 
-const char *TagReader::mood()
+const char *TagReader::mood() const
 {
   if(mAR_reader) {
     return mAR_reader->getMood();
@@ -117,7 +117,7 @@ const char *TagReader::mood()
   return 0;
 }
 
-const char *TagReader::situation()
+const char *TagReader::situation() const
 {
   if(mAR_reader) {
     return mAR_reader->getSituation();
@@ -125,7 +125,7 @@ const char *TagReader::situation()
   return 0;
 }
 
-const char *TagReader::tempo()
+const char *TagReader::tempo() const
 {
   if(mAR_reader) {
     return mAR_reader->getTempo();
@@ -133,7 +133,7 @@ const char *TagReader::tempo()
   return 0;
 }
 
-const char *TagReader::language()
+const char *TagReader::language() const
 {
   if(mAR_reader) {
     return mAR_reader->getLanguage();
@@ -141,7 +141,7 @@ const char *TagReader::language()
   return 0;
 }
 
-const char *TagReader::date()
+const char *TagReader::date() const
 {
   if(mAR_reader) {
     return mAR_reader->getDate();
@@ -149,7 +149,7 @@ const char *TagReader::date()
   return 0;
 }
 
-const char *TagReader::comment()
+const char *TagReader::comment() const
 {
   if(mAR_reader) {
     return mAR_reader->getComment();
@@ -157,7 +157,7 @@ const char *TagReader::comment()
   return 0;
 }
 
-const char *TagReader::length()
+const char *TagReader::length() const
 {
   if(mAR_reader) {
     return mAR_reader->getLength();
@@ -167,14 +167,14 @@ const char *TagReader::length()
 
 
 
-int TagReader::fileType()
+int TagReader::fileType() const
 {
   return mi_type;
 }
 
 
 
-int TagReader::error()
+int TagReader::error() const
 {
   if(mAR_reader) {
     return mAR_reader->error();

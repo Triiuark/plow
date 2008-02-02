@@ -28,7 +28,7 @@ PlowException::PlowException(const char *where,
 
 
 
-void PlowException::print()
+void PlowException::print() const
 {
   cout << endl;
   cerr << message() << endl;
@@ -37,7 +37,7 @@ void PlowException::print()
 
 
 
-string PlowException::message()
+string PlowException::message() const
 {
   string out("Error in ");
 
@@ -62,7 +62,7 @@ string PlowException::message()
 
 
 
-int PlowException::error()
+int PlowException::error() const
 {
   return mi_err;
 }

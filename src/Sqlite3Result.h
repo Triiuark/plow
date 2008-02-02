@@ -48,7 +48,7 @@ class Sqlite3Result
      * @return the column name of column col,
      *         or 0 if col not found
      */
-    const char *getHead(int col);
+    const char *getHead(int col) const;
 
     /**
      * @param row    row number
@@ -57,7 +57,7 @@ class Sqlite3Result
      * @returns the value at row, col,
      *          or 0 if row or col not found
      */
-    const char *get(int row, int col);
+    const char *get(int row, int col) const;
 
     /**
      * @param row    row number
@@ -66,17 +66,17 @@ class Sqlite3Result
      * @returns the value at row, column,
      *          or 0 if row or column not found
      */
-    const char *get(int row, const char *column);
+    const char *get(int row, const char *column) const;
 
     /**
      * @returns number of rows
      */
-    int rows();
+    int rows() const;
 
     /**
      * @returns number of columns
      */
-    int cols();
+    int cols() const;
 
     /**
      * @param col column number

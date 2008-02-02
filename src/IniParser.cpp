@@ -115,7 +115,7 @@ IniParser::IniParser(const char *iniFile)
 
 
 
-string IniParser::get(const char *option)
+string IniParser::get(const char *option) const
 {
   return (*mSM_options)[option];
 }

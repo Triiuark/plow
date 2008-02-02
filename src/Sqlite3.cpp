@@ -56,7 +56,7 @@ Sqlite3Result *Sqlite3::exe(const char *query)
 
 
 
-int Sqlite3::error()
+int Sqlite3::error() const
 {
   return mi_err;
 }

@@ -17,6 +17,9 @@
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
 ***********************************************************************/
 
+#ifndef PLOW_CONSTANTS_H
+#define PLOW_CONSTANTS_H
+
 //
 // constants for help stuff
 //
@@ -327,3 +330,5 @@ CREATE TABLE tbl_tmp (\n\
    tmp_id_tempo     INTEGER NOT NULL DEFAULT 1,\n\
    tmp_id_language  INTEGER NOT NULL DEFAULT 1\n\
 );";
+
+#endif

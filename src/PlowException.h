@@ -42,18 +42,18 @@ class PlowException
     /**
      * @returns a string containing an error description
      */
-    std::string message();
+    std::string message() const;
 
     /**
      * prints message() to std::cerr
      */
-    void print();
+    void print() const;
 
     /**
      * @returns the value of errno at the moment
      *          of creating this PlowException
      */
-    int error();
+    int error() const;
 
     /**
      * destroys the PlowException

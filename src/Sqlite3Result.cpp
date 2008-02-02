@@ -28,7 +28,7 @@ Sqlite3Result::Sqlite3Result(char **sqlresult, int rows, int cols)
 
 
 
-const char *Sqlite3Result::getHead(int col)
+const char *Sqlite3Result::getHead(int col) const
 {
   if(col >= 0 && col < cols())
   {
@@ -39,7 +39,7 @@ const char *Sqlite3Result::getHead(int col)
 
 
 
-const char *Sqlite3Result::get(int row, int col)
+const char *Sqlite3Result::get(int row, int col) const
 {
   int field = ((row + 1) * cols()) + col;
 
@@ -52,21 +52,21 @@ const char *Sqlite3Result::get(int row, int col)
 
 
 
-const char *Sqlite3Result::get(int row, const char *column)
+const char *Sqlite3Result::get(int row, const char *column) const
 {
   return get(row, (*mIM_columns)[column] - 1);
 }
 
 
 
-int Sqlite3Result::rows()
+int Sqlite3Result::rows() const
 {
   return mi_rows;
 }
 
 
 
-int Sqlite3Result::cols()
+int Sqlite3Result::cols() const
 {
   return mi_cols;
 }

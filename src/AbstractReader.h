@@ -43,87 +43,87 @@ class AbstractReader
     /**
      * @returns a unique id of the file, an empty string if not found
      */
-    virtual const char *getId();
+    virtual const char *getId() const;
 
     /**
      * @returns title, an empty string if not found
      */
-    virtual const char *getTitle();
+    virtual const char *getTitle() const;
 
     /**
      * @returns artist, an empty string if not found
      */
-    virtual const char *getArtist();
+    virtual const char *getArtist() const;
 
     /**
      * @returns album, an empty string if not found
      */
-    virtual const char *getAlbum();
+    virtual const char *getAlbum() const;
 
     /**
      * @returns part number, an empty string if not found
      */
-    virtual const char *getPart();
+    virtual const char *getPart() const;
 
     /**
      * @returns total number of parts, an empty string if not found
      */
-    virtual const char *getParts();
+    virtual const char *getParts() const;
 
     /**
      * @returns track number, an empty string if not found
      */
-    virtual const char *getTrack();
+    virtual const char *getTrack() const;
 
     /**
      * @returns total number of tracks, an empty string if not found
      */
-    virtual const char *getTracks();
+    virtual const char *getTracks() const;
 
     /**
      * @returns genre, an empty string if not found
      */
-    virtual const char *getGenre();
+    virtual const char *getGenre() const;
 
     /**
      * @returns rating, an empty string if not found
      */
-    virtual const char *getRating();
+    virtual const char *getRating() const;
 
     /**
      * @returns mood, an empty string if not found
      */
-    virtual const char *getMood();
+    virtual const char *getMood() const;
 
     /**
      * @returns situation, an empty string if not found
      */
-    virtual const char *getSituation();
+    virtual const char *getSituation() const;
 
     /**
      * @returns tempo, an empty string if not found
      */
-    virtual const char *getTempo();
+    virtual const char *getTempo() const;
 
     /**
      * @returns language, an empty string if not found
      */
-    virtual const char *getLanguage();
+    virtual const char *getLanguage() const;
 
     /**
      * @returns date, an empty string if not found
      */
-    virtual const char *getDate();
+    virtual const char *getDate() const;
 
     /**
      * @returns comment, an empty string if not found
      */
-    virtual const char *getComment();
+    virtual const char *getComment() const;
 
     /**
      * @returns length of song in seconds
      */
-    virtual const char *getLength();
+    virtual const char *getLength() const;
 
 
 
@@ -132,14 +132,14 @@ class AbstractReader
      *
      * @returns the value for @a field, an empty string if not found
      */
-    virtual const char *get(const char * field);
+    virtual const char *get(const char * field) const;
 
 
 
     /**
      * @returns 0 if no error occured
      */
-    virtual int error();
+    virtual int error() const;
 
 
 

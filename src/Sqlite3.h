@@ -54,7 +54,7 @@ class Sqlite3
      * @returns a sqlite3 error code (sqlite3.h),
      *          SQLITE_OK means no error
      */
-    int error();
+    int error() const;
 
     /**
      * destroys the Sqlite3 object
