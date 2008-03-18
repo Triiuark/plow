@@ -8,16 +8,16 @@ INSTALL        = install
 RM             = -rm -f
 RMDIR          = -rmdir
 MKDIR          = mkdir -p
-CPPFLAGS       = -Wall -ansi `taglib-config --cflags` ${CXXFLAGS}
+CPPFLAGS       = -Wall `taglib-config --cflags` ${CXXFLAGS}
 LIBS           = -lsqlite3
 LIBDIRS        =
 LDFLAGS        = ${LIBDIRS} ${LIBS} `taglib-config --libs`
 
-OBJS = bin/helper.o bin/PlowException.o \
-       bin/Sqlite3Result.o bin/Sqlite3.o \
-       bin/IniParser.o bin/StringParser.o \
-       bin/TagReader.o bin/AbstractReader.o \
-       bin/VorbisReader.o bin/ID3v2Reader.o
+OBJS = bin/PlowException.o bin/helper.o \
+       bin/StringParser.o bin/IniParser.o \
+       bin/AbstractReader.o bin/ID3v2Reader.o \
+       bin/VorbisReader.o bin/ReaderSelector.o \
+       bin/Sqlite3.o bin/Plow.o
 
 all: bin/plow
 
@@ -41,7 +41,7 @@ uninstall:
 	${RMDIR} ${INSTALLBINDIR}
 	${RM} ${INSTALLMANDIR}/plow.1
 	${RMDIR} ${INSTALLMANDIR}
-	
+
 clean:
 	${RM} ./bin/*
 

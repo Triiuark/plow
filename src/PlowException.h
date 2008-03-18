@@ -21,6 +21,8 @@
 #define PLOW_PLOW_EXCEPTION_H
 
 #include <string>
+#include <sstream>
+#include <memory>
 
 /**
  * @brief main exception class of plow
@@ -31,21 +33,29 @@ class PlowException
     /**
      * creates a new PlowException with the given messages
      *
-     * @param where    the function name, where the error occurs
-     * @param what     what "exactly" is the problem
+     * @param function the function name, where the error occurs
+     * @param error    what "exactly" is the problem
      * @param solution a hint to solve the problem, if there is one
      */
-    PlowException(const char *where,
-                  const char *what,
-                  const char *solution = 0);
+    PlowException(const char * const function,
+                  const char * const error = 0,
+                  const char * const solution = 0);
 
     /**
-     * @returns a string containing an error description
+     * creates a new PlowException from an existing one
+     *
+     * @param e an existing PlowException
+     */
+    PlowException(PlowException const &e);
+
+    /**
+     * @returns a string containing a complete error description
      */
     std::string message() const;
 
     /**
-     * prints message() to std::cerr
+     * prints message() to std::cerr and the solution string to std::cout,
+     * if there is one
      */
     void print() const;
 
@@ -53,18 +63,41 @@ class PlowException
      * @returns the value of errno at the moment
      *          of creating this PlowException
      */
-    int error() const;
+    int err() const;
 
     /**
-     * destroys the PlowException
+     * @returns ostringstream that contains the error description
+     *          for easy creating of error messages
      */
-    ~PlowException();
+    std::ostringstream &error();
+
+    ///
+    /// stuff for the copy ctor
+    ///
+
+    /**
+     * @returns the function name where the error occurs
+     */
+    std::string const &function() const;
+
+    /**
+     * @returns the solution, if there was one
+     */
+    std::string const &solution() const;
+
+    /**
+     * @returns the error description
+     */
+    std::string errorStr() const;
 
   private:
-    int mi_err;
-    std::string mcs_where;
-    std::string mcs_what;
-    std::string mcs_solution;
+    bool mUseErrno;
+    int  mErrno;
+
+    std::string mFunction;
+    std::string mSolution;
+
+    std::ostringstream mError;
 };
 
 #endif

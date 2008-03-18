@@ -2,15 +2,15 @@
 
 fileList=Split("""bin/main.cpp
                   bin/helper.cpp
+		  bin/Plow.cpp
                   bin/PlowException.cpp
                   bin/IniParser.cpp
                   bin/StringParser.cpp
                   bin/AbstractReader.cpp
                   bin/ID3v2Reader.cpp
-                  bin/TagReader.cpp
+                  bin/ReaderSelector.cpp
                   bin/VorbisReader.cpp
-                  bin/Sqlite3.cpp
-                  bin/Sqlite3Result.cpp""")
+                  bin/Sqlite3.cpp""")
 
 BuildDir("bin", "src", duplicate = 0)
 

@@ -7,60 +7,96 @@
 
 using namespace TagLib;
 
-VorbisReader::VorbisReader(const char *fname, CStrMap *fields)
-  : AbstractReader(fname, fields)
-{
-  mCSM_fields["id"       ] = "ID";
-  mCSM_fields["title"    ] = "TITLE";
-  mCSM_fields["artist"   ] = "ARTIST";
-  mCSM_fields["album"    ] = "ALBUM";
-  mCSM_fields["part"     ] = "DISCNUMBER";
-  mCSM_fields["parts"    ] = "DISCS";
-  mCSM_fields["track"    ] = "TRACKNUMBER";
-  mCSM_fields["tracks"   ] = "TRACKS";
-  mCSM_fields["genre"    ] = "GENRE";
-  mCSM_fields["rating"   ] = "RATING";
-  mCSM_fields["mood"     ] = "MOOD";
-  mCSM_fields["situation"] = "SITUATION";
-  mCSM_fields["tempo"    ] = "TEMPO";
-  mCSM_fields["language" ] = "LANGUAGE";
-  mCSM_fields["date"     ] = "DATE";
-  mCSM_fields["comment"  ] = "COMMENT";
+std::map<std::string, std::string> VorbisReader::sMapping;
 
-  CStrMapIt it = fields->begin();
-  while(it != fields->end())
+bool VorbisReader::sMappingDone = false;
+
+VorbisReader::VorbisReader(const char * const fname)
+    : AbstractReader(fname)
+{
+  initMapping();
+}
+
+void VorbisReader::initMapping() const
+{
+  if(sMapping.empty())
   {
-    if(strcmp(it->second, "") != 0)
+    sMapping["album"    ] = "ALBUM";
+    sMapping["artist"   ] = "ARTIST";
+    sMapping["comment"  ] = "COMMENT";
+    sMapping["date"     ] = "DATE";
+    sMapping["genre"    ] = "GENRE";
+    sMapping["id"       ] = "ID";
+    sMapping["language" ] = "LANGUAGE";
+    sMapping["lyrics"   ] = "LYRICS";
+    sMapping["mood"     ] = "MOOD";
+    sMapping["part"     ] = "DISCNUMBER";
+    sMapping["parts"    ] = "DISCS";
+    sMapping["rating"   ] = "RATING";
+    sMapping["release"  ] = "RELEASE";
+    sMapping["situation"] = "SITUATION";
+    sMapping["tempo"    ] = "TEMPO";
+    sMapping["title"    ] = "TITLE";
+    sMapping["track"    ] = "TRACKNUMBER";
+    sMapping["tracks"   ] = "TRACKS";
+  }
+}
+
+
+
+void VorbisReader::setMapping(StrMap &mapping) const
+{
+  if(!sMappingDone)
+  {
+    StrMapIt it = mapping.begin();
+    while(it != mapping.end())
     {
-      mCSM_fields[it->first] = it->second;
+      sMapping[it->first] = it->second;
+      ++it;
     }
-    ++it;
   }
 
-  Ogg::Vorbis::File f(mcs_fname);
+  sMappingDone = true;
+}
+
+
+
+bool VorbisReader::mappingDone() const
+{
+  return sMappingDone;
+}
+
+
+
+void VorbisReader::read()
+{
+  Ogg::Vorbis::File f(mValues["file"].c_str());
   Ogg::XiphComment *tag;
+
   if((tag = f.tag()))
   {
     const Ogg::FieldListMap *flm = &tag->fieldListMap();
 
-    CStrMapIt it = mCSM_fields.begin();
+    std::map<std::string, std::string>::iterator it = sMapping.begin();
 
     const StringList *sl;
 
-    while(it != mCSM_fields.end())
+    while(it != sMapping.end())
     {
 
-      sl = &(*flm)[mCSM_fields[it->first]];
+      sl = &(*flm)[sMapping[it->first]];
 
       if(!sl->isEmpty())
       {
-        (*mSM_values)[it->first] = (*sl)[0].toCString(true);
+        mValues[it->first.c_str()] = (*sl)[0].toCString(true);
       }
 
       ++it;
     }
-  } else {
-    mi_err = 1;
+  }
+  else
+  {
+    mErr = 1;
   }
 
   int len;
@@ -69,6 +105,6 @@ VorbisReader::VorbisReader(const char *fname, CStrMap *fields)
   {
     len = f.audioProperties()->length();
     sprintf(buff, "%d", len);
-    (*mSM_values)["length"] = buff;
+    mValues["length"] = buff;
   }
 }

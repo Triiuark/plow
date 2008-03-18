@@ -30,24 +30,41 @@
 class ID3v2Reader : public AbstractReader
 {
   public:
-    ID3v2Reader(const char* fname, CStrMap *fields = 0);
+    ID3v2Reader(const char * const fname);
+
+    const char * const sectionName() const
+    {
+      return "id3v2";
+    }
+
+    void setMapping(StrMap &mapping) const;
+
+    bool mappingDone() const;
+
+    void read();
 
   private:
-    void getTxxxFrame(const char *field,
-                      const char *description,
+    void initMapping() const;
+
+    void getTxxxFrame(const char * const field,
+                      const char * const description,
                       TagLib::ID3v2::FrameList *fl);
 
-    void getCommFrame(const char *field,
-                      const char *description,
+    void getCommFrame(const char * const field,
+                      const char * const description,
                       TagLib::ID3v2::FrameList *fl);
 
-    void getUfidFrame(const char *field,
-                      const char *description,
+    void getUfidFrame(const char * const field,
+                      const char * const description,
                       TagLib::ID3v2::FrameList *fl);
 
-    void getPopmFrame(const char *field,
-                      const char *description,
+    void getPopmFrame(const char * const field,
+                      const char * const description,
                       TagLib::ID3v2::FrameList *fl);
+
+    static bool sMappingDone;
+
+    static std::map<std::string, std::string> sMapping;
 };
 
 #endif

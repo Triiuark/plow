@@ -22,8 +22,6 @@
 
 #include "types.h"
 
-using namespace std;
-
 /**
  * @brief simple parser for INI like configuration files
  *
@@ -45,17 +43,29 @@ class IniParser
      *
      * @throws PlowException on any error
      */
-    IniParser(const char *iniFile);
+    IniParser(const char * const iniFile);
 
     /**
      * returns the value for the given @a option
      *
      * @param option the key you want to have the value for,
-     *               key has to be something like "[section]option"
+     *               key has to be something like "section/option"
      *
      * @returns the value, or an empty string if @a option not found
      */
-    string get(const char *option) const;
+    std::string const &get(const char * const option);
+
+
+    /**
+     * get a map containing all key-value pairs from a whole section
+     *
+     * @param section the section name (without brackets)
+     *
+     * @returns a new StrMap with the key-value pairs from [section]
+     *          - section is stripped from keys
+     *          - has to be freed using delete
+     */
+    StrMap *getSection(const char * const section);
 
     /**
      * destroys the IniParser
@@ -63,7 +73,7 @@ class IniParser
     ~IniParser();
 
   private:
-    StrMap *mSM_options;
+    StrMap mOptions;
 };
 
 #endif

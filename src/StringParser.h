@@ -23,8 +23,6 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 /**
  * @brief splits a string into tokens
  */
@@ -42,7 +40,7 @@ class StringParser
     /**
      * @returns a vector containing the tokens
      */
-    vector<string *> getTokens();
+    std::vector<std::string *> const &getTokens() const;
 
     /**
      * @returns a char ** like argv of the tokens,
@@ -54,7 +52,7 @@ class StringParser
     /**
      * @returns the number of tokens
      */
-    uint   getSize();
+    uint getSize() const;
 
     /**
      * destroys the StringParser
@@ -62,9 +60,8 @@ class StringParser
     ~StringParser();
 
   private:
-    bool mb_remove;
-    char **m_argv;
-    vector<string *> m_tokens;
+    char **mArgv;
+    std::vector<std::string *> mTokens;
 };
 
 #endif

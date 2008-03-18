@@ -8,9 +8,11 @@
 #include <cstring>
 #include <cerrno>
 
+extern "C" {
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+}
 
 #include "PlowException.h"
 
@@ -41,11 +43,15 @@ void getFiles(PrioQ &fnames,
     path[strlen(path) - 1] = 0;
   }
 
+  bool added;
+
   while((dent = readdir(dir)))
   {
     if(strcmp(dent->d_name, ".") != 0
         && strcmp(dent->d_name, "..") != 0 )
     {
+      added = false;
+
       fname = new char[strlen(path) + 1 + strlen(dent->d_name) + 1];
       sprintf(fname, "%s/%s", path, dent->d_name);
 
@@ -54,7 +60,6 @@ void getFiles(PrioQ &fnames,
         if(recursive && S_ISDIR(st.st_mode))
         {
           getFiles(fnames, fname, recursive, extensions, mode);
-          delete[] fname;
         }
         else if(S_ISREG(st.st_mode))
         {
@@ -65,23 +70,29 @@ void getFiles(PrioQ &fnames,
               i = 0;
               extension = strrchr(fname, '.');
               if(extension) {
-                while(extensions[i] != 0 && i < 100)
+                while(extensions[i] != 0 && i < 20)
                 {
                   if(strcmp(&extension[1], extensions[i]) == 0)
                   {
                     fnames.push(fname);
+                    added = true;
+                    break;
                   }
                   ++i;
                 }
               }
-            } else {
+            }
+            else
+            {
               fnames.push(fname);
+              added = true;
             }
           }
-        } else {
-          delete[] fname;
         }
-      } else {
+      }
+
+      if(!added)
+      {
         delete[] fname;
       }
     }
@@ -103,12 +114,12 @@ void mkdir_r(const string &path, int mode)
                           path.c_str(),
                           "(Re)moving this file may help.");
     }
-    // path exists
-    // TODO: has it mode?
+    /// path exists
+    /// TODO: has it mode?
     return;
   }
 
-  uint pos = path.find_last_of('/');
+  unsigned int pos = path.find_last_of('/');
 
   if(pos != string::npos && pos != 0)
   {
@@ -120,14 +131,14 @@ void mkdir_r(const string &path, int mode)
 
   if(mkdir(path.c_str(), mode) == -1)
   {
-    // EEXIST never happens, its caught above
+    /// EEXIST never happens, its caught above
     throw PlowException("mkdir_r", path.c_str());
   }
 }
 
 
 
-int copyfile(const string &src, const string &dst)
+int copyfile(string const &src, const string &dst)
 {
   int err = 0;
 
@@ -135,7 +146,7 @@ int copyfile(const string &src, const string &dst)
 
   if(stat(dst.c_str(), &st) == 0)
   {
-    // file exists
+    /// file exists
     return 1;
   }
 
@@ -161,21 +172,28 @@ int copyfile(const string &src, const string &dst)
     errno = err;
     throw PlowException("copyfile", dst.c_str());
   }
-  char c;
+
+  /// iso c++ forbids variable size array
+  char buffer[4096];
+  int buffSize = sizeof(buffer);
   errno = 0;
-  while(source.get(c))
+
+  do
   {
-    destination.put(c);
-    if(errno != 0)
-    {
-      err = errno;
-      source.close();
-      destination.close();
-      unlink(dst.c_str());
-      errno = err;
-      throw PlowException("copyfile", dst.c_str());
-    }
+    source.read(buffer, buffSize);
+    destination.write(buffer, source.gcount());
+  } while(source.good());
+
+  if(source.bad() || !source.eof())
+  {
+    err = errno;
+    source.close();
+    destination.close();
+    unlink(dst.c_str());
+    errno = err;
+    throw PlowException("copyfile", src.c_str());
   }
+
   err = errno;
 
   source.close();
@@ -193,39 +211,18 @@ int copyfile(const string &src, const string &dst)
 
 
 
-uint utf8strlen(const char *utf8str)
+unsigned int utf8strlen(const char * const utf8str)
 {
-  uint len = strlen(utf8str);
-  uint rl  = 0;
-  uint i   = 0;
+  unsigned int len = strlen(utf8str);
+  unsigned int rl  = 0;
+  unsigned int i   = 0;
 
   while(i < len)
   {
-    ++rl;
-
-    if(utf8str[i] > 0)
+    if((utf8str[i++] & 0xc0) != 0x80)
     {
-      i += 1;
-    }
-    else if(utf8str[i] < -32)
-    {
-      i += 2;
-    }
-    else if(utf8str[i] < -16)
-    {
-      i += 3;
-    }
-    else if(utf8str[i] <  -8)
-    {
-      i += 4;
-    }
-    else if(utf8str[i] <  -4)
-    {
-      i += 5;
-    }
-    else if(utf8str[i] <  -2)
-    {
-      i += 6;
+      /// byte don't starts with 10b so it is not a following byte
+      ++rl;
     }
   }
 
@@ -236,10 +233,10 @@ uint utf8strlen(const char *utf8str)
 
 void replaceChars(const string &chars, string &in, char by)
 {
-  char out[in.length() + 1];
-  bool replaced = false;
-  uint i        = 0;
-  uint j        = 0;
+  char         *out     = new char[in.length() + 1];
+  bool         replaced = false;
+  unsigned int i        = 0;
+  unsigned int j        = 0;
 
   while(in.c_str()[i] != 0)
   {
@@ -259,4 +256,5 @@ void replaceChars(const string &chars, string &in, char by)
   out[j] = 0;
 
   in = out;
+  delete[] out;
 }

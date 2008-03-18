@@ -40,7 +40,7 @@ settings under [general] section. If you use Ogg/Vorbis files it is
 recommanded to change also the field names under [vorbis] section.
 
 Run:
-  $ plow -I /path/to/music
+  $ plow --insert /path/to/music
 to fill the database. This may take a long time.
 
 Thats it now you can try:
@@ -58,4 +58,3 @@ or take a look at the man page:
 or
   $ man plow
 if you already installed plow.
-

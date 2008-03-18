@@ -4,26 +4,45 @@
 #include <string>
 #include <cerrno>
 
-#include "types.h"
-
 using namespace std;
 
-PlowException::PlowException(const char *where,
-                             const char *what,
-                             const char *solution)
+PlowException::PlowException(const char * const function,
+                             const char * const error,
+                             const char * const solution)
 {
-  mi_err = errno;
-  if(errno != 0)
+  mErrno = errno;
+
+  errno = 0;
+
+  mFunction = function;
+
+  if(error != 0)
   {
-    errno = 0;
+    mError << error;
   }
-  mcs_where = where;
-  mcs_what  = what;
 
   if(solution != 0)
   {
-    mcs_solution = solution;
+    mSolution = solution;
   }
+}
+
+
+
+PlowException::PlowException(PlowException const &e)
+{
+  mErrno    = e.err();
+  mFunction = e.function();
+  mSolution = e.solution();
+
+  mError << e.errorStr();
+}
+
+
+
+std::ostringstream &PlowException::error()
+{
+  return mError;
 }
 
 
@@ -32,7 +51,11 @@ void PlowException::print() const
 {
   cout << endl;
   cerr << message() << endl;
-  cout << endl;
+
+  if(!mSolution.empty())
+  {
+    cout << "\n" << mSolution << endl;
+  }
 }
 
 
@@ -41,20 +64,14 @@ string PlowException::message() const
 {
   string out("Error in ");
 
-  out.append(mcs_where);
-  out.append(":\n  >");
-  out.append(mcs_what);
+  out.append(mFunction);
+  out.append(": ");
+  out.append(mError.str());
 
-  if(mi_err != 0)
+  if(mErrno != 0)
   {
-    out.append(":\n  >");
-    out.append(strerror(mi_err));
-  }
-
-  if(!mcs_solution.empty())
-  {
-    out.append("\n  >");
-    out.append(mcs_solution);
+    out.append(": ");
+    out.append(strerror(mErrno));
   }
 
   return out;
@@ -62,14 +79,28 @@ string PlowException::message() const
 
 
 
-int PlowException::error() const
+int PlowException::err() const
 {
-  return mi_err;
+  return mErrno;
 }
 
 
 
-PlowException::~PlowException()
+string const &PlowException::function() const
 {
-  // empty
+  return mFunction;
+}
+
+
+
+string PlowException::errorStr() const
+{
+  return mError.str();
+}
+
+
+
+string const &PlowException::solution() const
+{
+  return mSolution;
 }

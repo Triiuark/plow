@@ -20,9 +20,9 @@
 #ifndef PLOW_HELPER_H
 #define PLOW_HELPER_H
 
-#include "types.h"
+#include <iostream>
 
-using namespace std;
+#include "types.h"
 
 /**
  * puts every regular file with access mode @a mode in @a path into
@@ -59,7 +59,7 @@ void getFiles(PrioQ &fnames,
  *
  * @throws PlowException on any error
  */
-void mkdir_r(const string &path, int mode = 0755);
+void mkdir_r(std::string const &path, int mode = 0700);
 
 
 
@@ -73,7 +73,7 @@ void mkdir_r(const string &path, int mode = 0755);
  *
  * @return 0 on success, 1 if @a dst exists
  */
-int copyfile(const string &src, const string &dst);
+int copyfile(const std::string &src, const std::string &dst);
 
 
 
@@ -85,7 +85,7 @@ int copyfile(const string &src, const string &dst);
  *
  * @return length in characters of @a utf8str
  */
-uint utf8strlen(const char *utf8str);
+unsigned int utf8strlen(const char * const utf8str);
 
 
 
@@ -98,6 +98,6 @@ uint utf8strlen(const char *utf8str);
  * @param in the string where characters should be replaced
  * @param by charcter to split on
  */
-void replaceChars(const string &chars, string &in, char by='_');
+void replaceChars(std::string const &chars, std::string &in, char by='_');
 
 #endif

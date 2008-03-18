@@ -32,107 +32,130 @@ class AbstractReader
     /**
      * creates a new AbstractReader
      *
-     * @param fname  file to read tag from
-     * @param fields if given the values of mCSM_fields
-     *               are overwritten by the values of @a fields
+     * @param fname file to read tag from
      */
-    AbstractReader(const char *fname, CStrMap *fields = 0);
+    AbstractReader(const char * const fname);
 
+    /**
+     * @returns the name of the config file section (e.g vorbis or id3v2)
+     */
+    virtual const char * const sectionName() const = 0;
 
+    /**
+     * This function is used to do the mapping of config file keys
+     * to meta data keys (e.g. id = TXXX/ID in config file overwrites
+     * the default in ID3v2Reader where it is UFID/)
+     *
+     * @param mapping a string map which contains the keys
+     *                of the config file
+     */
+    virtual void setMapping(StrMap &mapping) const = 0;
+
+    /**
+     * @returns true if the mapping was done for an object of a derived
+     *          class (so that it has only to be done
+     *          once for all instances)
+     */
+    virtual bool mappingDone() const = 0;
+
+    /**
+     * This function should do all the meta data reading. Call it after
+     * the mapping stuff.
+     */
+    virtual void read() = 0;
 
     /**
      * @returns a unique id of the file, an empty string if not found
      */
-    virtual const char *getId() const;
+    const char * const id();
 
     /**
      * @returns title, an empty string if not found
      */
-    virtual const char *getTitle() const;
+    const char * const title();
 
     /**
      * @returns artist, an empty string if not found
      */
-    virtual const char *getArtist() const;
+    const char * const artist();
 
     /**
      * @returns album, an empty string if not found
      */
-    virtual const char *getAlbum() const;
+    const char * const album();
 
     /**
      * @returns part number, an empty string if not found
      */
-    virtual const char *getPart() const;
+    const char * const part();
 
     /**
      * @returns total number of parts, an empty string if not found
      */
-    virtual const char *getParts() const;
+    const char * const parts();
 
     /**
      * @returns track number, an empty string if not found
      */
-    virtual const char *getTrack() const;
+    const char * const track();
 
     /**
      * @returns total number of tracks, an empty string if not found
      */
-    virtual const char *getTracks() const;
+    const char * const tracks();
 
     /**
      * @returns genre, an empty string if not found
      */
-    virtual const char *getGenre() const;
+    const char * const genre();
 
     /**
      * @returns rating, an empty string if not found
      */
-    virtual const char *getRating() const;
+    const char * const rating();
 
     /**
      * @returns mood, an empty string if not found
      */
-    virtual const char *getMood() const;
+    const char * const mood();
 
     /**
      * @returns situation, an empty string if not found
      */
-    virtual const char *getSituation() const;
+    const char * const situation();
 
     /**
      * @returns tempo, an empty string if not found
      */
-    virtual const char *getTempo() const;
+    const char * const tempo();
 
     /**
      * @returns language, an empty string if not found
      */
-    virtual const char *getLanguage() const;
+    const char * const language();
 
     /**
      * @returns date, an empty string if not found
      */
-    virtual const char *getDate() const;
+    const char * const date();
 
     /**
      * @returns comment, an empty string if not found
      */
-    virtual const char *getComment() const;
+    const char * const comment();
 
     /**
      * @returns length of song in seconds
      */
-    virtual const char *getLength() const;
-
-
+    const char * const length();
 
     /**
-     * @param field name of a field (e.g. "artist")
-     *
-     * @returns the value for @a field, an empty string if not found
+     * @returns file name (if a ...Reader class doesn't reads meta data
+     *                     from file which should be added to database,
+     *                     e.g. if data is read from another db)
      */
-    virtual const char *get(const char * field) const;
+    const char * const file();
+
 
 
 
@@ -149,10 +172,8 @@ class AbstractReader
     virtual ~AbstractReader();
 
   protected:
-    int        mi_err;
-    const char *mcs_fname;
-    StrMap     *mSM_values;
-    CStrMap    mCSM_fields;
+    int    mErr;
+    StrMap mValues;
 };
 
 #endif

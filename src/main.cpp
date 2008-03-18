@@ -23,1337 +23,367 @@
 #endif
 
 #include <iostream>
-#include <iomanip>
-#include <fstream>
 #include <sstream>
-
 #include <string>
-#include <vector>
-#include <queue>
 
-#include <cstring>
-#include <cerrno>
-
-#include <sqlite3.h>
-
-#include <sys/stat.h>
+extern "C"
+{
+#include <sqlite3.h> /// for quoting with sqlite3_mprintf()
+}
 
 #include "constants.h"
-#include "types.h"
-#include "helper.h"
 
 #include "PlowException.h"
-#include "IniParser.h"
-#include "Sqlite3.h"
-#include "Sqlite3Result.h"
-#include "StringParser.h"
-#include "TagReader.h"
-
-#include <iconv.h>
+#include "Plow.h"
 
 using namespace std;
-
-IniParser *gIniParser = 0;
-
-string gsPlowHome;
-string gsSelect;
-string gsUpdate;
-string gsSet;
-string gsDatabase;
-string gsMusicDirectory;
-string gsPlaylist;
-
-
-char gcPlayerNumber  = '0';   // player number
-                              // -0 | -1 | ... | -9
-bool gbShowquery     = false; // print out the query
-                              // -Q
-bool gbPlay          = true;  // start playing after all
-                              // --noplay = do not play
-bool gbAddToPlaylist = false; // add the query to current playlist
-                              // --add
-bool gbShuffle       = false; // shuffle playlist
-                              // -S
-
-
-/**
- * adds files in path into database dbPath, and strips musicPath from
- * file names
- */
-void add2Db(char *path, const char *dbPath, const char *musicPath);
-
-
 
 /**
  * prints out a help message
  */
-void printusage()
+void printUsage()
 {
-  cout << USAGE << endl;
-  cout << endl;
-  cout << HELP << endl;
-} // printusage()
+  cout << USAGE << "\n\n" << HELP << endl;
+}
 
 
 
 /**
- *
- * executes a sql query
- * @param query a sql statement
- *
- * @returns a new Sqlite3Result object for @a query
+ * prints out version
  */
-Sqlite3Result *exe(const char *query)
+void printVersion()
 {
-  Sqlite3 sql(gsDatabase.c_str());
-  Sqlite3Result *rs = sql.exe(query);
-
-  return rs;
-} // exe()
-
+  cout << PACKAGE << " " << VERSION << endl;
+}
 
 
 
 /**
- * create missing files and gIniParser
+ *  for parsing of --set option
  */
-void init()
+int parseUpdate(int actual, int argc, char *argv[], Plow &plow)
 {
-  if(!gIniParser) {
-    struct stat st;
-    if(stat(gsPlowHome.c_str(), &st) == -1) {
-      if(errno == ENOENT) {
-        mkdir_r(gsPlowHome);
-        cout << "> created directory:   " << gsPlowHome << "/" << endl;
-      }
-    }
-
-    string inifile = gsPlowHome + "/plow.conf";
-
-    if(stat(gsDatabase.c_str(), &st) == -1) {
-      if(errno == ENOENT) {
-        exe(DATABASE);
-        cout << "> created database:    " << gsDatabase << endl;
-      }
-    }
-
-    if(stat(inifile.c_str(), &st) == -1) {
-      if(errno == ENOENT) {
-        ofstream fout(inifile.c_str());
-        fout << INI_FILE;
-        fout.close();
-
-        cout << "> created config file: " << inifile << endl;
-        cout << endl;
-        cout << "You have to edit " << inifile << " now." << endl;
-        exit(0);
-      }
-    }
-
-    gIniParser       = new IniParser(inifile.c_str());
-    gsMusicDirectory = gIniParser->get("[general]path");
-
-    if(!gIniParser->get("[general]playlist").empty()) {
-      gsPlaylist = gIniParser->get("[general]playlist");
-    }
-
-  }
-} // init()
-
-
-
-/**
- * get the required fields for the filename
- */
-string infoString(Sqlite3Result &rs,
-                  uint row,
-                  const vector<string *> &tokens,
-                  bool removeslash = false)
-{
-  const string  forbidden = "\\\n\r\t\" '$@*{}[]()/:;&?";
-
-  string        out;
-  string        tmp;
-  string        tmp2;
-
-  uint strsize = 0;
-  uint pos;
-
-
-  bool isField   = true;
-  bool lastEmpty = false;
-
-  for(uint i = 0; i < tokens.size(); i++) {
-    tmp = "";
-    isField = true;
-
-    strsize = tokens[i]->size();
-
-    //
-    // first some 'special' fields
-    //
-    if(tokens[i]->c_str()[0] == '['
-        && tokens[i]->c_str()[strsize - 1] == ']') {
-      if(*tokens[i] == "[track0]") {
-        if(strlen(rs.get(row, "track")) < 2) {
-          tmp += "0";
-        }
-        tmp += rs.get(row, "track");
-      } else if(*tokens[i] == "[tracks0]") {
-        if(strlen(rs.get(row, "tracks")) < 2) {
-          tmp += "0";
-        }
-        tmp += rs.get(row, "tracks");
-      } else if(*tokens[i] == "[part0]") {
-        if(strlen(rs.get(row, "part")) < 2) {
-          tmp += "0";
-        }
-        tmp += rs.get(row, "part");
-      } else if(*tokens[i] == "[parts0]") {
-        if(strlen(rs.get(row, "parts")) < 2) {
-          tmp += "0";
-        }
-        tmp += rs.get(row, "parts");
-      } else if(*tokens[i] == "[extension]") {
-        tmp2 = rs.get(row, "file");
-        pos = tmp2.rfind('.');
-        if(pos != string::npos) {
-          tmp += tmp2.substr(pos);
-        }
-      } else if(*tokens[i] == "[artistOrAlbum]") {
-        if(strcmp(rs.get(row, "album_id_artist"), "1") != 0) {
-          tmp += rs.get(row, "artist");
-        } else {
-          tmp += rs.get(row, "album");
-        }
-      } else if(*tokens[i] == "[albumOrArtist]") {
-        if(strcmp(rs.get(row, "album_id_artist"), "1") != 0) {
-          tmp += rs.get(row, "album");
-        } else {
-          tmp += rs.get(row, "artist");
-        }
-      } else if(*tokens[i] == "[albumOrEmpty]") {
-        if(strcmp(rs.get(row, "album_id_artist"), "1") != 0) {
-          tmp += rs.get(row, "album");
-        } else {
-          lastEmpty = true;
-        }
-      } else if(*tokens[i] == "[emptyOrAlbum]") {
-        if(strcmp(rs.get(row, "album_id_artist"), "1") == 0) {
-          tmp += rs.get(row, "album");
-        } else {
-          lastEmpty = true;
-        }
-      } else if(*tokens[i] == "[artistOrEmpty]") {
-        if(strcmp(rs.get(row, "album_id_artist"), "1") != 0) {
-          tmp += rs.get(row, "artist");
-        } else {
-          lastEmpty = true;
-        }
-      } else if(*tokens[i] == "[emptyOrArtist]") {
-        if(strcmp(rs.get(row, "album_id_artist"), "1") == 0) {
-          tmp += rs.get(row, "artist");
-        } else {
-          lastEmpty = true;
-        }
-      }
-
-      //
-      // now fields from database
-      //
-      else {
-        tmp2 = &(tokens[i]->c_str()[1]);
-        tmp2.erase(tmp2.size() - 1, 1);
-        if(rs.get(row, tmp2.c_str()) != NULL) {
-          tmp += rs.get(row, tmp2.c_str());
-        } else {
-          isField = false;
-          tmp += *tokens[i];
-        }
-      }
-    } else if (!lastEmpty) {
-      isField = false;
-      tmp += *tokens[i];
-    } else if (lastEmpty) {
-      lastEmpty = false;
-    }
-
-    if(removeslash && isField) {
-      // create a legal file name
-      replaceChars(forbidden, tmp);
-      out.append(tmp);
-    } else {
-      out += tmp;
-    }
-  }
-
-  return out;
-} // infoString()
-
-
-
-/**
- * copies files in playlist to the portable device
- */
-void copy2Portable()
-{
-  vector<string> *files = new vector<string>;
-
-  string portable = gIniParser->get("[general]portable");
-
-  if(portable.empty()) {
-    delete files;
-    errno = 0;
-    throw PlowException("copy2Portable",
-                        "no portable device set in config file");
-  }
-
-  cout << "Copying " << flush;
-
-  //
-  // read playlist and add files to files
-  //
-
-  ifstream inputStream;
-  inputStream.open(gsPlaylist.c_str(), ios::in);
-  if(!inputStream) {
-    delete files;
-    throw PlowException("copy2Portable", gsPlaylist.c_str());
-  }
-
-  char *buf = new char[1024];
-
-  int numFiles = 0;
-  while(inputStream.getline(buf, 1024)) {
-    if(buf[0] != '#') {
-      numFiles++;
-      files->push_back(buf);
-    }
-  }
-  inputStream.close();
-  delete[] buf;
-
-
-  cout << numFiles <<  " files to " << portable << " ..." << endl;
-
-  string dst;
-
-  //
-  // find out how to rename files and copy them
-  //
-
-  string portableName = gIniParser->get("[general]portable_name");
-
-  string query("SELECT *\n");
-  query += FROM;
-  query += WHERE;
-  query += " AND file='";
-
-  string q;
-
-  Sqlite3Result *rs;
-
-  for(uint i = 0, j = files->size(); i < files->size(); i++, j--) {
-    dst = portable + "/";
-
-    if(!portableName.empty()) {
-      q  = query + files->at(i).substr(gsMusicDirectory.size()) + "';";
-      rs = exe(q.c_str());
-
-      if(rs->cols() == 0) {
-        string *tmp = new string("file not found in database: ");
-        tmp->append(files->at(i));
-        errno = 0;
-        PlowException *e = new PlowException("copy2Portable",
-                                             tmp->c_str());
-        e->print();
-        delete rs;
-        delete tmp;
-        delete e;
-        continue;
-      }
-
-      dst += infoString(*rs,
-                        0,
-                        StringParser(portableName.c_str()).getTokens(),
-                        true);
-      delete rs;
-    } else {
-      // fallback: use original filename
-      dst += files->at(i).substr(gsMusicDirectory.size());
-    }
-
-    try {
-      if(copyfile(files->at(i), dst) == 1) {
-        // file already exists
-        cout << "*";
-      }
-      cout << j << " " << flush;
-    } catch (PlowException &e) {
-      e.print();
-      if(e.error() == ENOSPC || e.error() == ENOTDIR) {
-        // no space left on device or can't create dir -> break here
-        break;
-      }
-    }
-  }
-
-  delete files;
-
-  cout << "\n... done" << endl;
-
-} //copy2Portable()
-
-
-
-/**
- * executes query and prints out the result as a nice table
- *
- * @param query a sql statement
- */
-void printResult(const char *query)
-{
-  Sqlite3Result *rs = exe(query);
-
-  if(rs->cols()) {
-    cout << "| ";
-    int len = 0;
-    for(int i = 0; i < rs->cols(); ++i) {
-      len = strlen(rs->getHead(i)) - utf8strlen(rs->getHead(i));
-      cout << setw(rs->getWidth(i) + len);
-      cout << setiosflags(ios::left);
-      cout << rs->getHead(i);
-      cout << " | ";
-    }
-    cout << endl;
-    cout << endl;
-
-    for(int i = 0; i < rs->rows(); i++) {
-      cout << "| ";
-      for(int j = 0; j < rs->cols(); j++) {
-        len = strlen(rs->get(i, j)) - utf8strlen(rs->get(i, j));
-        cout << setw(rs->getWidth(j) + len);
-        cout << setiosflags(ios::left) << rs->get(i, j);
-        cout << " | ";
-      }
-      cout << endl;
-    }
-  } else {
-    cout << "Successfully executed satement. Empty result." << endl;
-  }
-  delete rs;
-} // printResult()
-
-
-
-/**
- * creates a playlist for the given query
- *
- * @param query a sql statement
-*/
-void createList(const char *query)
-{
-  Sqlite3Result *rs = exe(query);
-
-  if(rs->rows() == 0) {
-    gbPlay = false;
-    cout << "Empty result. Sorry." << endl;
-    delete rs;
-    return;
-  } else if(rs->rows() == 1) {
-    cout << "1 file found";
-  } else {
-    cout << rs->rows() << " files found";
-  }
-
-  _Ios_Openmode open_mode=ios::out;
-  if(gbAddToPlaylist) {
-    open_mode=ios::app;
-  }
-  ofstream m3u(gsPlaylist.c_str(), open_mode);
-  if(!m3u) {
-    throw PlowException("createList", "Can't open playlist file.");
-  }
-
-  if(!gbAddToPlaylist) {
-    m3u << "#EXTM3U" << endl;
-  }
-
-  uint playtime = 0;
-  uint total_playtime = 0;
-  StringParser sp(gIniParser->get("[general]extinf").c_str());
-  bool extinf = true;
-  if(gIniParser->get("[general]extinf").empty()) {
-    extinf = false;
-  }
-
-  for(int i = 0; i < rs->rows(); ++i) {
-    playtime = (uint)(atof(rs->get(i, "length")));
-    total_playtime += playtime;
-    if(extinf) {
-      m3u << "#EXTINF:" << infoString(*rs, i, sp.getTokens()) << endl;
-    }
-    m3u << rs->get(i, 0) << endl;
-  }
-  m3u.close();
-
-  uint hours = (total_playtime / 3600);
-  uint mins  = (total_playtime - (hours * 3600)) / 60;
-  uint secs  = (total_playtime - (hours * 3600)) - (mins * 60);
-  cout << " (" << hours << "h" << mins << "m" << secs << "s)." << endl;
-
-  delete rs;
-} // createList()
-
-
-
-/**
- * parses the command-line arguments for the set options
- * (creates gsUpdate)
- *
- * @param argc number of arguments
- * @param argv arguments
- * @param i    number of the argument to parse
- *
- * @throws PlowException on any error
- *
- * @return number of the next argument to parse
- */
-int parseSetOptions(int argc, char **argv, int i)
-{
-  map<char, string> fieldNames;
-
-  fieldNames['a'] = "artist";
-  fieldNames['r'] = "rating";
-  fieldNames['g'] = "genre";
-  fieldNames['l'] = "language";
-  fieldNames['m'] = "mood";
-  fieldNames['A'] = "album";
-  fieldNames['s'] = "situation";
-  fieldNames['t'] = "tempo";
+  char key;
+  const char *field;
 
   ostringstream errmsg;
 
-  string select;
-  string insert;
-  string in;
-
-  char       f      = 0;
-  char       *value = 0;
-  const char *id    = 0;
-
-  Sqlite3Result *result = 0;
-
-  while( i < argc && argv[i][0] != '-') {
-    f = argv[i][0];
-
-    if(fieldNames[f] == "") {
-      errmsg << "Missing option near '" << argv[i] << "'";
-      throw PlowException("parseSetOptions", errmsg.str().c_str(), USAGE);
-    }
-    if(argc < i + 2) {
-      errmsg << "Missing argument for option '" << f << "'";
-      throw PlowException("parseSetOptions", errmsg.str().c_str(), USAGE);
+  while(actual < argc
+        && argv[actual][0] != '-'
+        && argv[actual][0] != '+')
+  {
+    if(argv[actual][1] != 0)
+    {
+      errmsg << "wrong syntax near '" << argv[actual] << "'";
+      throw PlowException("paseUpdate", errmsg.str().c_str());
     }
 
-    value = sqlite3_mprintf("'%q'", argv[i+1]);
+    key   = argv[actual][0];
+    field = Plow::getField(key)->first;
 
-    select  = "SELECT * ";
-    select += "FROM tbl_";
-    select += fieldNames[f];
-    select += " WHERE ";
-    select += fieldNames[f];
-    select += "=";
-    select += value;
-    select += ";";
-
-
-    result = exe(select.c_str());
-
-    if(!result->rows()) {
-      delete result;
-      cout << "> There is no " << fieldNames[f];
-      cout << " '" << argv[i+1] << "'" << endl;
-      cout << "> Do you want to create it? y/[n] ";
-      cin >> in;
-      if(in[0] == 'y') {
-        insert  = "INSERT INTO tbl_";
-        insert += fieldNames[f];
-        insert += " (";
-        insert += fieldNames[f];
-        insert += ") VALUES (";
-        insert += value;
-        insert += ");";
-        result = exe(insert.c_str());
-        delete result;
-        result = exe(select.c_str());
-      } else {
-        cout << "> aborted ..." << endl;
-        return i+1;
-      }
-
+    if(field == 0)
+    {
+      errmsg << "unkown field '" << key << "'";
+      throw PlowException("parseUpdate", errmsg.str().c_str(), USAGE);
     }
 
-    id = result->get(0, 0);
+    if(argc < actual + 2) {
+      errmsg << "missing argument for field '" << key
+             << " (" << field << ")'";
+      throw PlowException("parseUpdate", errmsg.str().c_str(), USAGE);
+    }
 
-    gsUpdate += ", _id_";
-    gsUpdate += fieldNames[f];
-    gsUpdate += "=";
-    gsUpdate += id;
-
-    delete result;
-
-    i+=2;
+    ++actual;
+    plow.appendUpdate(key, argv[actual]);
+    ++actual;
   }
 
-  return i-1;
-} // parseSetOptions()
+  return actual - 1;
+}
 
 
 
 /**
- * parses the command-line arguments for filtering
- * (creates gsSelect)
- *
- * @param argc number of arguments
- * @param argv arguments
- * @param i    number of the argument to parse
- *
- * @throws PlowException on any error
- *
- * @return number of the next argument to parse
+ *  for parsing of filter
  */
-int parseFilter(int argc, char **argv, int i)
+int parseFilter(int actual, int argc, char **argv, Plow &plow)
 {
-  map<char, string> fieldNames;
+  char key = argv[actual][1];
 
-  fieldNames['T'] = "title";
-  fieldNames['a'] = "artist";
-  fieldNames['r'] = "rating";
-  fieldNames['g'] = "genre";
-  fieldNames['l'] = "language";
-  fieldNames['m'] = "mood";
-  fieldNames['A'] = "album";
-  fieldNames['s'] = "situation";
-  fieldNames['t'] = "tempo";
-
-  char f = argv[i][1];
+  const char *field = Plow::getField(key)->first;
 
   ostringstream errmsg;
 
-  if(fieldNames[f] == "") {
-    errmsg << "Missing option near '" << argv[i] << "'";
-    throw PlowException("parseFilter", errmsg.str().c_str(), USAGE);
-  }
-  if(argc < i + 2) {
-    errmsg << "Missing argument for option '" << f << "'";
+  if(field == 0)
+  {
+    errmsg << "unkown field '" << key << "'";
     throw PlowException("parseFilter", errmsg.str().c_str(), USAGE);
   }
 
-  char pre[9];
-  char post[7];
-
-  if(argv[i][2] == 0) {
-    sprintf(pre, " LIKE '%%");
-    sprintf(post, "%%' OR ");
-  } else if(argv[i][2] == 'e') {
-    sprintf(pre, "='");
-    sprintf(post, "' OR ");
-  } else if(argv[i][2] != 0) {
-    errmsg << "Wrong syntax near '";
-    errmsg << argv[i][1] << argv[i][2] << "'";
+  if(argc < actual + 2)
+  {
+    errmsg << "missing argument for field '" << key << "'";
     throw PlowException("parseFilter", errmsg.str().c_str(), USAGE);
   }
 
-  if(argv[i][0] == '+') {
-    gsSelect.append("\tAND NOT (");
-  } else {
-    gsSelect.append("\tAND (");
-  }
+  string pre;
+  string post = "' OR ";
 
-  int pos = ++i;
-  while(i < argc && (argv[i][0]!='-' && argv[i][0]!='+')){
-    gsSelect.append(fieldNames[f]);
-    gsSelect.append(pre);
-    gsSelect.append(argv[i]);
-    gsSelect.append(post);
-    ++i;
+  if(argv[actual][2] == 0)
+  {
+    pre  = " LIKE '%%";
+    post = "%%' OR ";
   }
-
-  if(pos == i) {
-    errmsg << "Missing argument for option '" << f << "'";
+  else if(argv[actual][2] == 'e' && argv[actual][3] == 0)
+  {
+    pre  = "='";
+  }
+  else if(argv[actual][2] == 'l' && argv[actual][3] == 0)
+  {
+    pre  = "<'";
+  }
+  else if(argv[actual][2] == 'g' && argv[actual][3] == 0)
+  {
+    pre  = ">'";
+  }
+  else
+  {
+    errmsg << "wrong syntax near '" << argv[actual] << "'";
     throw PlowException("parseFilter", errmsg.str().c_str(), USAGE);
   }
 
-  gsSelect.replace(gsSelect.length()-4, 4, ")\n");
 
-  return i-1;
-} // parseFilter()
+  string filter;
+
+  if(argv[actual][0] == '+')
+  {
+    filter.append("\tAND NOT (");
+  }
+  else
+  {
+    filter.append("\tAND (");
+  }
+
+  int pos = ++actual;
+  char *quoted;
+
+  while(actual < argc
+        && (argv[actual][0] != '-' && argv[actual][0] != '+'))
+  {
+    quoted = sqlite3_mprintf("%q", argv[actual]);
+
+    filter.append(field);
+    filter.append(pre);
+    filter.append(quoted);
+    filter.append(post);
+
+    sqlite3_free(quoted);
+
+    ++actual;
+  }
+
+  if(pos == actual)
+  {
+    errmsg << "Missing argument for option '" << key << "'";
+    throw PlowException("parseFilter", errmsg.str().c_str(), USAGE);
+  }
+
+  /// replace last " OR "
+  filter.replace(filter.length() - 4, 4, ")\n");
+
+  plow.appendFilter(filter);
+
+  return actual - 1;
+}
 
 
 
 /**
- * parses command-line arguments
- *
- * @param argc number of arguments
- * @param argv arguments
- *
- * @throws PlowException on any error
+ *  parses all options starting with '--'
  */
-void parseArgs(int argc, char** argv)
+int parseLongOption(int actual, int argc, char *argv[], Plow &plow)
 {
-  for(int i = 1; i < argc; i++) {
-    switch(argv[i][0]) {
-      case '-': // -?
-        switch(argv[i][1]) {
+  char *value = &argv[actual][2];
 
-          case 0: // -
-            throw PlowException("parseArgs",
-                      "Missing option after -",
-                      USAGE);
-          break;
+  if(strcmp(value, "v") == 0 || strcmp(value, "version") == 0)
+  {
+    printVersion();
 
-          case '-': // --
-            if(strcmp(argv[i], "--noplay") == 0) {
-              gbPlay = false;
-            } else if(strcmp(argv[i], "--add") == 0) {
-              gbAddToPlaylist = true;
-            } else if(strcmp(argv[i], "--help") == 0) {
-              printusage();
-              delete gIniParser;
-              exit(0);
-            } else if(strcmp(argv[i], "--version") == 0) {
-              cout << PACKAGE << " " << VERSION << endl;
-              delete gIniParser;
-              exit(0);
-            } else if (strcmp(argv[i], "--set") == 0) {
-              i = parseSetOptions(argc, argv, i + 1);
-            } else {
-              throw PlowException("parseArgs",
-                        "Wrong syntax near '--'",
-                        USAGE);
-            }
-          break;
+    exit(0);
+  }
 
-          case 'q': // -q
-            if(argv[i][2] != 0) {
-              throw PlowException("parseArgs",
-                        "Wrong syntax near '-q'",
-                        USAGE);
-            } else {
-              if(argv[i + 1] == 0) {
-                throw PlowException("parseArgs",
-                          "Missing sql statement for option '-q'",
+  else if(strcmp(value, "h") == 0 || strcmp(value, "help") == 0)
+  {
+    printUsage();
+
+    exit(0);
+  }
+
+  else if(strcmp(value, "q") == 0 || strcmp(value, "query") == 0)
+  {
+    if(argv[++actual] == 0)
+    {
+      throw PlowException("parseLongOption",
+                          "missing sql statement for option '--query'",
                           USAGE);
-              } else {
-                printResult(argv[i + 1]);
-                exit(0);
-              }
-            }
+    }
+
+    plow.setQuery(argv[actual++]);
+  }
+
+  else if(strcmp(value, "r") == 0 || strcmp(value, "random") == 0)
+  {
+    plow.setRandom(true);
+  }
+
+  else if(strcmp(value, "a") == 0 || strcmp(value, "add") == 0)
+  {
+    plow.setAppend(true);
+  }
+
+  else if(strcmp(value, "n") == 0 || strcmp(value, "noplay") == 0)
+  {
+    plow.setPlay(false);
+  }
+
+  else if(strcmp(value, "s") == 0 || strcmp(value, "show") == 0)
+  {
+    plow.setShowQuery(true);
+  }
+
+  else if(strcmp(value, "c") == 0 || strcmp(value, "copy") == 0)
+  {
+    plow.setCopy(true);
+  }
+
+  else if(value[1] == 0 && value[0] > 47 && value[0] < 58)
+  {
+    plow.setPlayer(value[0]);
+  }
+
+  else if(strcmp(value, "l") == 0 || strcmp(value, "list") == 0)
+  {
+    if(argv[++actual] != 0)
+    {
+      char *quotedValue = sqlite3_mprintf(argv[actual]);
+      char query[42 + 4 * strlen(quotedValue)];
+
+      sprintf(query, "SELECT id_%s, %s FROM tbl_%s ORDER BY %s;",
+              quotedValue, quotedValue, quotedValue, quotedValue);
+
+      plow.setQuery(query);
+
+      sqlite3_free(quotedValue);
+    }
+    else
+    {
+      throw PlowException("parseArguments",
+                          "missing argument for option '--print'",
+                          USAGE);
+    }
+  }
+
+  else if(strcmp(value, "S") == 0 || strcmp(value, "set") == 0)
+  {
+    actual = parseUpdate(++actual, argc, argv, plow);
+  }
+
+  else if(strcmp(value, "i") == 0 || strcmp(value, "insert") == 0)
+  {
+    if(actual + 1 < argc)
+    {
+      plow.insert(argv[++actual]);
+      ++actual;
+    }
+    else
+    {
+      throw PlowException("parseArgs",
+                          "missing argument for option '--insert'",
+                          USAGE);
+    }
+  }
+
+  else
+  {
+    ostringstream errmsg;
+    errmsg << "unkown option '" << value << "'";
+    throw PlowException("parseLongOption", errmsg.str().c_str(), USAGE);
+  }
+
+  return actual;
+}
+
+
+
+/**
+ * parses arguments and calls the appropriate parser function
+ */
+void parseArguments(int argc, char *argv[], Plow &plow)
+{
+  for(int i = 1; i < argc; ++i)
+  {
+    switch(argv[i][0])
+    {
+      case '-':
+        switch(argv[i][1])
+        {
+          case '-':
+            i = parseLongOption(i, argc, argv, plow);
           break;
 
-          case 'S': // -S
-            gbShuffle = true;
+          default:
+            i = parseFilter(i, argc, argv, plow);
           break;
-
-          case 'Q': // -Q
-            gbShowquery = true;
-          break;
-
-          case 'C': // -C
-            init();
-            copy2Portable();
-            delete gIniParser;
-            exit(0);
-          break;
-
-          case 'I': // -I
-            if(i + 1 < argc) {
-              init();
-              add2Db(argv[i+1],
-                     gsDatabase.c_str(),
-                     gsMusicDirectory.c_str());
-              delete gIniParser;
-              exit(0);
-            } else {
-              throw PlowException("parseArgs",
-                                  "Missing argument for option '-I'",
-                                  USAGE);
-            }
-
-          break;
-
-          case 'L': // -L
-            if(argv[i + 1]) {
-              char query[42 + 4 * strlen(argv[i + 1])];
-              sprintf(query,
-                      "SELECT \"id_%s\", \"%s\"\
-                          FROM \"tbl_%s\" ORDER BY \"%s\";",
-                      argv[i + 1],
-                      argv[i + 1],
-                      argv[i + 1],
-                      argv[i + 1]);
-              printResult(query);
-              delete gIniParser;
-              exit(0);
-            } else {
-              throw PlowException("parseArgs",
-                                  "Missing argument for option '-L'",
-                                  USAGE);
-            }
-          break;
-
-          // select player
-          case '0': case '1': case '2': case '3': case '4':
-          case '5': case '6': case '7': case '8': case '9':
-            gcPlayerNumber = argv[i][1];
-          break;
-
-          default: // -?
-            i = parseFilter(argc, argv, i);
-          break;
-        } // switch(argv[i][1])
-      break; // case '-'
-
-      case '+': // +?
-        i = parseFilter(argc, argv, i);
-      break;
-
-      // parse abbrevations set in inifile
-      // and call this function again
-      case '.':  // .?
-        if(argv[i][1] != 0) {
-          init();
-          char buf[strlen(argv[i]) + 6];
-          sprintf(buf, "[abbr]%s", &argv[i][1]);
-
-          // just a dummy - parseArgs ignores first one
-          string abbr = "ARGV[0]_IGNORED ";
-
-          abbr.append(gIniParser->get(buf));
-
-          StringParser abbrP(abbr.c_str());
-          parseArgs(abbrP.getSize(), abbrP.getArgv());
-        } else {
-          throw PlowException("parseArgs",
-                              "Missing abbrevation name",
-                              USAGE);
         }
       break;
 
-      default: // ?
-        throw PlowException("parseArgs","Wrong syntax", USAGE);
+      case '+':
+        i = parseFilter(i, argc, argv, plow);
       break;
-    } // switch(argv[i][0])
-  } // for(int i = 0; i < argc; i++)
-} // parseArgs()
+
+      default:
+        ostringstream errmsg;
+        errmsg << "wrong syntax near '" << argv[i] << "'";
+        throw PlowException("parseArguments", errmsg.str().c_str(), USAGE);
+    }
+  }
+}
 
 
 
 /**
  * hmm
  */
-int main(int argc, char** argv)
+int main(int argc, char *argv[])
 {
-    bool forkplayer = true;  // wether or not to fork player
+  Plow plow;
 
-    ostringstream errmsg;
+  try
+  {
+    parseArguments(argc, argv, plow);
 
-    gsPlowHome  = getenv("HOME");
-    gsPlowHome += "/.plow";
+    plow.run();
+  }
 
-    gsDatabase = gsPlowHome + "/plow.sqlite";
-    gsPlaylist = gsPlowHome + "/plow.m3u";
-
-    string order("ORDER BY\n\talbum ASC, part ASC, track ASC");
-
-  try {
-    parseArgs(argc, argv);
-
-    init();
-
-    if(gbShuffle) {
-      order = "ORDER BY\n\tRANDOM();";
-    } else if(!gIniParser->get("[general]order").empty()) {
-      order  = "ORDER BY\n\t";
-      order += gIniParser->get("[general]order");
-      order += ";";
-    }
-
-    char select[strlen(SELECT) + gsMusicDirectory.size() + 1];
-    sprintf(select, SELECT, gsMusicDirectory.c_str());
-
-    char buffer[strlen(select) + strlen(FROM) + strlen(WHERE) +\
-                strlen(gsSelect.c_str()) + strlen(order.c_str()) + 1];
-
-    sprintf(buffer, "%s%s%s%s%s", select, FROM, WHERE,
-            gsSelect.c_str(), order.c_str());
-
-    if(!gsUpdate.empty()) {
-      string in;
-      string update("UPDATE tbl_music SET ");
-      update += &(gsUpdate.c_str()[2]);
-      update += " WHERE id_music IN (\n  SELECT\n\t id_music\n  ";
-      update += FROM;
-      update += "  ";
-      update += WHERE;
-      update += gsSelect;
-      update += ");";
-      Sqlite3Result *rs = exe(buffer);
-      cout << "> Do you really want to update " << rs->rows();
-      cout << " rows? y/[n] ";
-      cin >> in;
-      if(in[0] == 'y')
-      {
-        delete rs;
-        rs = exe(update.c_str());
-      } else {
-        cout << "> aborted ..." << endl;
-      }
-      delete rs;
-      if(gbShowquery) {
-        cout << update << endl;
-      }
-      delete gIniParser;
-      exit(0);
-    }
-
-
-    if(gbShowquery) {
-      cout << buffer << "\n" << endl;
-    }
-
-    createList(buffer);
-
-    ostringstream player;
-    if(gbPlay) {
-      string inivalue = "[general]player";
-      inivalue.append(1, gcPlayerNumber);
-      player << gIniParser->get(inivalue.c_str());
-      if(player.str().empty()) {
-        errmsg << "No player with number " << gcPlayerNumber;
-        errmsg << " set in inifile. Using player 0.";
-        PlowException *e = new PlowException("main", errmsg.str().c_str());
-        e->print();
-        delete e;
-        inivalue = "[general]player0";
-        player << gIniParser->get(inivalue.c_str());
-        gcPlayerNumber = 0;
-      }
-      inivalue = "[general]playernofork";
-      if(gIniParser->get(inivalue.c_str()).find_first_of(gcPlayerNumber) !=
-          string::npos) {
-        forkplayer = false;
-      }
-      delete gIniParser;
-      player << " \"" << gsPlaylist << "\"";
-
-      StringParser sp(player.str().c_str());
-
-      char **playerArgs = sp.getArgv();
-
-      int child_pid = 0;
-
-      if(forkplayer) {
-        child_pid = fork();
-      }
-
-      switch(child_pid) {
-        case 0: /* child */
-          execvp(playerArgs[0], playerArgs);
-          errmsg << "Can't execute player (" << playerArgs[0] << ")";
-          throw PlowException("main", errmsg.str().c_str());
-        case -1: /* fork error */
-          throw PlowException("main", "Can't fork() process");
-      }
-    } else {
-      delete gIniParser;
-    }
-  } catch(PlowException &e) {
+  catch(PlowException &e)
+  {
     e.print();
     return 1;
-  } catch (string &str) {
+  }
+
+  catch(string &str)
+  {
     cerr << "Exception: " << str << endl;
     cout << endl;
     return 1;
-  } catch (...) {
+  }
+
+  catch(...)
+  {
     cerr << "Unhandled exception" << endl;
     cout << endl;
     return 1;
   }
+
   return 0;
-} // main()
-
-
-
-/**
- *
- */
-CStrMap *vorbisFields()
-{
-  CStrMap *fields = new CStrMap;
-
-  (*fields)["id"       ] = gIniParser->get("[vorbis]id"       ).c_str();
-  (*fields)["title"    ] = gIniParser->get("[vorbis]title"    ).c_str();
-  (*fields)["artist"   ] = gIniParser->get("[vorbis]artist"   ).c_str();
-  (*fields)["album"    ] = gIniParser->get("[vorbis]album"    ).c_str();
-  (*fields)["part"     ] = gIniParser->get("[vorbis]part"     ).c_str();
-  (*fields)["parts"    ] = gIniParser->get("[vorbis]parts"    ).c_str();
-  (*fields)["track"    ] = gIniParser->get("[vorbis]track"    ).c_str();
-  (*fields)["tracks"   ] = gIniParser->get("[vorbis]tracks"   ).c_str();
-  (*fields)["genre"    ] = gIniParser->get("[vorbis]genre"    ).c_str();
-  (*fields)["rating"   ] = gIniParser->get("[vorbis]rating"   ).c_str();
-  (*fields)["mood"     ] = gIniParser->get("[vorbis]mood"     ).c_str();
-  (*fields)["situation"] = gIniParser->get("[vorbis]situation").c_str();
-  (*fields)["tempo"    ] = gIniParser->get("[vorbis]tempo"    ).c_str();
-  (*fields)["language" ] = gIniParser->get("[vorbis]language" ).c_str();
-  (*fields)["date"     ] = gIniParser->get("[vorbis]date"     ).c_str();
-  (*fields)["comment"  ] = gIniParser->get("[vorbis]comment"  ).c_str();
-
-  return fields;
-} // vorbisFields()
-
-
-
-/**
- *
- */
-CStrMap *id3Fields()
-{
-  CStrMap *fields = new CStrMap;
-
-  (*fields)["id"       ] = gIniParser->get("[id3v2]id"       ).c_str();
-  (*fields)["rating"   ] = gIniParser->get("[id3v2]rating"   ).c_str();
-  (*fields)["mood"     ] = gIniParser->get("[id3v2]mood"     ).c_str();
-  (*fields)["situation"] = gIniParser->get("[id3v2]situation").c_str();
-  (*fields)["tempo"    ] = gIniParser->get("[id3v2]tempo"    ).c_str();
-  (*fields)["language" ] = gIniParser->get("[id3v2]language" ).c_str();
-
-  return fields;
-} // id3Fields()
-
-
-
-/**
- * see above
- */
-void add2Db(char *path, const char *dbPath, const char *musicPath)
-{
-  map<int, CStrMap *> fieldNames;
-
-  fieldNames[TagReader::VORBIS] = vorbisFields();
-  fieldNames[TagReader::ID3V2]  = id3Fields();
-
-  Sqlite3Result *sr, *sr2;
-  string query, query2, query3;
-
-  vector<string> fields;
-
-  fields.push_back("artist");
-  fields.push_back("album");
-  fields.push_back("genre");
-  fields.push_back("rating");
-  fields.push_back("mood");
-  fields.push_back("situation");
-  fields.push_back("tempo");
-  fields.push_back("language");
-
-  const char *format = "%q";
-  char *result;
-
-  TagReader *tag;
-  PrioQ *fnames = new PrioQ;
-
-  ostringstream errmsg;
-  string unsupportedFiles;
-
-  StringParser *sp = new StringParser(gIniParser->get(
-                              "[general]extensions").c_str());
-  char **extensions  = sp->getArgv();
-  getFiles(*fnames, path, true, extensions);
-  delete sp;
-
-  cout << "> " << fnames->size() << " files found." << endl;
-  if(fnames->size() == 0) {
-    delete fnames;
-    return;
-  }
-  query.reserve(fnames->size() * 1024);
-  Sqlite3 sql(dbPath);
-
-
-  // remove old stuff from tbl_tmp
-  sr = sql.exe("DELETE FROM tbl_tmp; VACUUM;");
-  delete sr;
-
-  //
-  // read tags from files and insert it into tbl_tmp
-  //
-
-  cout << "> read infos from files ... " << endl;
-
-  query = "BEGIN TRANSACTION;";
-  int removepos = strlen(musicPath);
-  while(!fnames->empty()) {
-    cout << "." << flush;
-    tag = new TagReader(fnames->top(), fieldNames);
-
-    if(tag->fileType() != TagReader::UNKNOWN) {
-
-      query2 = fnames->top();
-      query2 = query2.substr(removepos);
-
-      query  += "INSERT INTO tbl_tmp (tmp_file_id, tmp_file, ";
-      query  += "tmp_artist, tmp_title, tmp_album, tmp_part, ";
-      query  += "tmp_parts, tmp_track, tmp_tracks, tmp_genre, ";
-      query  += "tmp_rating, tmp_date, tmp_comment, tmp_length";
-      query  += ") VALUES (";
-
-      result = sqlite3_mprintf(
-          "'%q','%q','%q','%q','%q','%q','%q','%q','%q','%q','%q',\
-            '%q','%q','%q');",
-          tag->id(), query2.c_str(), tag->artist(), tag->title(),
-          tag->album(), tag->part(), tag->parts(), tag->track(),
-          tag->tracks(), tag->genre(), tag->rating(), tag->date(),
-          tag->comment(), tag->length());
-
-      query += result;
-      sqlite3_free(result);
-    } else {
-      unsupportedFiles.append("\t");
-      unsupportedFiles.append(fnames->top());
-      unsupportedFiles.append("\n");
-    }
-
-    if(tag->error()) {
-      errmsg << "Error (" << tag->error() << ") at ";
-      errmsg << fnames->top() << endl;
-      PlowException *e = new PlowException("add2Db",
-                                 errmsg.str().c_str());
-      e->print();
-      delete e;
-      errmsg.str("");
-    }
-    delete tag;
-    delete[] fnames->top();
-    fnames->pop();
-  }
-  query += "COMMIT TRANSACTION;";
-
-  sr = sql.exe(query.c_str());
-  delete sr;
-  delete fnames;
-  cout << "\n ... done." << endl;
-
-  //
-  // add new artists, albums and genres
-  //
-
-  string fieldtmp, fieldid;
-
-  for(uint i = 0; i < fields.size(); i++) {
-    cout << "> insert new " << fields.at(i) << "s ..." << flush;
-
-    query = "BEGIN TRANSACTION;";
-
-    query3  = "SELECT DISTINCT tmp_";
-    query3 += fields.at(i);
-    query3 += " FROM tbl_tmp;";
-
-    sr = sql.exe(query3.c_str());
-
-    fieldtmp = "tmp_" + fields.at(i);
-    fieldid  = "id_" + fields.at(i);
-
-    if(sql.error() == SQLITE_OK) {
-      for(int j = 0; j < sr->rows(); j++) {
-        query3 = "SELECT id_";
-        query3 += fields.at(i);
-        query3 += " FROM tbl_";
-        query3 += fields.at(i);
-        query3 += " WHERE ";
-        query3 += fields.at(i);
-        query3 += "='";
-
-        result = sqlite3_mprintf(format, sr->get(j, fieldtmp.c_str()));
-        query3 += result;
-        sqlite3_free(result);
-
-        query3 += "';";
-
-        sr2 = sql.exe(query3.c_str());
-
-        if(sr2->rows() == 0) {
-          delete sr2;
-          query2  = "BEGIN TRANSACTION;INSERT INTO tbl_";
-          query2 += fields.at(i);
-          query2 += " (";
-          query2 += fields.at(i);
-          query2 += ")  VALUES ('";
-
-          result = sqlite3_mprintf(format, sr->get(j,
-                                   fieldtmp.c_str()));
-          query2 += result;
-          sqlite3_free(result);
-
-          query2 += "');";
-          query2 += query3;
-          query2 += "COMMIT TRANSACTION;";
-
-          sr2 = sql.exe(query2.c_str());
-          cout << "\n\t" << sr->get(j, fieldtmp.c_str()) << flush;
-        }
-        query += "UPDATE tbl_tmp SET tmp_id_";
-        query += fields.at(i);
-        query += "='";
-        query += sr2->get(0, fieldid.c_str());
-        query += "' WHERE tmp_";
-        query += fields.at(i);
-        query += "='";
-
-        result = sqlite3_mprintf(format, sr->get(j, fieldtmp.c_str()));
-        query += result;
-        sqlite3_free(result);
-
-        query += "';";
-
-        delete sr2;
-      }
-
-      query += "COMMIT TRANSACTION;";
-
-      sr2 = sql.exe(query.c_str());
-      delete sr2;
-
-    }
-    delete sr;
-    cout << "\n ... done." << endl;
-  }
-
-
-  //
-  // set additional info to albums
-  //
-
-  // set album_id_artist for album if it isn't a sampler
-  // (more than 3 songs from one artist)
-  cout << "> add info to (new) albums ..." << endl;
-
-  query  = "SELECT tmp_id_album, tmp_id_artist FROM ";
-  query += "tbl_tmp GROUP BY tmp_id_artist, tmp_id_album ";
-  query += "HAVING COUNT(*) > 3;";
-
-  /*
-  query  = "SELECT DISTINCT(tmp_id_artist), tmp_id_album FROM tbl_tmp ";
-  query += "WHERE tmp_id_album NOT IN (";
-  query += "SELECT DISTINCT(tmp_id_album) FROM tbl_tmp ";
-  query += "GROUP BY tmp_id_artist, tmp_id_album HAVING COUNT() < 3);";
-  */
-
-
-  sr = sql.exe(query.c_str());
-
-  query = "BEGIN TRANSACTION;";
-
-  if(sql.error() == SQLITE_OK) {
-    for(int i = 0; i < sr->rows(); i++) {
-      query += "UPDATE tbl_album SET album_id_artist='";
-      query += sr->get(i, "tmp_id_artist");
-      query += "' WHERE id_album='";
-      query += sr->get(i, "tmp_id_album");
-      query += "';";
-
-    }
-    query += " COMMIT TRANSACTION;";
-    sr2 = sql.exe(query.c_str());
-    delete sr2;
-  }
-  delete sr;
-
-  // add number of parts and tracks to tbl_album
-  sr = sql.exe(
-      "SELECT DISTINCT tmp_id_album, tmp_parts, tmp_tracks FROM tbl_tmp;");
-
-  query = "BEGIN TRANSACTION;";
-  for(int i = 0; i < sr->rows(); i++) {
-    query += "UPDATE tbl_album SET parts='";
-    query += sr->get(i, "tmp_parts");
-    query += "', tracks='";
-    query += sr->get(i, "tmp_tracks");
-    query += "' WHERE id_album='";
-    query += sr->get(i, "tmp_id_album");
-    query += "';";
-  }
-  delete sr; sr = NULL;
-  query += "COMMIT TRANSACTION;";
-  sr = sql.exe(query.c_str());
-  delete sr; sr = NULL;
-  cout << " ... done." << endl;
-
-
-  //
-  // insert new songs
-  //
-
-  sr = sql.exe(
-    "SELECT * FROM tbl_tmp ORDER BY tmp_album, tmp_part, tmp_track;");
-
-  int count = 0;
-
-  query = "BEGIN TRANSACTION;";
-
-  for(int i = 0; i < sr->rows(); i++) {
-    query3  = "SELECT file FROM tbl_music WHERE file='";
-
-    result = sqlite3_mprintf(format, sr->get(i, "tmp_file"));
-    query3 += result;
-    sqlite3_free(result);
-
-    query3 += "';";
-
-    sr2 = sql.exe(query3.c_str());
-
-    if(sr2->rows() == 0) {
-      ++count;
-
-      query += "INSERT INTO tbl_music (file_id, file, title, ";
-      query += " _id_artist, _id_album, part, track, _id_genre,";
-      query += " _id_rating, _id_mood, _id_situation, _id_tempo,";
-      query += "_id_language, date, comment, length) VALUES (";
-
-      result = sqlite3_mprintf(
-          "'%q','%q','%q','%q','%q','%q','%q','%q','%q','%q',\
-              '%q','%q','%q','%q','%q','%q');",
-          sr->get(i,"tmp_file_id"),      sr->get(i,"tmp_file"),
-          sr->get(i,"tmp_title"),        sr->get(i,"tmp_id_artist"),
-          sr->get(i,"tmp_id_album"),     sr->get(i,"tmp_part"),
-          sr->get(i,"tmp_track"),        sr->get(i,"tmp_id_genre"),
-          sr->get(i,"tmp_id_rating"),    sr->get(i,"tmp_id_mood"),
-          sr->get(i,"tmp_id_situation"), sr->get(i,"tmp_id_tempo"),
-          sr->get(i,"tmp_id_language"),  sr->get(i,"tmp_date"),
-          sr->get(i,"tmp_comment"),      sr->get(i,"tmp_length"));
-
-      query += result;
-      sqlite3_free(result);
-    }
-    delete sr2;
-  }
-
-  query += "COMMIT TRANSACTION";
-
-  sr2 = sql.exe(query.c_str());
-  delete sr2;
-  delete sr;
-
-  sr = sql.exe("DELETE FROM tbl_tmp; VACUUM;");
-  delete sr;
-  cout << "> " << count << " new files inserted." << endl;
-
-  delete fieldNames[TagReader::VORBIS];
-  delete fieldNames[TagReader::ID3V2];
-
-  if(unsupportedFiles.length()) {
-    cout << "> The following files don't contain a supported tag:" << endl;
-    cout << unsupportedFiles.c_str() << flush;
-  }
-} // add2Db()
+}

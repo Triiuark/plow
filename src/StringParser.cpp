@@ -6,18 +6,18 @@ using namespace std;
 
 StringParser::StringParser(const char *str, const char delim)
 {
-  m_argv    = NULL;
+  mArgv = 0;
 
   string  mystring(str);
-  string  *token = NULL;
-  uint    pos;
+  string  *token = 0;
+  unsigned int pos;
 
   while(!mystring.empty())
   {
     if(mystring.c_str()[0] != '"')
     {
-      // token is from beginning of mystring up to first ' ' or
-      // end of mystring
+      /// token is from beginning of mystring up to first ' ' or
+      /// end of mystring
       pos = mystring.find_first_of(delim);
       token = new string(mystring);
 
@@ -29,30 +29,30 @@ StringParser::StringParser(const char *str, const char delim)
         mystring.clear();
       }
     } else {
-      // remove first '"'
+      /// remove first '"'
       mystring = mystring.substr(1);
-      // find next '"'
+      /// find next '"'
       pos = mystring.find_first_of('"');
       if(pos != string::npos)
       {
-        // mystring is not complete quoted
-        // put everything quoted into token and ...
+        /// mystring is not complete quoted
+        /// put everything quoted into token and ...
         token = new string(mystring.substr(0, pos));
-        // ... remove it from mystring
+        /// ... remove it from mystring
         mystring = mystring.substr(pos + 1);
       } else {
-        // complete mystring is quoted, so put everything in token
+        /// complete mystring is quoted, so put everything in token
         token = new string(mystring);
         mystring.clear();
       }
     }
     if(token && !token->empty())
     {
-      m_tokens.push_back(token);
+      mTokens.push_back(token);
     }
     else if(token)
     {
-      // clear unaccessary ones
+      /// clear unaccessary ones
       delete token;
     }
   }
@@ -60,49 +60,49 @@ StringParser::StringParser(const char *str, const char delim)
 
 
 
-vector <string *>StringParser::getTokens()
+vector<string *> const& StringParser::getTokens() const
 {
-  return m_tokens;
+  return mTokens;
 }
 
 
 
-uint StringParser::getSize()
+unsigned int StringParser::getSize() const
 {
-  return m_tokens.size();
+  return mTokens.size();
 }
 
 
 
 char **StringParser::getArgv()
 {
-  if(m_argv == 0)
+  if(mArgv == 0)
   {
-    uint size = m_tokens.size();
-    m_argv = new char*[size + 1];
+    unsigned int size = mTokens.size();
+    mArgv = new char*[size + 1];
 
-    memset(m_argv, 0, sizeof(char *) * (size + 1));
+    memset(mArgv, 0, sizeof(char *) * (size + 1));
 
-    for(uint i = 0; i < size; i++)
+    for(unsigned int i = 0; i < size; ++i)
     {
-      m_argv[i] = (char *)(m_tokens[i]->c_str());
+      mArgv[i] = (char *)(mTokens[i]->c_str());
     }
   }
 
-  return m_argv;
+  return mArgv;
 }
 
 
 
 StringParser::~StringParser()
 {
-  if(m_argv)
+  if(mArgv)
   {
-    delete[] m_argv;
+    delete[] mArgv;
   }
 
-  for(uint i = 0; i < m_tokens.size(); ++i)
+  for(unsigned int i = 0; i < mTokens.size(); ++i)
   {
-    delete m_tokens[i];
+    delete mTokens[i];
   }
 }

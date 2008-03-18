@@ -1,118 +1,110 @@
 #include "AbstractReader.h"
 
-AbstractReader::AbstractReader(const char *fname, CStrMap *fields)
-{
-  mi_err     = 0;
-  mcs_fname  = fname;
-  mSM_values = new StrMap;
-};
+#include <iostream>
 
-
-const char *AbstractReader::getId() const
+AbstractReader::AbstractReader(const char * const fname)
 {
-  return (*mSM_values)["id"].c_str();
+  mErr             = 0;
+  mValues["file"]  = fname;
 }
 
-const char *AbstractReader::getTitle() const
+const char * const AbstractReader::id()
 {
-  //mi_err = 12;
-  return (*mSM_values)["title"].c_str();
+  return mValues["id"].c_str();
 }
 
-const char *AbstractReader::getArtist() const
+const char * const AbstractReader::title()
 {
-  return (*mSM_values)["artist"].c_str();
+  return mValues["title"].c_str();
 }
 
-const char *AbstractReader::getAlbum() const
+const char * const AbstractReader::artist()
 {
-  return (*mSM_values)["album"].c_str();
+  return mValues["artist"].c_str();
 }
 
-const char *AbstractReader::getPart() const
+const char * const AbstractReader::album()
 {
-  return (*mSM_values)["part"].c_str();
+  return mValues["album"].c_str();
 }
 
-const char *AbstractReader::getParts() const
+const char * const AbstractReader::part()
 {
-  return (*mSM_values)["parts"].c_str();
+  return mValues["part"].c_str();
 }
 
-const char *AbstractReader::getTrack() const
+const char * const AbstractReader::parts()
 {
-  return (*mSM_values)["track"].c_str();
+  return mValues["parts"].c_str();
 }
 
-const char *AbstractReader::getTracks() const
+const char * const AbstractReader::track()
 {
-  return (*mSM_values)["tracks"].c_str();
+  return mValues["track"].c_str();
 }
 
-const char *AbstractReader::getGenre() const
+const char * const AbstractReader::tracks()
 {
-  return (*mSM_values)["genre"].c_str();
+  return mValues["tracks"].c_str();
 }
 
-const char *AbstractReader::getRating() const
+const char * const AbstractReader::genre()
 {
-  return (*mSM_values)["rating"].c_str();
+  return mValues["genre"].c_str();
 }
 
-const char *AbstractReader::getMood() const
+const char * const AbstractReader::rating()
 {
-  return (*mSM_values)["mood"].c_str();
+  return mValues["rating"].c_str();
 }
 
-const char *AbstractReader::getSituation() const
+const char * const AbstractReader::mood()
 {
-  return (*mSM_values)["situation"].c_str();
+  return mValues["mood"].c_str();
 }
 
-const char *AbstractReader::getTempo() const
+const char * const AbstractReader::situation()
 {
-  return (*mSM_values)["tempo"].c_str();
+  return mValues["situation"].c_str();
 }
 
-const char *AbstractReader::getLanguage() const
+const char * const AbstractReader::tempo()
 {
-  return (*mSM_values)["language"].c_str();
+  return mValues["tempo"].c_str();
 }
 
-const char *AbstractReader::getDate() const
+const char * const AbstractReader::language()
 {
-  return (*mSM_values)["date"].c_str();
+  return mValues["language"].c_str();
 }
 
-const char *AbstractReader::getComment() const
+const char * const AbstractReader::date()
 {
-  return (*mSM_values)["comment"].c_str();
+  return mValues["date"].c_str();
 }
 
-const char *AbstractReader::getLength() const
+const char * const AbstractReader::comment()
 {
-  return (*mSM_values)["length"].c_str();
+  return mValues["comment"].c_str();
 }
 
-
-
-const char *AbstractReader::get(const char *field) const
+const char * const AbstractReader::length()
 {
-  return (*mSM_values)[field].c_str();
+  return mValues["length"].c_str();
 }
 
-
+const char * const AbstractReader::file()
+{
+  return mValues["file"].c_str();
+}
 
 int AbstractReader::error() const
 {
-  return mi_err;
+  return mErr;
 }
-
-
 
 AbstractReader::~AbstractReader()
 {
-  if(mSM_values) {
-    delete mSM_values;
-  }
-};
+  /// empty
+}
+

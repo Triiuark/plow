@@ -15,42 +15,77 @@
 
 using namespace TagLib;
 
-ID3v2Reader::ID3v2Reader(const char* fname, CStrMap *fields)
-    : AbstractReader(fname, fields)
-{
-  mCSM_fields["comment"  ] = "COMM/";
-  mCSM_fields["id"       ] = "UFID/*";
-  mCSM_fields["rating"   ] = "POPM/*";
-  mCSM_fields["mood"     ] = "TXXX/MOOD";
-  mCSM_fields["situation"] = "TXXX/SITUATION";
-  mCSM_fields["tempo"    ] = "TXXX/TEMPO";
-  mCSM_fields["language" ] = "TXXX/LANGUAGE";
+std::map<std::string, std::string> ID3v2Reader::sMapping;
 
-  CStrMapIt it = fields->begin();
-  while(it != fields->end())
-  {
-    if(strcmp(it->second, "") != 0) {
-      mCSM_fields[it->first] = it->second;
+bool ID3v2Reader::sMappingDone = false;
+
+ID3v2Reader::ID3v2Reader(const char * const fname)
+    : AbstractReader(fname)
+{
+  initMapping();
+}
+
+
+
+void ID3v2Reader::initMapping() const
+{
+    if(sMapping.empty())
+    {
+      sMapping["comment"  ] = "COMM/";
+      sMapping["id"       ] = "UFID/*";
+      sMapping["language" ] = "TXXX/LANGUAGE";
+      sMapping["lyrics"   ] = "TXXX/LYRICS";
+      sMapping["mood"     ] = "TXXX/MOOD";
+      sMapping["rating"   ] = "POPM/*";
+      sMapping["release"  ] = "TXXX/RELEASE";
+      sMapping["situation"] = "TXXX/SITUATION";
+      sMapping["tempo"    ] = "TXXX/TEMPO";
     }
-    ++it;
+}
+
+
+
+void ID3v2Reader::setMapping(StrMap &mapping) const
+{
+  if(!sMappingDone)
+  {
+    StrMapIt it = mapping.begin();
+    while(it != mapping.end())
+    {
+      sMapping[it->first] = it->second;
+      ++it;
+    }
   }
 
-  mSM_values = new StrMap;
+  sMappingDone = true;
+}
+
+
+
+bool ID3v2Reader::mappingDone() const
+{
+  return sMappingDone;
+}
+
+
+
+void ID3v2Reader::read()
+{
   ID3v2::Tag *tag;
-  MPEG::File f(mcs_fname);
+  MPEG::File f(mValues["file"].c_str());
 
   if((tag = f.ID3v2Tag()))
   {
-    (*mSM_values)["artist"] = tag->artist().toCString(true);
-    (*mSM_values)["title" ] = tag->title().toCString(true);
-    (*mSM_values)["album" ] = tag->album().toCString(true);
-    (*mSM_values)["genre" ] = tag->genre().toCString(true);
+    mValues["artist"] = tag->artist().toCString(true);
+    mValues["title" ] = tag->title().toCString(true);
+    mValues["album" ] = tag->album().toCString(true);
+    mValues["genre" ] = tag->genre().toCString(true);
 
     if(tag->year() > 0)
     {
       char tmp[24];
       sprintf(tmp, "%d", tag->year());
-      (*mSM_values)["date"] = tmp;
+      mValues["date"] = tmp;
     }
 
     std::string s;
@@ -64,10 +99,10 @@ ID3v2Reader::ID3v2Reader(const char* fname, CStrMap *fields)
       pos = s.find('/', 0);
       if(pos == std::string::npos)
       {
-        (*mSM_values)["track"] = s;
+        mValues["track"] = s;
       } else {
-        (*mSM_values)["track"]  = s.substr(0, pos);
-        (*mSM_values)["tracks"] = s.substr(++pos, s.size() - 1);
+        mValues["track"]  = s.substr(0, pos);
+        mValues["tracks"] = s.substr(++pos, s.size() - 1);
       }
     }
 
@@ -78,20 +113,20 @@ ID3v2Reader::ID3v2Reader(const char* fname, CStrMap *fields)
       pos = s.find('/', 0);
       if(pos == std::string::npos)
       {
-        (*mSM_values)["part"] = s;
+        mValues["part"] = s;
       } else {
-        (*mSM_values)["part"]  = s.substr(0, pos);
-        (*mSM_values)["parts"] = s.substr(++pos, s.size() - 1);
+        mValues["part"]  = s.substr(0, pos);
+        mValues["parts"] = s.substr(++pos, s.size() - 1);
       }
     }
 
-    CStrMapIt fieldsIt = mCSM_fields.begin();
+    std::map<std::string, std::string>::iterator fieldsIt = sMapping.begin();
     const char *description;
     char frameName[5] = { 0, 0, 0, 0, 0 };
-    while(fieldsIt != mCSM_fields.end())
+    while(fieldsIt != sMapping.end())
     {
-      strncpy(frameName, fieldsIt->second, 4);
-      description = strchr(fieldsIt->second, '/');
+      strncpy(frameName, fieldsIt->second.c_str(), 4);
+      description = strchr(fieldsIt->second.c_str(), '/');
 
       if(description)
       {
@@ -106,19 +141,19 @@ ID3v2Reader::ID3v2Reader(const char* fname, CStrMap *fields)
       {
         if(strcmp(frameName, "TXXX") == 0)
         {
-          getTxxxFrame(fieldsIt->first, description, &fl);
+          getTxxxFrame(fieldsIt->first.c_str(), description, &fl);
         }
         else if(strcmp(frameName, "COMM") == 0)
         {
-          getCommFrame(fieldsIt->first, description, &fl);
+          getCommFrame(fieldsIt->first.c_str(), description, &fl);
         }
         else if(strcmp(frameName, "UFID") == 0)
         {
-          getUfidFrame(fieldsIt->first, description, &fl);
+          getUfidFrame(fieldsIt->first.c_str(), description, &fl);
         }
         else if(strcmp(frameName, "POPM") == 0)
         {
-          getPopmFrame(fieldsIt->first, description, &fl);
+          getPopmFrame(fieldsIt->first.c_str(), description, &fl);
         }
       }
       ++fieldsIt;
@@ -132,14 +167,14 @@ ID3v2Reader::ID3v2Reader(const char* fname, CStrMap *fields)
   {
     len = f.audioProperties()->length();
     sprintf(buff, "%d", len);
-    (*mSM_values)["length"] = (buff);
+    mValues["length"] = (buff);
   }
 }
 
 
 
-void ID3v2Reader::getTxxxFrame(const char *field,
-                               const char *description,
+void ID3v2Reader::getTxxxFrame(const char  * const field,
+                               const char  * const description,
                                ID3v2::FrameList *fl)
 {
   char *tmp;
@@ -152,17 +187,17 @@ void ID3v2Reader::getTxxxFrame(const char *field,
 
     if(strcmp(utif->description().toCString(true), description) == 0)
     {
-      char tmp2[strlen(utif->toString().toCString(true)) + 1];
+      char *tmp2 = new char[strlen(utif->toString().toCString(true)) + 1];
       sprintf(tmp2, "%s", utif->toString().toCString(true));
 
       tmp = strchr(tmp2, ']');
       if(tmp && strlen(tmp) > 2)
       {
-        (*mSM_values)[field] = &tmp[2]; // remove '[description]'
+        mValues[field] = &tmp[2]; /// remove '[description]'
       } else {
-        (*mSM_values)[field] = tmp2;
+        mValues[field] = tmp2;
       }
-
+      delete[] tmp2;
       return;
     }
   }
@@ -170,8 +205,8 @@ void ID3v2Reader::getTxxxFrame(const char *field,
 
 
 
-void ID3v2Reader::getCommFrame(const char *field,
-                               const char *description,
+void ID3v2Reader::getCommFrame(const char * const field,
+                               const char * const description,
                                ID3v2::FrameList *fl)
 {
   ID3v2::CommentsFrame *comf;
@@ -182,10 +217,7 @@ void ID3v2Reader::getCommFrame(const char *field,
 
     if(strcmp(comf->description().toCString(true), description) == 0)
     {
-      char tmp[strlen(comf->toString().toCString(true)) + 1];
-      sprintf(tmp, "%s", comf->toString().toCString(true));
-
-      (*mSM_values)[field] = tmp;
+      mValues[field] = comf->toString().toCString(true);
       return;
     }
   }
@@ -193,8 +225,8 @@ void ID3v2Reader::getCommFrame(const char *field,
 
 
 
-void ID3v2Reader::getUfidFrame(const char *field,
-                               const char *description,
+void ID3v2Reader::getUfidFrame(const char * const field,
+                               const char * const description,
                                ID3v2::FrameList *fl)
 {
   char tmp[2];
@@ -214,13 +246,11 @@ void ID3v2Reader::getUfidFrame(const char *field,
         if(isBinary)
         {
           sprintf(tmp, "%x", ufif->identifier()[i]);
-          (*mSM_values)[field] += tmp;
+          mValues[field] += tmp;
         } else {
-          (*mSM_values)[field] += ufif->identifier()[i];
+          mValues[field] += ufif->identifier()[i];
         }
       }
-
-      //(*mSM_values)[field] = oss.str().c_str();
 
       return;
     }
@@ -229,8 +259,8 @@ void ID3v2Reader::getUfidFrame(const char *field,
 
 
 
-void ID3v2Reader::getPopmFrame(const char *field,
-                               const char *description,
+void ID3v2Reader::getPopmFrame(const char * const field,
+                               const char * const description,
                                ID3v2::FrameList *fl)
 {
   char tmp[2];
@@ -254,7 +284,7 @@ void ID3v2Reader::getPopmFrame(const char *field,
       }
 
       sprintf(tmp, "%d", uf->data()[j + 1]);
-      (*mSM_values)[field] = tmp;
+      mValues[field] = tmp;
 
       return;
     }

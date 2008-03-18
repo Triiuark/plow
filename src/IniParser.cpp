@@ -13,18 +13,16 @@ using namespace std;
 
 
 
-IniParser::IniParser(const char *iniFile)
+IniParser::IniParser(const char * const iniFile)
 {
-  ostringstream errmsg;
 
   ifstream ini(iniFile);
   if(!ini)
   {
-    errmsg << "Could not open " <<  iniFile;
-    throw PlowException("IniParser", errmsg.str().c_str());
+    PlowException e("IniParser");
+    e.error() << "could not open " <<  iniFile;
+    throw e;
   }
-
-  mSM_options = new StrMap;
 
   const string whitespace(" \t");
 
@@ -34,15 +32,15 @@ IniParser::IniParser(const char *iniFile)
 
   char *option;
 
-  uint pos;
-  uint line = 0;
+  unsigned int pos;
+  unsigned int line = 0;
 
   while(getline(ini, buffer))
   {
     ++line;
     value = "";
 
-    // trim buffer
+    /// trim buffer
     pos = buffer.find_first_not_of(whitespace);
     if(pos != string::npos)
     {
@@ -54,41 +52,45 @@ IniParser::IniParser(const char *iniFile)
       buffer = buffer.substr(0, pos + 1);
     }
 
-    // ignore empty lines and comments
+    /// ignore empty lines and comments
     if(buffer.length() == 0 || buffer.c_str()[0] == '#')
     {
       continue;
     }
 
-    // get section
+    /// get section
     if(buffer.c_str()[0] == '[')
     {
       if(buffer.c_str()[buffer.length() - 1] == ']')
       {
-        group = buffer;
+        group = &buffer[1];
+        group[group.size() - 1] = '/';
       } else {
-        errmsg << "Corrupted section name in ";
-        errmsg << iniFile << " at line " << line << ".";
-        throw PlowException("IniParser", errmsg.str().c_str());
+        PlowException e("IniParser");
+        e.error() << "missing ']' in " << iniFile
+                  << " at line " << line;
+        throw e;
       }
     }
 
-    // get option - value pairs
+    /// get option - value pairs
     else
     {
       pos = buffer.find_first_of("=");
 
       if(pos == string::npos)
       {
-        errmsg << "Missing '=' in " << iniFile;
-        errmsg << " at line " << line << ".";
-        throw PlowException("IniParser", errmsg.str().c_str());
+        PlowException e("IniParser");
+        e.error() << "missing '=' in " << iniFile
+                  << " at line " << line;
+        throw e;
       }
       else if(pos == 0)
       {
-        errmsg << "Missing option in" << iniFile;
-        errmsg << " at line " << line << ".";
-        throw PlowException("IniParser", errmsg.str().c_str());
+        PlowException e("IniParser");
+        e.error() << "missing option in" << iniFile
+                  << " at line " << line;
+        throw e;
       }
 
       value  = buffer.substr(pos + 1);
@@ -106,7 +108,7 @@ IniParser::IniParser(const char *iniFile)
         option = new char[group.length() + buffer.length() + 1];
         sprintf(option, "%s%s", group.c_str(), buffer.c_str());
 
-        (*mSM_options)[option] = value;
+        mOptions[option] = value;
       }
     }
   }
@@ -115,27 +117,43 @@ IniParser::IniParser(const char *iniFile)
 
 
 
-string IniParser::get(const char *option) const
+string const &IniParser::get(const char * const option)
 {
-  return (*mSM_options)[option];
+  return mOptions[option];
+}
+
+StrMap *IniParser::getSection(const char * const section)
+{
+  StrMap *sectionMap = new StrMap;
+  StrMapIt it = mOptions.begin();
+
+  int len = strlen(section);
+
+  while(it != mOptions.end())
+  {
+    if(strncmp(section, it->first, len) == 0 && it->second.size() > 0)
+    {
+      (*sectionMap)[&it->first[len + 1]] = it->second;
+    }
+    ++it;
+  }
+  return sectionMap;
 }
 
 
 
 IniParser::~IniParser()
 {
-  StrMapIt it = mSM_options->begin();
+  StrMapIt it = mOptions.begin();
 
-  while(it != mSM_options->end())
+  while(it != mOptions.end())
   {
     if(it->second != "")
     {
-      //if it is empty, key wasn't created with new,
-      // so I can't delete it
+      /// if it->second is empty, key wasn't created with new,
+      /// so I can't delete it
       delete[] it->first;
     }
     ++it;
   }
-
-  delete mSM_options;
 }

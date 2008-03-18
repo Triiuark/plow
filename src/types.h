@@ -25,14 +25,12 @@
 #include <map>
 #include <queue>
 
-using namespace std;
-
 /**
  * for ascending sorting of STL containers with char* keys
  */
 struct _cstrcmp
 {
-  bool operator() (const char *a, const char *b)
+  bool operator() (const char * const a, const char * const b) const
   {
     return strcmp(a, b) < 0 ? true : false;
   }
@@ -43,7 +41,7 @@ struct _cstrcmp
  */
 struct _cstrcmp_r
 {
-  bool operator() (const char *a, const char *b)
+  bool operator() (const char * const a, const char * const b) const
   {
     return strcmp(b, a) < 0 ? true : false;
   }
@@ -55,37 +53,37 @@ struct _cstrcmp_r
 /**
  * associative array of C strings
  */
-typedef map<const char*, const char*, _cstrcmp> CStrMap;
+typedef std::map<const char *, const char *, _cstrcmp> CStrMap;
 
 /**
  * iterator for associative array of C strings
  */
-typedef map<const char*, const char*, _cstrcmp>::iterator CStrMapIt;
+typedef std::map<const char *, const char*, _cstrcmp>::iterator CStrMapIt;
 
 
 
 /**
  * associative array of C++ strings
  */
-typedef map<const char*, string, _cstrcmp> StrMap;
+typedef std::map<const char *, std::string, _cstrcmp> StrMap;
 
 /**
  * iterator for associative array of C++ strings
  */
-typedef map<const char*, string, _cstrcmp>::iterator StrMapIt;
+typedef std::map<const char *, std::string, _cstrcmp>::iterator StrMapIt;
 
 
 
 /**
  * associative array of integers
  */
-typedef map<const char*, int, _cstrcmp> IntMap;
+typedef std::map<const char *, int, _cstrcmp> IntMap;
 
 
 
 /**
  * priority queue of vector<char *> with descending order
  */
-typedef priority_queue<char *, vector<char *>, _cstrcmp_r> PrioQ;
+typedef std::priority_queue<char *, std::vector<char *>, _cstrcmp_r> PrioQ;
 
 #endif

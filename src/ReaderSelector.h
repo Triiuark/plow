@@ -17,54 +17,52 @@
 * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
 ***********************************************************************/
 
-#ifndef PLOW_TAG_READER_H
-#define PLOW_TAG_READER_H
+#ifndef PLOW_READER_SELECTOR_H
+#define PLOW_READER_SELECTOR_H
 
 #include <map>
 
 #include "types.h"
 #include "AbstractReader.h"
 
-class TagReader
+/**
+ * @brief this one chooses the reader type
+ */
+class ReaderSelector
 {
   public:
 
-    static const enum {
+    /**
+     *
+     */
+    enum FileType
+    {
       UNKNOWN = -1,
       VORBIS,
       ID3V2
-    } TAG_TYPE;
+    };
 
-    TagReader(const char* fname, std::map<int, CStrMap *> fieldNames);
+    /**
+     * Creates a new ReaderSelector object
+     *
+     * @param fname file name
+     */
+    ReaderSelector(const char * const fname);
 
-    const char *id()        const;
-    const char *artist()    const;
-    const char *title()     const;
-    const char *album()     const;
-    const char *part()      const;
-    const char *parts()     const;
-    const char *track()     const;
-    const char *tracks()    const;
-    const char *genre()     const;
-    const char *rating()    const;
-    const char *mood()      const;
-    const char *situation() const;
-    const char *tempo()     const;
-    const char *language()  const;
-    const char *date()      const;
-    const char *comment()   const;
-    const char *length()    const;
+    /**
+     * @returns the FileType of the file
+     */
+    FileType fileType() const;
 
-    int fileType() const;
-
-    int error()    const;
-
-    ~TagReader();
+    /**
+     * @returns an AbstractReader object if fileType is not UNKNOWN
+     */
+    AbstractReader * const reader() const;
 
   private:
-    AbstractReader *mAR_reader;
-    int            mi_type;
-    int            mi_err;
+    FileType mType;
+    std::auto_ptr<AbstractReader> mReader;
+
 };
 
 #endif

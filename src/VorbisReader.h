@@ -28,7 +28,23 @@
 class VorbisReader : public AbstractReader
 {
   public:
-    VorbisReader(const char *fname, CStrMap *fields = 0);
+    VorbisReader(const char * const fname);
+
+    const char * const sectionName() const
+    {
+      return "vorbis";
+    }
+
+    void setMapping(StrMap &mapping) const;
+
+    bool mappingDone() const;
+
+    void read();
+
+  private:
+    void initMapping() const;
+    static bool sMappingDone;
+    static std::map<std::string, std::string> sMapping;
 };
 
 #endif

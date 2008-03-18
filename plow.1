@@ -23,23 +23,18 @@ plow \- create m3u playlist (and start a player)
 .SH "SYNOPSIS"
 .na
 .nh
-\fBplow\fR [-|+<c>[e] <str> [<str>]*]* [\-Q] [\-0...9] [\-S] [\-\-add]
-[\-\-noplay]
-.br
-\fBplow\fR [-|+<c>[e] <str> [<str>]*]* [\-Q] \-\-set <c> <str>
-[<c> <str>]*
-.br
-\fBplow\fR \-L <tbl>
-.br
-\fBplow\fR \-q <sql>
-.br
-\fBplow\fR \-C
-.br
-\fBplow\fR \-I \fI/path/to/music\fR
-.br
+.nf
+\fBplow\fR [-|+<c>[e|l|g] <str> [<str>]*]* [\-\-random] [\-\-add]
+     [\-\-0|...|9] [\--show] [\-\-noplay]
+\fBplow\fR [-|+<c>[e|l|g] <str> [<str>]*]* \-\-set <c> <str> [<c> <str>]*
+     [\--show]
+\fBplow\fR \-\-list <tbl>
+\fBplow\fR \-\-query <sql>
+\fBplow\fR \-\-copy
+\fBplow\fR \-\-insert \fI/path/to/music\fR
 \fBplow\fR \-\-help
-.br
 \fBplow\fR \-\-version
+.fi
 .ad
 .hy
 .\" ------------------------------------------------------------------
@@ -56,7 +51,7 @@ fields like mood, tempo, language, etc.
 .\" ------------------------------------------------------------------
 .SH "OPTIONS"
 .
-.IPn "\fB\-|+<c>[e] <str> [<str>]*"
+.IPn "\fB\-|+<c>[e|l|g] <str> [<str>]*"
 This sets the filter for creating the playlist.
 .PD 0
 .RS 8
@@ -66,86 +61,55 @@ search for fields containing <str>
 search for fields \fBnot\fR containing <str>
 .IPn "e"
 <str> matches exactly
+.IPn "l"
+value in <c> is less than <str>
+.IPn "g"
+value in <c> is greater than <str>
 .IPn "<c>"
 is one of the following characters:
-.RS 16
-.IPn "A"
-album
-.IPn "a"
-artist
-.IPn "g"
-genre
-.IPn "l"
-language
-.IPn "m"
-mood
-.IPn "r"
-rating
-.IPn "s"
-situation
-.IPn "t"
-tempo
-.IPn "T"
-title
-.RE
+.nf
+  A (album),  a (artist),    c (comment),
+  d (date),   f (file name), g (genre),
+  i (id),     L (lyrics),    l (language),
+  m (mood),   N (tracks),    n (track),
+  P (parts),  p (part),      R (release),
+  r (rating), S (status),    s (situation),
+  T (title),  t (tempo),     x (length)
+.fi
 .RE
 .PD 1
 .
-.IPn "\fB\-\-set <c> <str> [<c> <str>]*"
+.IPn "\fB\-\-S|set <c> <str> [<c> <str>]*"
 This sets the field <c> to <str> in all songs that matches the actual
-filter.
-.PD 0
-.RS 8
-.IPn "<c>"
-is one of the following characters:
-.RS 16
-.IPn "A"
-album
-.IPn "a"
-artist
-.IPn "g"
-genre
-.IPn "l"
-language
-.IPn "m"
-mood
-.IPn "r"
-rating
-.IPn "s"
-situation
-.IPn "t"
-tempo
-.RE
-.RE
-.PD 1
+filter. <c> is one of the characters above.
 .
-.IPn "\fB\-Q"
-Print out the executed SQL query.
+.IPn "\fB\-\-s|show"
+Print out the executed SQL query for filter and set options.
 .
-.IPn "\fB\-0...9"
+.IPn "\fB\-\-0|...|9"
 Select the player set in configuration file.
 .
-.IPn "\fB\-S"
+.IPn "\fB\-\-r|random"
 Shuffle the playlist.
 .
-.IPn "\fB\-\-add"
+.IPn "\fB\-\-a|add"
 Append the files to the playlist (do not overwrite the old one).
 .
-.IPn "\fB\-\-noplay"
+.IPn "\fB\-\-n|noplay"
 Create the playlist normally, but do not start a player.
 .
-.IPn "\fB\-L <tbl>"
+.IPn "\fB\-\-l|list <tbl>"
 Print out values for <tbl>. <tbl> is one of album, artist, genre,
 language, mood, rating, situation or tempo.
 .
-.IPn "\fB\-q <sql>"
+.IPn "\fB\-\-q|query <sql>"
 Execute SQL query <sql> and print the result.
 .
-.IPn "\fB\-C"
+.IPn "\fB\-\-c|copy"
 Copy all files in the current playlist to the portable device
 set in configuration file.
 .
-.IPn "\fB\-I /path/to/music"
+.IPn "\fB\-\-i|insert /path/to/music"
 Add files in /path/to/music to database. Files allready in database
 are ignored.
 .
@@ -179,6 +143,8 @@ artist contains queen \fBor\fR beatles
 artist contains queen \fBand not\fR queens
 .IPn "plow \-a queen \-a 'stone age'"
 artist contains queen \fBand\fR stone age
+.IPn "plow \-al Queen"
+artist is less than Queen
 .\" ------------------------------------------------------------------
 .SS "SETTING VALUES"
 .IPn "plow \-a queen \-\-set l english r 'best music ever'"
@@ -245,7 +211,7 @@ are some special fields like [artistOrAlbum], which are explained
 in "SPECIAL FIELDS FOR portable_name AND extinf" below.
 .br
 The following characters are replaced by a '_':
-\\\\n\\r\\t"'$@*{}[]()/:;&? and space
+\\\\n\\r\\t"'$@*{}[]()/:;&? and space.
 .br
 The fields and strings here are seperated by space characters.
 .br
@@ -261,7 +227,7 @@ Default: empty (no renaming)
 .
 .IPn "extinf = [length] "", "" [artist] "" - "" [title]"
 A m3u file can contain extended information, so if a player can't
-read tags from files  or reads them only if the file is played,
+read tags from files or reads them only if the file is played,
 it shows (maybe) this as file information. You can use the same
 as in portable_name here.
 .br
@@ -273,20 +239,13 @@ which extensions your music files have. Otherwise plow tries to
 read tags from every file.
 .br
 Default: empty (no filtering by file extension)
-.\" ------------------------------------------------------------------
-.SS "SECTION [abbr]"
-In this section you can set abbrevations for often used commands.
-You can use all command-line options here. An abbrevation is something
-like <name> = options. Abbrevations are called with a '.', like
-plow .compilation or plow .rock. Examples:
 .
-.IPn "complilation = -q ""SELECT album FROM tbl_album WHERE  album_id_artist=1;"""
-This executes the sql command and prints out a table containing all
-albums that are compilations (tbl_album.album_id_artist = 1).
-.
-.IPn "rock = -g rock -r good best"
-This creates a playlist containig all files where genre contains rock
-and rating contains good or best.
+.IPn "backups = 5"
+This sets the number of database backups to keep. Every time you
+change the database (with \-\-insert or \-\-set) a backup
+file (\fI~/.plow/.YYYYMMDDHHSS.sqlite~\fR) is created.
+.br
+Default: 5
 .\" ------------------------------------------------------------------
 .SS "SECTION [vorbis]"
 Here you set how your ogg/vorbis files are tagged. (The values here
@@ -332,7 +291,7 @@ popularimeter frame (rating) with an owner string
 .RE
 .PD 1
 .PP
-The frame identifier have to be followed by a '/' and the description
+The frame identifier has to be followed by a '/' and the description
 or owner string you used in the frame. If you just want to use the
 first frame of that type, or there is just one, than you can use
 a '*'. Is there nothing after the '/' it means an empty description or
