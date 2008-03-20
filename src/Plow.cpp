@@ -960,6 +960,8 @@ void Plow::createList()
 
 int Plow::readTags()
 {
+  cout << "> searching files ... " << flush;
+
   ///
   /// get files
   ///
@@ -974,7 +976,7 @@ int Plow::readTags()
 
   delete[] path;
 
-  cout << "> " << files->size() << " file(s) found" << endl;
+  cout << files->size() << " found" << endl;
 
   if(files->size() == 0)
   {
@@ -992,12 +994,12 @@ int Plow::readTags()
   char           *quoted;
 
   const char * const  format =
-     "INSERT INTO tbl_tmp (tmp_file_id, tmp_file, tmp_title, tmp_artist, \
-      tmp_album, tmp_part, tmp_parts, tmp_track, tmp_tracks,\
-      tmp_length, tmp_date, tmp_genre, tmp_rating, tmp_mood,\
-      tmp_situation, tmp_tempo, tmp_language, tmp_comment) VALUES (\
-      '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q',\
-      '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q');";
+      "INSERT INTO tbl_tmp (tmp_file_id, tmp_file, tmp_title, tmp_artist, \
+      tmp_album, tmp_part, tmp_parts, tmp_track, tmp_tracks, tmp_length,\
+      tmp_date, tmp_album_release, tmp_genre, tmp_rating, tmp_mood,\
+      tmp_situation, tmp_tempo, tmp_language, tmp_comment, tmp_lyrics)\
+      VALUES ('%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q',\
+      '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q');";
 
   cout << "> reading metadata ...\n\t" << flush;
 
@@ -1041,9 +1043,9 @@ int Plow::readTags()
     {
       if(!reader->mappingDone())
       {
-        StrMap *test = mIniParser->getSection(reader->sectionName());
-        reader->setMapping(*test);
-        delete test;
+        StrMap *mapping = mIniParser->getSection(reader->sectionName());
+        reader->setMapping(*mapping);
+        delete mapping;
       }
 
       reader->read();
@@ -1053,9 +1055,10 @@ int Plow::readTags()
           reader->id(), &reader->file()[mMusicDir.size()], reader->title(),
           reader->artist(), reader->album(), reader->part(),
           reader->parts(), reader->track(), reader->tracks(),
-          reader->length(), reader->date(), reader->genre(),
-          reader->rating(), reader->mood(), reader->situation(),
-          reader->tempo(), reader->language(), reader->comment());
+          reader->length(), reader->date(), reader->release(),
+          reader->genre(), reader->rating(), reader->mood(),
+          reader->situation(), reader->tempo(), reader->language(),
+          reader->comment(), reader->lyrics());
 
       query += quoted;
       sqlite3_free(quoted);
@@ -1178,9 +1181,9 @@ void Plow::addNewValues()
   ///
   cout << "> add info to new albums ..." << endl;
 
-  query  = "SELECT tmp_id_album, tmp_id_artist FROM ";
-  query += "tbl_tmp GROUP BY tmp_id_artist, tmp_id_album ";
-  query += "HAVING COUNT(*) > 3;";
+  query  = "SELECT tmp_id_album, tmp_id_artist FROM \
+            tbl_tmp GROUP BY tmp_id_artist, tmp_id_album\
+            HAVING COUNT(*) > 3;";
 
   mSqlite3->exe(query.c_str());
 
@@ -1200,17 +1203,37 @@ void Plow::addNewValues()
   mSqlite3->exe(query.c_str());
 
   mSqlite3->exe(
-      "SELECT DISTINCT tmp_id_album, tmp_parts, tmp_tracks FROM tbl_tmp;");
+      "SELECT DISTINCT tmp_id_album, tmp_parts, tmp_tracks,\
+       tmp_album_release FROM tbl_tmp;");
 
   query = "BEGIN TRANSACTION;";
 
   for(int i = 0; i < mSqlite3->rows(); ++i)
   {
-    query += "UPDATE tbl_album SET parts='";
-    query += mSqlite3->get(i, "tmp_parts");
-    query += "', tracks='";
-    query += mSqlite3->get(i, "tmp_tracks");
-    query += "' WHERE id_album='";
+    query += "UPDATE tbl_album SET ";
+    if(mSqlite3->get(i, "tmp_parts")[0] != 0)
+    {
+      quoted = sqlite3_mprintf("parts='%q', ",
+                               mSqlite3->get(i, "tmp_parts"));
+      query += quoted;
+      sqlite3_free(quoted);
+    }
+
+    if(mSqlite3->get(i, "tmp_tracks")[0] != 0)
+    {
+      quoted = sqlite3_mprintf("tracks='%q', ",
+                               mSqlite3->get(i, "tmp_tracks"));
+      query += quoted;
+      sqlite3_free(quoted);
+    }
+
+    quoted = sqlite3_mprintf("album_release='%q' ",
+                             mSqlite3->get(i, "tmp_album_release"));
+    query += quoted;
+    sqlite3_free(quoted);
+
+
+    query += "WHERE id_album='";
     query += mSqlite3->get(i, "tmp_id_album");
     query += "';";
   }
@@ -1226,14 +1249,14 @@ void Plow::insertNewSongs()
 {
   string query = "BEGIN TRANSACTION;";
 
-  char   *quoted;
+  char *quoted;
 
   const char * const format =
       "INSERT INTO tbl_music (file_id, file, title, _id_artist, _id_album,\
-       part, track, length, _id_genre, _id_rating, _id_mood,\
-       _id_situation, _id_tempo, _id_language, date, comment) VALUES (\
-      '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q',\
-      '%q', '%q', '%q', '%q', '%q');";
+      part, track, length, _id_genre, _id_rating, _id_mood,\
+      _id_situation, _id_tempo, _id_language, date, comment, lyrics)\
+      VALUES ('%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q',\
+      '%q', '%q', '%q', '%q', '%q', '%q', '%q');";
 
   mSqlite3->exe(
       "SELECT * FROM tbl_tmp ORDER BY tmp_album, tmp_part, tmp_track;");
@@ -1258,7 +1281,8 @@ void Plow::insertNewSongs()
         mSqlite3->get(i, "tmp_id_tempo"),
         mSqlite3->get(i, "tmp_id_language"),
         mSqlite3->get(i, "tmp_date"),
-        mSqlite3->get(i, "tmp_comment"));
+        mSqlite3->get(i, "tmp_comment"),
+        mSqlite3->get(i, "tmp_lyrics"));
 
     query += quoted;
 

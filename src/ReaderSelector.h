@@ -33,13 +33,14 @@ class ReaderSelector
   public:
 
     /**
-     *
+     * supported file/tag types
      */
     enum FileType
     {
-      UNKNOWN = -1,
-      VORBIS,
-      ID3V2
+      UNKNOWN = -1, /// unsupported file
+      OGG_VORBIS,   /// Ogg/Vorbis file with Vorbis comments
+      OGG_FLAC,     /// Ogg/FLAC file with Vorbis comments
+      MPEG_ID3V2    /// MP3 file with ID3v2 tag
     };
 
     /**
@@ -55,7 +56,8 @@ class ReaderSelector
     FileType fileType() const;
 
     /**
-     * @returns an AbstractReader object if fileType is not UNKNOWN
+     * @returns an AbstractReader object if fileType is not UNKNOWN,
+     *          0 otherwise
      */
     AbstractReader * const reader() const;
 

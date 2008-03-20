@@ -339,6 +339,29 @@ album if the album is no compilation, artist otherwise
 .SH "DATABASE FILE"
 \fI~/.plow/plow.sqlite\fR is a SQLite3 database file containing all
 the data used by plow.
+.nf
+    album         TABLE
+    artist        TABLE
+    genre         TABLE
+    language      TABLE
+    mood          TABLE
+    rating        TABLE
+    situation     TABLE
+    tempo         TABLE
+    comment       TEXT
+    date          TEXT
+    file          TEXT
+    file_id       TEXT
+    lyrics        TEXT
+    album_release TEXT
+    title         TEXT
+    tracks        NUMBER
+    track         NUMBER
+    parts         NUMBER
+    part          NUMBER
+    status        NUMBER
+    length        NUMBER
+.fi
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------

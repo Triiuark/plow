@@ -26,7 +26,7 @@
 
 const char * const USAGE = "plow\
  [-|+<c>[e|l|g] <str> [<str>]*]* [--show]                               \n\
- ([--0|...|9] [--random] [--append] [--noplay] | [--set (<c> <str>)+])  \n\
+ ([--0|...|9] [--random] [--add] [--noplay] | [--set (<c> <str>)+])     \n\
  | [--print <tbl>] | [--query <sql>] | [--copy] | [--insert <dir>]      \n\
  | [--help] | [--version]";
 
@@ -150,23 +150,24 @@ extensions = mp3 MP3 ogg OGG\n\
 ###\n\
 [vorbis]\n\
 \n\
-#title     = TITLE\n\
-#artist    = ARTIST\n\
 #album     = ALBUM\n\
-#part      = DISCNUMBER\n\
-#track     = TRACKNUMBER\n\
-#genre     = GENRE\n\
+#artist    = ARTIST\n\
 #comment   = COMMENT\n\
 #date      = DATE\n\
-\n\
+#genre     = GENRE\n\
 #id        = ID\n\
-#parts     = DISCS\n\
-#tracks    = TRACKS\n\
-#rating    = RATING\n\
+#language  = LANGUAGE\n\
+#lyrics    = LYRICS\n\
 #mood      = MOOD\n\
+#part      = DISCNUMBER\n\
+#parts     = DISCS\n\
+#rating    = RATING\n\
+#release   = RELEASE\n\
 #situation = SITUATION\n\
 #tempo     = TEMPO\n\
-#language  = LANGUAGE\n\
+#title     = TITLE\n\
+#track     = TRACKNUMBER\n\
+#tracks    = TRACKS\n\
 \n\
 \n\
 ######################################################################\n\
@@ -175,13 +176,16 @@ extensions = mp3 MP3 ogg OGG\n\
 ###\n\
 [id3v2]\n\
 \n\
-#id        = UFID/*\n\
 #comment   = COMM/\n\
-#rating    = POPM/*\n\
-#mood      = TXXX/MOOD\n\
-#situation = TXXX/SITUATION\n\
-#tempo     = TXXX/TEMPO\n\
+#id        = UFID/*\n\
 #language  = TXXX/LANGUAGE\n\
+#lyrics    = TXXX/LYRICS\n\
+#mood      = TXXX/MOOD\n\
+#rating    = POPM/*\n\
+#release   = TXXX/RELEASE\n\
+#situation = TXXX/SITUATION\n\
+#release   = TXXX/RELEASE\n\
+#tempo     = TXXX/TEMPO\n\
 ";
 
 

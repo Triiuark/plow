@@ -48,19 +48,19 @@ class ID3v2Reader : public AbstractReader
 
     void getTxxxFrame(const char * const field,
                       const char * const description,
-                      TagLib::ID3v2::FrameList *fl);
+                      TagLib::ID3v2::FrameList &fl);
 
     void getCommFrame(const char * const field,
                       const char * const description,
-                      TagLib::ID3v2::FrameList *fl);
+                      TagLib::ID3v2::FrameList &fl);
 
     void getUfidFrame(const char * const field,
                       const char * const description,
-                      TagLib::ID3v2::FrameList *fl);
+                      TagLib::ID3v2::FrameList &fl);
 
     void getPopmFrame(const char * const field,
                       const char * const description,
-                      TagLib::ID3v2::FrameList *fl);
+                      TagLib::ID3v2::FrameList &fl);
 
     static bool sMappingDone;
 

@@ -64,15 +64,11 @@ class AbstractReader
      */
     virtual void read() = 0;
 
-    /**
-     * @returns a unique id of the file, an empty string if not found
-     */
-    const char * const id();
 
     /**
-     * @returns title, an empty string if not found
+     * @returns album, an empty string if not found
      */
-    const char * const title();
+    const char * const album();
 
     /**
      * @returns artist, an empty string if not found
@@ -80,9 +76,51 @@ class AbstractReader
     const char * const artist();
 
     /**
-     * @returns album, an empty string if not found
+     * @returns comment, an empty string if not found
      */
-    const char * const album();
+    const char * const comment();
+
+    /**
+     * @returns date, an empty string if not found
+     */
+    const char * const date();
+
+    /**
+     * @returns file name (if a ...Reader class doesn't reads meta data
+     *                     from file which should be added to database,
+     *                     e.g. if data is read from another db)
+     */
+    const char * const file();
+
+    /**
+     * @returns genre, an empty string if not found
+     */
+    const char * const genre();
+
+    /**
+     * @returns a unique id of the file, an empty string if not found
+     */
+    const char * const id();
+
+    /**
+     * @returns language, an empty string if not found
+     */
+    const char * const language();
+
+    /**
+     * @returns length of song in seconds
+     */
+    const char * const length();
+
+    /**
+     * @returns lyrics, an empty string if not found
+     */
+    const char * const lyrics();
+
+    /**
+     * @returns mood, an empty string if not found
+     */
+    const char * const mood();
 
     /**
      * @returns part number, an empty string if not found
@@ -95,29 +133,14 @@ class AbstractReader
     const char * const parts();
 
     /**
-     * @returns track number, an empty string if not found
-     */
-    const char * const track();
-
-    /**
-     * @returns total number of tracks, an empty string if not found
-     */
-    const char * const tracks();
-
-    /**
-     * @returns genre, an empty string if not found
-     */
-    const char * const genre();
-
-    /**
      * @returns rating, an empty string if not found
      */
     const char * const rating();
 
     /**
-     * @returns mood, an empty string if not found
+     * @returns album release date, an empty string if not found
      */
-    const char * const mood();
+    const char * const release();
 
     /**
      * @returns situation, an empty string if not found
@@ -130,34 +153,19 @@ class AbstractReader
     const char * const tempo();
 
     /**
-     * @returns language, an empty string if not found
+     * @returns title, an empty string if not found
      */
-    const char * const language();
+    const char * const title();
 
     /**
-     * @returns date, an empty string if not found
+     * @returns track number, an empty string if not found
      */
-    const char * const date();
+    const char * const track();
 
     /**
-     * @returns comment, an empty string if not found
+     * @returns total number of tracks, an empty string if not found
      */
-    const char * const comment();
-
-    /**
-     * @returns length of song in seconds
-     */
-    const char * const length();
-
-    /**
-     * @returns file name (if a ...Reader class doesn't reads meta data
-     *                     from file which should be added to database,
-     *                     e.g. if data is read from another db)
-     */
-    const char * const file();
-
-
-
+    const char * const tracks();
 
     /**
      * @returns 0 if no error occured

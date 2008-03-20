@@ -1,7 +1,9 @@
 #include "VorbisReader.h"
 
 #include <tag.h>
+#include <oggfile.h>
 #include <vorbisfile.h>
+#include <oggflacfile.h>
 #include <xiphcomment.h>
 #include <audioproperties.h>
 
@@ -15,6 +17,8 @@ VorbisReader::VorbisReader(const char * const fname)
     : AbstractReader(fname)
 {
   initMapping();
+
+  mType = ReaderSelector::OGG_VORBIS;
 }
 
 void VorbisReader::initMapping() const
@@ -70,10 +74,25 @@ bool VorbisReader::mappingDone() const
 
 void VorbisReader::read()
 {
-  Ogg::Vorbis::File f(mValues["file"].c_str());
+  std::auto_ptr<Ogg::File> of;
   Ogg::XiphComment *tag;
 
-  if((tag = f.tag()))
+  switch(mType)
+  {
+    case ReaderSelector::OGG_FLAC:
+      of.reset(new Ogg::FLAC::File(mValues["file"].c_str()));
+    break;
+
+    default:
+      of.reset(new Ogg::Vorbis::File(mValues["file"].c_str()));
+    break;
+  }
+
+  tag = (Ogg::XiphComment *)of.get()->tag();
+  //Ogg::Vorbis::File f(mValues["file"].c_str());
+  //Ogg::XiphComment *tag;
+
+  if(tag)
   {
     const Ogg::FieldListMap *flm = &tag->fieldListMap();
 
@@ -101,10 +120,19 @@ void VorbisReader::read()
 
   int len;
   char buff[16];
-  if(f.audioProperties())
+  if(of->audioProperties())
   {
-    len = f.audioProperties()->length();
+    len = of->audioProperties()->length();
     sprintf(buff, "%d", len);
     mValues["length"] = buff;
   }
+
+  //delete of;
+}
+
+
+
+void VorbisReader::setType(ReaderSelector::FileType type)
+{
+  mType = type;
 }

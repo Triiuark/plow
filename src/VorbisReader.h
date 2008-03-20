@@ -21,6 +21,7 @@
 #define PLOW_VORBIS_READER_H
 
 #include "AbstractReader.h"
+#include "ReaderSelector.h" /// for ReaderSelector::FileType
 
 /**
  * @see AbstractReader.h
@@ -37,14 +38,19 @@ class VorbisReader : public AbstractReader
 
     void setMapping(StrMap &mapping) const;
 
+    void setType(ReaderSelector::FileType);
+
     bool mappingDone() const;
 
     void read();
 
   private:
     void initMapping() const;
+
     static bool sMappingDone;
     static std::map<std::string, std::string> sMapping;
+
+    ReaderSelector::FileType mType;
 };
 
 #endif
