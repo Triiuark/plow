@@ -102,16 +102,23 @@ void getFiles(PrioQ &fnames,
 
 
 
-void mkdir_r(const string &path, int mode)
+void mkdir_r(string const &path, int mode)
 {
+  string newPath = path;
+
+  if(newPath[newPath.size() - 1] == '/')
+  {
+    newPath[newPath.size() - 1] = 0;
+  }
+
   struct stat st;
 
-  if(path.length() == 0 || stat(path.c_str(), &st) == 0)
+  if(newPath.length() == 0 || stat(newPath.c_str(), &st) == 0)
   {
     if(!S_ISDIR(st.st_mode))
     {
       throw PlowException("mkdir_r",
-                          path.c_str(),
+                          newPath.c_str(),
                           "(Re)moving this file may help.");
     }
     /// path exists
@@ -119,17 +126,17 @@ void mkdir_r(const string &path, int mode)
     return;
   }
 
-  unsigned int pos = path.find_last_of('/');
+  unsigned int pos = newPath.find_last_of('/');
 
   if(pos != string::npos && pos != 0)
   {
-    string parentpath(path);
+    string parentpath(newPath);
     parentpath.resize(pos);
 
     mkdir_r(parentpath, mode);
   }
 
-  if(mkdir(path.c_str(), mode) == -1)
+  if(mkdir(newPath.c_str(), mode) == -1)
   {
     /// EEXIST never happens, its caught above
     throw PlowException("mkdir_r", path.c_str());
@@ -138,7 +145,7 @@ void mkdir_r(const string &path, int mode)
 
 
 
-int copyfile(string const &src, const string &dst)
+int copyfile(string const &src, string const &dst)
 {
   int err = 0;
 
@@ -173,7 +180,6 @@ int copyfile(string const &src, const string &dst)
     throw PlowException("copyfile", dst.c_str());
   }
 
-  /// iso c++ forbids variable size array
   char buffer[4096];
   int buffSize = sizeof(buffer);
   errno = 0;

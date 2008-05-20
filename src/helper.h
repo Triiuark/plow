@@ -1,5 +1,5 @@
 /***********************************************************************
-* Copyright (C) 2006 by René Bählkow                                   *
+* Copyright (C) 2006 - 2008 by René Bählkow                            *
 *                                                                      *
 * This program is free software; you can redistribute it and/or modify *
 * it under the terms of the GNU General Public License as published by *
@@ -73,7 +73,7 @@ void mkdir_r(std::string const &path, int mode = 0700);
  *
  * @return 0 on success, 1 if @a dst exists
  */
-int copyfile(const std::string &src, const std::string &dst);
+int copyfile(std::string const &src, std::string const &dst);
 
 
 
@@ -96,7 +96,7 @@ unsigned int utf8strlen(const char * const utf8str);
  *
  * @param chars a string containing all characters to replace
  * @param in the string where characters should be replaced
- * @param by charcter to split on
+ * @param by character to use instead
  */
 void replaceChars(std::string const &chars, std::string &in, char by='_');
 

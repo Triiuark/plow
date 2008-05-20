@@ -1,5 +1,5 @@
 /***********************************************************************
-* Copyright (C) 2006 by René Bählkow                                   *
+* Copyright (C) 2006 - 2008 by René Bählkow                            *
 *                                                                      *
 * This program is free software; you can redistribute it and/or modify *
 * it under the terms of the GNU General Public License as published by *
@@ -20,6 +20,10 @@
 #define PACKAGE "plow"
 #ifndef VERSION
 #define VERSION "(version not set)"
+#endif
+
+#ifndef TAGLIB_VERSION
+#define TAGLIB_VERSION "(version not set)"
 #endif
 
 #include <iostream>
@@ -66,16 +70,15 @@ int parseUpdate(int actual, int argc, char *argv[], Plow &plow)
   char key;
   const char *field;
 
-  ostringstream errmsg;
-
   while(actual < argc
         && argv[actual][0] != '-'
         && argv[actual][0] != '+')
   {
     if(argv[actual][1] != 0)
     {
-      errmsg << "wrong syntax near '" << argv[actual] << "'";
-      throw PlowException("paseUpdate", errmsg.str().c_str());
+      PlowException e("paseUpdate", "", USAGE);
+      e.error() << "wrong syntax near '" << argv[actual] << "'";
+      throw e;
     }
 
     key   = argv[actual][0];
@@ -83,14 +86,16 @@ int parseUpdate(int actual, int argc, char *argv[], Plow &plow)
 
     if(field == 0)
     {
-      errmsg << "unkown field '" << key << "'";
-      throw PlowException("parseUpdate", errmsg.str().c_str(), USAGE);
+      PlowException e("parseUpdate", "", USAGE);
+      e.error() << "unkown field '" << key << "'";
+      throw e;
     }
 
     if(argc < actual + 2) {
-      errmsg << "missing argument for field '" << key
-             << " (" << field << ")'";
-      throw PlowException("parseUpdate", errmsg.str().c_str(), USAGE);
+      PlowException e("parseUpdate", "", USAGE);
+      e.error() << "missing argument for field '" << key
+                << " (" << field << ")'";
+      throw e;
     }
 
     ++actual;
@@ -112,18 +117,18 @@ int parseFilter(int actual, int argc, char **argv, Plow &plow)
 
   const char *field = Plow::getField(key)->first;
 
-  ostringstream errmsg;
-
   if(field == 0)
   {
-    errmsg << "unkown field '" << key << "'";
-    throw PlowException("parseFilter", errmsg.str().c_str(), USAGE);
+    PlowException e("parseFilter", "", USAGE);
+    e.error() << "unkown field '" << key << "'";
+    throw e;
   }
 
   if(argc < actual + 2)
   {
-    errmsg << "missing argument for field '" << key << "'";
-    throw PlowException("parseFilter", errmsg.str().c_str(), USAGE);
+    PlowException e("parseFilter", "", USAGE);
+    e.error() << "missing argument for field '" << key << "'";
+    throw e;
   }
 
   string pre;
@@ -148,8 +153,9 @@ int parseFilter(int actual, int argc, char **argv, Plow &plow)
   }
   else
   {
-    errmsg << "wrong syntax near '" << argv[actual] << "'";
-    throw PlowException("parseFilter", errmsg.str().c_str(), USAGE);
+    PlowException e("parseFilter", "", USAGE);
+    e.error() << "wrong syntax near '" << argv[actual] << "'";
+    throw e;
   }
 
 
@@ -184,8 +190,9 @@ int parseFilter(int actual, int argc, char **argv, Plow &plow)
 
   if(pos == actual)
   {
-    errmsg << "Missing argument for option '" << key << "'";
-    throw PlowException("parseFilter", errmsg.str().c_str(), USAGE);
+    PlowException e("parseFilter", "", USAGE);
+    e.error() << "Missing argument for option '" << key << "'";
+    throw e;
   }
 
   /// replace last " OR "
@@ -277,7 +284,7 @@ int parseLongOption(int actual, int argc, char *argv[], Plow &plow)
     }
     else
     {
-      throw PlowException("parseArguments",
+      throw PlowException("parseLongOption",
                           "missing argument for option '--print'",
                           USAGE);
     }
@@ -297,17 +304,26 @@ int parseLongOption(int actual, int argc, char *argv[], Plow &plow)
     }
     else
     {
-      throw PlowException("parseArgs",
+      throw PlowException("parseLongOption",
                           "missing argument for option '--insert'",
                           USAGE);
     }
   }
-
+  else if(strcmp(value, "d") == 0 || strcmp(value, "dump") == 0)
+  {
+    plow.dump(false);
+    //return 1000;
+  }
+  else if(strcmp(value, "D") == 0 || strcmp(value, "dumpfull") == 0)
+  {
+    plow.dump(true);
+    //return 1000;
+  }
   else
   {
-    ostringstream errmsg;
-    errmsg << "unkown option '" << value << "'";
-    throw PlowException("parseLongOption", errmsg.str().c_str(), USAGE);
+    PlowException e("parseLongOption", "", USAGE);
+    e.error() << "unkown option '" << value << "'";
+    throw e;
   }
 
   return actual;
@@ -342,9 +358,9 @@ void parseArguments(int argc, char *argv[], Plow &plow)
       break;
 
       default:
-        ostringstream errmsg;
-        errmsg << "wrong syntax near '" << argv[i] << "'";
-        throw PlowException("parseArguments", errmsg.str().c_str(), USAGE);
+        PlowException e("parseArguments", "", USAGE);
+        e.error() << "wrong syntax near '" << argv[i] << "'";
+        throw e;
     }
   }
 }
@@ -380,7 +396,7 @@ int main(int argc, char *argv[])
 
   catch(...)
   {
-    cerr << "Unhandled exception" << endl;
+    cerr << "Unhandled exception:" << endl;
     cout << endl;
     return 1;
   }

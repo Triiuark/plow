@@ -152,6 +152,7 @@ int Sqlite3::affectedRowsTotal() const
 }
 
 
+
 void Sqlite3::clear()
 {
   if(mHasResult)

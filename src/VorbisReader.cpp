@@ -89,8 +89,6 @@ void VorbisReader::read()
   }
 
   tag = (Ogg::XiphComment *)of.get()->tag();
-  //Ogg::Vorbis::File f(mValues["file"].c_str());
-  //Ogg::XiphComment *tag;
 
   if(tag)
   {
@@ -126,8 +124,6 @@ void VorbisReader::read()
     sprintf(buff, "%d", len);
     mValues["length"] = buff;
   }
-
-  //delete of;
 }
 
 

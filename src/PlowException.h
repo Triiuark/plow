@@ -1,5 +1,5 @@
 /***********************************************************************
-* Copyright (C) 2007 by René Bählkow                                   *
+* Copyright (C) 2006 - 2008 by René Bählkow                            *
 *                                                                      *
 * This program is free software; you can redistribute it and/or modify *
 * it under the terms of the GNU General Public License as published by *

@@ -1,5 +1,5 @@
 /***********************************************************************
-* Copyright (C) 2008 by René Bählkow                                   *
+* Copyright (C) 2006 - 2008 by René Bählkow                            *
 *                                                                      *
 * This program is free software; you can redistribute it and/or modify *
 * it under the terms of the GNU General Public License as published by *
@@ -96,11 +96,11 @@ class Plow
     void setPlayer(char player);
 
     /**
-     * execute a query
+     * execute a sql query
      *
      * @param query to execute
      */
-    void setQuery (const char * const query);
+    void setQuery(const char * const query);
 
     /**
      * add a filter value
@@ -124,10 +124,13 @@ class Plow
      */
     void insert(const char * const path);
 
+
+    void dump(bool full = false);
   private:
     static void initFields();
 
     void backup();
+
     void copy();
     void printQuery(const std::string &query);
     void createFileNames();
@@ -135,6 +138,7 @@ class Plow
     void createList();
     void createFilter(const std::string &select);
     void openDb();
+    void dumpTable(const char * const, bool full = false);
     std::string createPlayerArgs();
     std::string infoString(unsigned int row,
                            const std::vector<std::string *> &tokens,
@@ -146,7 +150,7 @@ class Plow
     void addNewValues();
     void insertNewSongs();
 
-    static std::map<char, std::pair<const char *, FieldType> > fields;
+    static std::map<char, std::pair<const char *, FieldType> > sFields;
 
     std::auto_ptr<IniParser> mIniParser;
     std::auto_ptr<Sqlite3>   mSqlite3;
@@ -176,6 +180,7 @@ class Plow
     bool mShuffle;
     bool mFork;
     bool mCopy;
+    bool mDoNothing;
 };
 
 

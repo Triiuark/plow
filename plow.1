@@ -243,13 +243,16 @@ Default: empty (no filtering by file extension)
 .IPn "backups = 5"
 This sets the number of database backups to keep. Every time you
 change the database (with \-\-insert or \-\-set) a backup
-file (\fI~/.plow/.YYYYMMDDHHSS.sqlite~\fR) is created.
+file (\fI~/.plow/.YYYYMMDDHHSS.sqlite~\fR) is created. 0 means don't
+remove old backups. -1 means do not create backups.
 .br
 Default: 5
 .\" ------------------------------------------------------------------
 .SS "SECTION [vorbis]"
 Here you set how your ogg/vorbis files are tagged. (The values here
 are the defaults used by plow.)
+\fBAll keys have to be in uppercase, even if they are in lowercase in the
+files.\fR
 .IPn "title     = TITLE"
 .IPn "artist    = ARTIST"
 .IPn "album     = ALBUM"
@@ -273,8 +276,7 @@ field is used for the total number of discs.
 .IPn "language  = LANGUAGE"
 .\"-------------------------------------------------------------------
 .SS "SECTION [id3v2]"
-Here you set how your mp3s are tagged. Since ID3v2 is more restricted
-then vorbis comments you could only change the 'special' fields here.
+Here you set how your mp3s are tagged.
 .br
 plow supports the following frame types:
 .PD 0
@@ -292,22 +294,35 @@ popularimeter frame (rating) with an owner string
 .PD 1
 .PP
 The frame identifier has to be followed by a '/' and the description
-or owner string you used in the frame. If you just want to use the
-first frame of that type, or there is just one, than you can use
-a '*'. Is there nothing after the '/' it means an empty description or
-owner string.
+or owner string you used in the frame. Is there nothing after the '/' it
+means an empty description or owner string. If you just want to use the
+first frame of UFID or POPM frames, or there is just one, than you can use
+a '*' as owner string.
 .PP
 You can use all frame types for all fields, e.g. tempo = UFID/* or
 rating = COMM/rating.
 .PP
 (The values here are the defaults used by plow.)
-.IPn "id        = UFID/*"
+.IPn "album     = TALB"
+ID3v2 standard
+.IPn "artist    = TPE1"
+ID3v2 standard
 .IPn "comment   = COMM/"
-.IPn "rating    = POPM/*"
+.IPn "date      = TDRC"
+ID3v2 standard
+.IPn "genre     = TCON"
+ID3v2 standard
+.IPn "id        = UFID/*"
+.IPn "language  = TLAN"
+ID3v2 standard
+.IPn "lyrics    = TXXX/LYRICS"
 .IPn "mood      = TXXX/MOOD"
+.IPn "rating    = POPM/*"
+.IPn "release   = TDRL"
 .IPn "situation = TXXX/SITUATION"
 .IPn "tempo     = TXXX/TEMPO"
-.IPn "language  = TXXX/LANGUAGE"
+.IPn "title     = TIT2"
+ID3v2 standard
 .\" ------------------------------------------------------------------
 .SS "SPECIAL FIELDS FOR portable_name AND extinf"
 .IPn "[track0]"
@@ -340,27 +355,29 @@ album if the album is no compilation, artist otherwise
 \fI~/.plow/plow.sqlite\fR is a SQLite3 database file containing all
 the data used by plow.
 .nf
-    album         TABLE
-    artist        TABLE
-    genre         TABLE
-    language      TABLE
-    mood          TABLE
-    rating        TABLE
-    situation     TABLE
-    tempo         TABLE
-    comment       TEXT
-    date          TEXT
-    file          TEXT
-    file_id       TEXT
-    lyrics        TEXT
-    album_release TEXT
-    title         TEXT
-    tracks        NUMBER
-    track         NUMBER
-    parts         NUMBER
-    part          NUMBER
-    status        NUMBER
-    length        NUMBER
+    name         table            Sqlite type
+
+    album        tbl_album        TEXT
+    artist       tbl_artist       TEXT
+    genre        tbl_genre        TEXT
+    language     tbl_language     TEXT
+    mood         tbl_mood         TEXT
+    rating       tbl_rating       TEXT
+    situation    tbl_situation    TEXT
+    tempo        tbl_tempo        TEXT
+    comment      tbl_music        TEXT
+    date         tbl_music        TEXT
+    file         tbl_music        TEXT
+    file_id      tbl_music        TEXT
+    lyrics       tbl_music        TEXT
+    release      tbl_album        TEXT
+    status       tbl_music        TEXT
+    title        tbl_music        TEXT
+    length       tbl_music        INTEGER
+    tracks       tbl_album        INTEGER
+    track        tbl_music        INTEGER
+    parts        tbl_album        INTEGER
+    part         tbl_music        INTEGER
 .fi
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------

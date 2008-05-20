@@ -20,15 +20,17 @@ ReaderSelector::ReaderSelector(const char * const fname)
 
   if(strncmp("OggS", head, 4) == 0)
   {
-    unsigned int pos = (unsigned char)head[26] + 28;
+    unsigned int pos = (unsigned char)head[26] + 27;
 
-    if(strncmp(&head[pos + 1],  "vorbis", 6) == 0) //&& head[pos] == 0x01
+    //head[pos] == 0x01 &&
+    if(strncmp(&head[pos + 1],  "vorbis", 6) == 0)
     {
       mType = OGG_VORBIS;
       mReader.reset(new VorbisReader(fname));
       ((VorbisReader *)mReader.get())->setType(OGG_VORBIS);
     }
-    else if(strncmp(&head[pos + 1], "FLAC", 4) == 0) //&& head[pos] == 0x7f
+    //head[pos] == 0x7f &&
+    else if(strncmp(&head[pos + 1], "FLAC", 4) == 0)
     {
       mType = OGG_FLAC;
       mReader.reset(new VorbisReader(fname));

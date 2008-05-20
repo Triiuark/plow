@@ -1,13 +1,10 @@
 #include "AbstractReader.h"
 
-
-
 AbstractReader::AbstractReader(const char * const fname)
 {
   mErr             = 0;
   mValues["file"]  = fname;
 }
-
 
 
 

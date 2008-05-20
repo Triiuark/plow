@@ -21,45 +21,45 @@ extern "C" {
 
 using namespace std;
 
-map<char, pair<const char *,Plow::FieldType> > Plow::fields;
+map<char, pair<const char *,Plow::FieldType> > Plow::sFields;
 
+/// static
 void Plow::initFields()
 {
-  if(Plow::fields.size() == 0)
+  if(Plow::sFields.size() == 0)
   {
-    fields['A'] = pair<const char *, FieldType> ("album",         TABLE);
-    fields['a'] = pair<const char *, FieldType> ("artist",        TABLE);
-    fields['c'] = pair<const char *, FieldType> ("comment",       TEXT);
-    fields['d'] = pair<const char *, FieldType> ("date",          TEXT);
-    fields['f'] = pair<const char *, FieldType> ("file",          TEXT);
-    fields['g'] = pair<const char *, FieldType> ("genre",         TABLE);
-    fields['i'] = pair<const char *, FieldType> ("file_id",       TEXT);
-    fields['l'] = pair<const char *, FieldType> ("language",      TABLE);
-    fields['L'] = pair<const char *, FieldType> ("lyrics",        TEXT);
-    fields['m'] = pair<const char *, FieldType> ("mood",          TABLE);
-    fields['N'] = pair<const char *, FieldType> ("tracks",        NUMBER);
-    fields['n'] = pair<const char *, FieldType> ("track",         NUMBER);
-    fields['P'] = pair<const char *, FieldType> ("parts",         NUMBER);
-    fields['p'] = pair<const char *, FieldType> ("part",          NUMBER);
-    fields['R'] = pair<const char *, FieldType> ("album_release", TEXT);
-    fields['r'] = pair<const char *, FieldType> ("rating",        TABLE);
-    fields['S'] = pair<const char *, FieldType> ("status",        NUMBER);
-    fields['s'] = pair<const char *, FieldType> ("situation",     TABLE);
-    fields['T'] = pair<const char *, FieldType> ("title",         TEXT);
-    fields['t'] = pair<const char *, FieldType> ("tempo",         TABLE);
-    fields['x'] = pair<const char *, FieldType> ("length",        NUMBER);
+    sFields['A'] = pair<const char *, FieldType> ("album",     TABLE);
+    sFields['a'] = pair<const char *, FieldType> ("artist",    TABLE);
+    sFields['c'] = pair<const char *, FieldType> ("comment",   TEXT);
+    sFields['d'] = pair<const char *, FieldType> ("date",      TEXT);
+    sFields['f'] = pair<const char *, FieldType> ("file",      TEXT);
+    sFields['g'] = pair<const char *, FieldType> ("genre",     TABLE);
+    sFields['i'] = pair<const char *, FieldType> ("file_id",   TEXT);
+    sFields['L'] = pair<const char *, FieldType> ("lyrics",    TEXT);
+    sFields['l'] = pair<const char *, FieldType> ("language",  TABLE);
+    sFields['m'] = pair<const char *, FieldType> ("mood",      TABLE);
+    sFields['N'] = pair<const char *, FieldType> ("tracks",    NUMBER);
+    sFields['n'] = pair<const char *, FieldType> ("track",     NUMBER);
+    sFields['P'] = pair<const char *, FieldType> ("parts",     NUMBER);
+    sFields['p'] = pair<const char *, FieldType> ("part",      NUMBER);
+    sFields['R'] = pair<const char *, FieldType> ("release",   TEXT);
+    sFields['r'] = pair<const char *, FieldType> ("rating",    TABLE);
+    sFields['S'] = pair<const char *, FieldType> ("status",    NUMBER);
+    sFields['s'] = pair<const char *, FieldType> ("situation", TABLE);
+    sFields['T'] = pair<const char *, FieldType> ("title",     TEXT);
+    sFields['t'] = pair<const char *, FieldType> ("tempo",     TABLE);
+    sFields['x'] = pair<const char *, FieldType> ("length",    NUMBER);
   }
 }
 
 
-
+/// static
 pair<const char *, Plow::FieldType> *Plow::getField(char key)
 {
   Plow::initFields();
 
-  return &fields[key];
+  return &sFields[key];
 }
-
 
 
 
@@ -72,6 +72,7 @@ Plow::Plow()
   mAddToPlaylist = false;
   mShuffle       = false;
   mCopy          = false;
+  mDoNothing     = false;
 }
 
 
@@ -187,7 +188,7 @@ void Plow::initialize()
         cout << "> created config file: " << inifile << "\n\n"
              << "You have to edit " << inifile << " now." << endl;
 
-        exit(0);
+        mDoNothing = true;
       }
     }
 
@@ -219,9 +220,74 @@ void Plow::openDb()
 
 
 
+void Plow::dumpTable(const char * const table, bool full)
+{
+  char select[48];
+  char *quotedValue;
+
+  snprintf(select, 47, "SELECT * FROM %s;", table);
+  Sqlite3 sql(mDbFile.c_str());
+
+  sql.exe(select);
+
+  int i = 0;
+
+  if(!full && strcmp(table, "tbl_music") != 0)
+  {
+    i = 1;
+  }
+
+  for(; i < sql.rows(); ++i)
+  {
+    cout << "INSERT INTO \"" << table << "\" VALUES (";
+
+    int j = 0;
+    for(; j < sql.cols() - 1; ++j)
+    {
+      quotedValue = sqlite3_mprintf("'%q',", sql.get(i, j));
+      cout << quotedValue;
+      sqlite3_free(quotedValue);
+    }
+
+    quotedValue = sqlite3_mprintf("'%q');", sql.get(i, j));
+    cout << quotedValue << endl;;
+    sqlite3_free(quotedValue);
+  }
+}
+
+
+void Plow::dump(bool full)
+{
+  initialize();
+  openDb();
+
+  mDoNothing = true;
+
+  mSqlite3->exe("SELECT name, sql FROM SQLITE_MASTER WHERE type='table';");
+
+  cout << "BEGIN TRANSACTION;" << endl;
+
+  if(full)
+  {
+    for(int i = 0; i < mSqlite3->rows(); ++i)
+    {
+      cout << mSqlite3->get(i, 1) << ";" << endl;
+    }
+  }
+
+  for(int i = 0; i < mSqlite3->rows(); ++i)
+  {
+    dumpTable(mSqlite3->get(i, 0), full);
+  }
+
+  cout << "COMMIT TRANSACTION;" << endl;
+}
+
+
+
 void Plow::backup()
 {
-  if(mKeepBackup < 1)
+  if(mKeepBackup < 0)
   {
     return;
   }
@@ -239,6 +305,10 @@ void Plow::backup()
 
   copyfile(mDbFile, dst);
 
+  if(mKeepBackup == 0)
+  {
+    return;
+  }
 
   PrioQ fnames;
   char  *path         = new char[mDataDir.size() + 1];
@@ -595,7 +665,7 @@ void Plow::update()
   string insert;
   ostringstream query;
 
-  string filter="SELECT\n\tid_music\n  ";
+  string filter = "SELECT\n\tid_music\n  ";
   filter += FROM;
   filter += "  ";
   filter += WHERE;
@@ -652,7 +722,7 @@ void Plow::update()
 
   if(mUpdate.size() > 0)
   {
-    update  ="UPDATE tbl_music SET ";
+    update  = "UPDATE tbl_music SET ";
     update += &(mUpdate.c_str()[1]);
     update += "\nWHERE id_music IN (\n  ";
     update += filter + ");";
@@ -676,8 +746,11 @@ void Plow::update()
   {
     update  = "UPDATE tbl_album SET ";
     update += &(mUpdateAlbum.c_str()[1]);
-    update += "\nWHERE id_album IN (\n  ";
-    update += filter + ");";
+    update += "\nWHERE id_album IN (\n  SELECT id_album\n ";
+    update += FROM;
+    update += "  ";
+    update += WHERE;
+    update += mFilter + ");";
 
     if(!backedUp)
     {
@@ -917,7 +990,10 @@ void Plow::createList()
   ofstream m3u(mPlaylistFile.c_str(), open_mode);
   if(!m3u)
   {
-    throw PlowException("Plow::createList", "Can't open playlist file.");
+    throw PlowException(
+              "Plow::createList",
+              "can't open playlist file",
+              "Did you set a proper value for playlist in config file?");
   }
 
   if(!mAddToPlaylist)
@@ -996,7 +1072,7 @@ int Plow::readTags()
   const char * const  format =
       "INSERT INTO tbl_tmp (tmp_file_id, tmp_file, tmp_title, tmp_artist, \
       tmp_album, tmp_part, tmp_parts, tmp_track, tmp_tracks, tmp_length,\
-      tmp_date, tmp_album_release, tmp_genre, tmp_rating, tmp_mood,\
+      tmp_date, tmp_release, tmp_genre, tmp_rating, tmp_mood,\
       tmp_situation, tmp_tempo, tmp_language, tmp_comment, tmp_lyrics)\
       VALUES ('%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q',\
       '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q');";
@@ -1101,11 +1177,11 @@ void Plow::addNewValues()
   Sqlite3 sql(mDbFile.c_str());
 
   map<char, pair<const char *, Plow::FieldType> >::iterator it =
-      Plow::fields.begin();
+      Plow::sFields.begin();
 
   query3 = "BEGIN TRANSACTION;";
 
-  while(it != Plow::fields.end())
+  while(it != Plow::sFields.end())
   {
     if(it->second.second != Plow::TABLE)
     {
@@ -1204,7 +1280,7 @@ void Plow::addNewValues()
 
   mSqlite3->exe(
       "SELECT DISTINCT tmp_id_album, tmp_parts, tmp_tracks,\
-       tmp_album_release FROM tbl_tmp;");
+       tmp_release FROM tbl_tmp;");
 
   query = "BEGIN TRANSACTION;";
 
@@ -1227,8 +1303,8 @@ void Plow::addNewValues()
       sqlite3_free(quoted);
     }
 
-    quoted = sqlite3_mprintf("album_release='%q' ",
-                             mSqlite3->get(i, "tmp_album_release"));
+    quoted = sqlite3_mprintf("release='%q' ",
+                             mSqlite3->get(i, "tmp_release"));
     query += quoted;
     sqlite3_free(quoted);
 
@@ -1311,6 +1387,11 @@ void Plow::run()
 {
   initialize();
 
+  if(mDoNothing)
+  {
+    return;
+  }
+
   openDb();
 
   if(mUpdate.size() > 0
@@ -1347,7 +1428,6 @@ void Plow::run()
     createFilter(select);
     printQuery(mFilter);
     createList();
-
   }
 
   if(mCopy)
@@ -1374,7 +1454,7 @@ void Plow::run()
     {
       case 0: /// child
         execvp(playerArgs[0], playerArgs);
-        e.error() << "Can't execute player (" << playerArgs[0] << ")";
+        e.error() << "can't execute player (" << playerArgs[0] << ")";
         throw e;
       case -1: /// fork error
         e.error() << "can't fork() process";

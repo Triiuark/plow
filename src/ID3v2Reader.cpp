@@ -1,8 +1,5 @@
 #include "ID3v2Reader.h"
 
-#include <sstream>
-
-
 #include <tag.h>
 #include <audioproperties.h>
 #include <mpegfile.h>
@@ -82,6 +79,10 @@ void ID3v2Reader::read()
 
   if((tag = f.ID3v2Tag()))
   {
+    ///
+    /// track and part parsing
+    ///
+
     std::string s;
     ID3v2::TextIdentificationFrame *tif;
     unsigned int pos;
@@ -116,6 +117,10 @@ void ID3v2Reader::read()
       }
     }
 
+    ///
+    /// all the other fields
+    ///
+
     std::map<std::string, std::string>::iterator fieldsIt =
         sMapping.begin();
 
@@ -125,7 +130,7 @@ void ID3v2Reader::read()
     while(fieldsIt != sMapping.end())
     {
       strncpy(frameName, fieldsIt->second.c_str(), 4);
-      description = strchr(fieldsIt->second.c_str(), '/');
+
 
       ID3v2::FrameList fl =
               (ID3v2::FrameList)(tag->frameListMap()[frameName]);
@@ -135,18 +140,25 @@ void ID3v2Reader::read()
         ++fieldsIt;
         continue;
       }
-
+      /// check for TextIdentificationFrame
       if(frameName[0] == 'T' && strcmp(frameName, "TXXX") != 0)
       {
-        //for(TagLib::uint i = 0; i < fl.size(); ++i)
-        //{
+        /// just use the first value fl.front()
         mValues[fieldsIt->first.c_str()] =
                 fl.front()->toString().toCString(true);
-        //}
       }
-      else if(description)
+      else
       {
-        description = &description[1];
+        description = strchr(fieldsIt->second.c_str(), '/');
+
+        if(description)
+        {
+          description = &description[1];
+        }
+        else
+        {
+          description = 0;
+        }
 
         if(strcmp(frameName, "TXXX") == 0)
         {
@@ -185,8 +197,6 @@ void ID3v2Reader::getTxxxFrame(const char  * const field,
                                const char  * const description,
                                ID3v2::FrameList &fl)
 {
-  char *tmp;
-
   ID3v2::UserTextIdentificationFrame *utif;
 
   for(TagLib::uint i = 0; i < fl.size(); ++i)
@@ -195,17 +205,9 @@ void ID3v2Reader::getTxxxFrame(const char  * const field,
 
     if(strcmp(utif->description().toCString(true), description) == 0)
     {
-      char *tmp2 = new char[strlen(utif->toString().toCString(true)) + 1];
-      sprintf(tmp2, "%s", utif->toString().toCString(true));
+      /// TODO: is this always correct?
+      mValues[field] = utif->fieldList().back().toCString(true);
 
-      tmp = strchr(tmp2, ']');
-      if(tmp && strlen(tmp) > 2)
-      {
-        mValues[field] = &tmp[2]; /// remove '[description]'
-      } else {
-        mValues[field] = tmp2;
-      }
-      delete[] tmp2;
       return;
     }
   }
@@ -241,7 +243,6 @@ void ID3v2Reader::getUfidFrame(const char * const field,
 
   /// TODO: ID3v2 standard says up to 64 Bytes of BINARY data, but
   ///       should I convert readable id's into hex strings?
-  ///       (e.g UFID frames from musicbrainz.org)
   ///       workaround is now: if UFID contains only [:alnum:], '-' or '_'
   ///       it is not converted into a hex string
 

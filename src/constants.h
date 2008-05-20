@@ -25,51 +25,51 @@
 ///
 
 const char * const USAGE = "plow\
- [-|+<c>[e|l|g] <str> [<str>]*]* [--show]                               \n\
- ([--0|...|9] [--random] [--add] [--noplay] | [--set (<c> <str>)+])     \n\
- | [--print <tbl>] | [--query <sql>] | [--copy] | [--insert <dir>]      \n\
- | [--help] | [--version]";
+ [-|+<c>[e|l|g] <str> [ <str>]*]* [--show]\n\
+     ([--0|...|9] [--random] [--add] [--noplay] | [--set (<c> <str>)+])\n\
+     | [--print <tbl>] | [--query <sql>] | [--copy] | [--insert <dir>]\n\
+     | [--help] | [--version]";
 
 
 
 const char * const HELP = "\
--|+<c>[e|l|g] <str>  - search <c> for fields containing <str>           \n\
-                     + search <c> for fields not containing <str>       \n\
-                     e <str> matches exactly                            \n\
-                     l value in <c> is less than <str>                  \n\
-                     g value in <c> is greater than <str>               \n\
-                     <c> is one of:                                     \n\
-                         A (album),  a (artist),    c (comment),        \n\
-                         d (date),   f (file name), g (genre),          \n\
-                         i (id),     L (lyrics),    l (language),       \n\
-                         m (mood),   N (tracks),    n (track),          \n\
-                         P (parts),  p (part),      R (release),        \n\
-                         r (rating), S (status),    s (situation),      \n\
-                         T (title),  t (tempo),     x (length)          \n\
---S|set <c> <str>    set field <c> to value <str> using actual filter,  \n\
-                     <c> is the same as above                           \n\
-                     (you can change more than one field at a time)     \n\
---0|...|9            select player number (set in configuration file)   \n\
---r|random           shuffle playlist                                   \n\
---a|add              append to playlist                                 \n\
---n|noplay           don't start a player                               \n\
---s|show             print out sql statement for filter or set option   \n\
-                                                                        \n\
---l|list <tbl>       print out values for <tbl>                         \n\
+-|+<c>[e|l|g] <str>  -   search <c> for fields containing <str>\n\
+                     +   search <c> for fields not containing <str>\n\
+                     e   <str> matches exactly\n\
+                     l   value in <c> is less than <str>\n\
+                     g   value in <c> is greater than <str>\n\
+                     <c> is one of:\n\
+                         A (album),  a (artist),    c (comment),\n\
+                         d (date),   f (file name), g (genre),\n\
+                         i (id),     L (lyrics),    l (language),\n\
+                         m (mood),   N (tracks),    n (track),\n\
+                         P (parts),  p (part),      R (release),\n\
+                         r (rating), S (status),    s (situation),\n\
+                         T (title),  t (tempo),     x (length)\n\
+--S|set <c> <str>    set field <c> to value <str> using actual filter,\n\
+                     <c> is the same as above\n\
+                     (you can change more than one field at a time)\n\
+--0|...|9            select player number (set in configuration file)\n\
+--r|random           shuffle playlist\n\
+--a|add              append to playlist\n\
+--n|noplay           don't start a player\n\
+--s|show             print out sql statement for filter or set option\n\
+\n\
+--l|list <tbl>       print out values for <tbl>\n\
                      <tbl> is one of album, artist, genre,     language,\n\
-                                     mood,  rating, situation, tempo    \n\
-                                                                        \n\
---q|query <sql>      execute statement <sql>                            \n\
-                                                                        \n\
---c|copy             copy all files in the current playlist             \n\
-                     to portable_device set in config file              \n\
-                                                                        \n\
---i|insert <path>    add all (supported) files in <path> to database    \n\
-                     Note: <path> has to be absolute                    \n\
-                                                                        \n\
---h|help             print this message                                 \n\
---v|version          print version                                      \n\
-                                                                        \n\
+                                     mood,  rating, situation, tempo\n\
+\n\
+--q|query <sql>      execute statement <sql>\n\
+\n\
+--c|copy             copy all files in the current playlist\n\
+                     to portable_device set in config file\n\
+\n\
+--i|insert <path>    add all (supported) files in <path> to database\n\
+                     Note: <path> has to be absolute\n\
+\n\
+--h|help             print this message\n\
+--v|version          print version\n\
+\n\
 See man plow for some detailed information.";
 
 
@@ -80,7 +80,7 @@ See man plow for some detailed information.";
 
 const char * const SELECT = "SELECT\n\t'%s' || file AS file,\n\t file_id,\
  artist, title, album, genre, language, mood,\n\t tempo, rating,\
- situation, part, track, parts, tracks,\n\t length, album_release, date,\
+ situation, part, track, parts, tracks,\n\t length, release, date,\
  status, comment, lyrics\n";
 
 const char * const FROM = "FROM\n\ttbl_music, tbl_artist, tbl_album,\
@@ -119,9 +119,9 @@ const char * const INI_FILE ="\
 \n\
 ### the player you wish to use, at minimum player0 is required\n\
 player0 = mplayer -playlist\n\
-player1 = audacious\n\
-player2 = xmms\n\
-player3 = amarok -pl\n\
+#player1 = audacious\n\
+#player2 = xmms\n\
+#player3 = amarok -pl\n\
 \n\
 ### the player numbers that requires not to fork\n\
 playernofork = 0\n\
@@ -139,7 +139,7 @@ playernofork = 0\n\
 extinf = [length] \", \" [artist] \" - \" [title]\n\
 \n\
 ### search only for files with an extension in this list\n\
-extensions = mp3 MP3 ogg OGG\n\
+#extensions = mp3 MP3 ogg OGG\n\
 \n\
 ### number of database backups to keep\n\
 #backups = 5\n\
@@ -147,6 +147,7 @@ extensions = mp3 MP3 ogg OGG\n\
 ######################################################################\n\
 ###\n\
 ### here you can set how your ogg/vorbis files are tagged\n\
+### all keys have to be upper case\n\
 ###\n\
 [vorbis]\n\
 \n\
@@ -176,27 +177,32 @@ extensions = mp3 MP3 ogg OGG\n\
 ###\n\
 [id3v2]\n\
 \n\
+#album     = TALB\n\
+#artist    = TPE1\n\
 #comment   = COMM/\n\
+#date      = TDRC\n\
+#genre     = TCON\n\
 #id        = UFID/*\n\
-#language  = TXXX/LANGUAGE\n\
+#language  = TLAN\n\
 #lyrics    = TXXX/LYRICS\n\
 #mood      = TXXX/MOOD\n\
 #rating    = POPM/*\n\
-#release   = TXXX/RELEASE\n\
+#release   = TDRL\n\
 #situation = TXXX/SITUATION\n\
-#release   = TXXX/RELEASE\n\
 #tempo     = TXXX/TEMPO\n\
+#title     = TIT2\
 ";
+
 
 
 const char * const DATABASE =" BEGIN TRANSACTION;\
 CREATE TABLE tbl_album (\n\
   id_album        INTEGER NOT NULL PRIMARY KEY,\n\
-  album           TEXT    NOT NULL DEFAULT '',\n\
+  album           TEXT             DEFAULT '',\n\
   album_id_artist INTEGER NOT NULL DEFAULT 1,\n\
-  tracks          INTEGER NOT NULL DEFAULT 0,\n\
-  parts           INTEGER NOT NULL DEFAULT 1,\n\
-  album_release   TEXT    NOT NULL DEFAULT ''\n\
+  tracks          INTEGER          DEFAULT 0,\n\
+  parts           INTEGER          DEFAULT 1,\n\
+  release         TEXT             DEFAULT ''\n\
 );\n\
 INSERT INTO 'tbl_album' VALUES(1, '', 1, 0, 1, '');\n\
 \n\
@@ -204,7 +210,7 @@ INSERT INTO 'tbl_album' VALUES(1, '', 1, 0, 1, '');\n\
 \n\
 CREATE TABLE tbl_artist (\n\
   id_artist INTEGER NOT NULL PRIMARY KEY,\n\
-  artist    TEXT    NOT NULL UNIQUE\n\
+  artist    TEXT             UNIQUE\n\
 );\n\
 INSERT INTO 'tbl_artist' VALUES(1, '');\n\
 \n\
@@ -212,7 +218,7 @@ INSERT INTO 'tbl_artist' VALUES(1, '');\n\
 \n\
 CREATE TABLE tbl_genre (\n\
   id_genre INTEGER NOT NULL PRIMARY KEY,\n\
-  genre    TEXT    NOT NULL UNIQUE\n\
+  genre    TEXT             UNIQUE\n\
 );\n\
 INSERT INTO 'tbl_genre' VALUES(1, '');\n\
 \n\
@@ -220,7 +226,7 @@ INSERT INTO 'tbl_genre' VALUES(1, '');\n\
 \n\
 CREATE TABLE tbl_language (\n\
   id_language INTEGER NOT NULL PRIMARY KEY,\n\
-  language    TEXT    NOT NULL UNIQUE\n\
+  language    TEXT             UNIQUE\n\
 );\n\
 INSERT INTO 'tbl_language' VALUES(1, '');\n\
 \n\
@@ -228,7 +234,7 @@ INSERT INTO 'tbl_language' VALUES(1, '');\n\
 \n\
 CREATE TABLE tbl_mood (\n\
   id_mood INTEGER NOT NULL PRIMARY KEY,\n\
-  mood    TEXT    NOT NULL UNIQUE\n\
+  mood    TEXT             UNIQUE\n\
 );\n\
 INSERT INTO 'tbl_mood' VALUES(1, '');\n\
 \n\
@@ -236,31 +242,31 @@ INSERT INTO 'tbl_mood' VALUES(1, '');\n\
 \n\
 CREATE TABLE tbl_music (\n\
   id_music       INTEGER NOT NULL PRIMARY KEY,\n\
-  file_id        TEXT    NOT NULL DEFAULT '',\n\
+  file_id        TEXT             DEFAULT '',\n\
   file           TEXT    NOT NULL UNIQUE,\n\
-  title          TEXT    NOT NULL DEFAULT '',\n\
+  title          TEXT             DEFAULT '',\n\
   _id_artist     INTEGER NOT NULL DEFAULT 1,\n\
   _id_album      INTEGER NOT NULL DEFAULT 1,\n\
-  part           INTEGER NOT NULL DEFAULT 1,\n\
-  track          INTEGER NOT NULL DEFAULT 0,\n\
-  length         INTEGER NOT NULL DEFAULT 0,\n\
+  part           INTEGER          DEFAULT 1,\n\
+  track          INTEGER          DEFAULT 0,\n\
+  length         INTEGER          DEFAULT 0,\n\
   _id_genre      INTEGER NOT NULL DEFAULT 1,\n\
   _id_rating     INTEGER NOT NULL DEFAULT 1,\n\
   _id_mood       INTEGER NOT NULL DEFAULT 1,\n\
   _id_situation  INTEGER NOT NULL DEFAULT 1,\n\
   _id_tempo      INTEGER NOT NULL DEFAULT 1,\n\
   _id_language   INTEGER NOT NULL DEFAULT 1,\n\
-  date           TEXT    NOT NULL DEFAULT '',\n\
-  status         TEXT    NOT NULL DEFAULT '',\n\
-  comment        TEXT    NOT NULL DEFAULT '',\n\
-  lyrics         TEXT    NOT NULL DEFAULT ''\n\
+  date           TEXT             DEFAULT '',\n\
+  status         TEXT             DEFAULT '',\n\
+  comment        TEXT             DEFAULT '',\n\
+  lyrics         TEXT             DEFAULT ''\n\
 );\n\
 \n\
 \n\
 \n\
 CREATE TABLE tbl_rating (\n\
   id_rating INTEGER NOT NULL PRIMARY KEY,\n\
-  rating    TEXT    NOT NULL UNIQUE\n\
+  rating    TEXT             UNIQUE\n\
 );\n\
 INSERT INTO 'tbl_rating' VALUES(1, '');\n\
 \n\
@@ -268,7 +274,7 @@ INSERT INTO 'tbl_rating' VALUES(1, '');\n\
 \n\
 CREATE TABLE tbl_situation (\n\
   id_situation INTEGER NOT NULL PRIMARY KEY,\n\
-  situation    TEXT    NOT NULL UNIQUE\n\
+  situation    TEXT             UNIQUE\n\
 );\n\
 INSERT INTO 'tbl_situation' VALUES(1, '');\n\
 \n\
@@ -276,51 +282,51 @@ INSERT INTO 'tbl_situation' VALUES(1, '');\n\
 \n\
 CREATE TABLE tbl_tempo (\n\
   id_tempo INTEGER NOT NULL PRIMARY KEY,\n\
-  tempo    TEXT    NOT NULL UNIQUE\n\
+  tempo    TEXT             UNIQUE\n\
 );\n\
 INSERT INTO 'tbl_tempo' VALUES(1, '');\n\
 \n\
 \n\
 \n\
 CREATE TABLE tbl_tmp (\n\
-  tmp_id            INTEGER NOT NULL PRIMARY KEY,\n\
-  tmp_file_id       TEXT    NOT NULL DEFAULT '',\n\
-  tmp_file          TEXT    NOT NULL DEFAULT '',\n\
-  tmp_title         TEXT    NOT NULL DEFAULT '',\n\
-  tmp_artist        TEXT    NOT NULL DEFAULT '',\n\
-  tmp_album         TEXT    NOT NULL DEFAULT '',\n\
-  tmp_part          INTEGER NOT NULL DEFAULT 1,\n\
-  tmp_parts         INTEGER NOT NULL DEFAULT 1,\n\
-  tmp_track         INTEGER NOT NULL DEFAULT 0,\n\
-  tmp_tracks        INTEGER NOT NULL DEFAULT 0,\n\
-  tmp_length        INTEGER NOT NULL DEFAULT 0,\n\
-  tmp_date          TEXT    NOT NULL DEFAULT '',\n\
-  tmp_album_release TEXT    NOT NULL DEFAULT '',\n\
-  tmp_genre         TEXT    NOT NULL DEFAULT '',\n\
-  tmp_rating        TEXT    NOT NULL DEFAULT '',\n\
-  tmp_mood          TEXT    NOT NULL DEFAULT '',\n\
-  tmp_situation     TEXT    NOT NULL DEFAULT '',\n\
-  tmp_tempo         TEXT    NOT NULL DEFAULT '',\n\
-  tmp_language      TEXT    NOT NULL DEFAULT '',\n\
-  tmp_comment       TEXT    NOT NULL DEFAULT '',\n\
-  tmp_lyrics        TEXT    NOT NULL DEFAULT '',\n\
-  tmp_id_artist     INTEGER NOT NULL DEFAULT 1,\n\
-  tmp_id_album      INTEGER NOT NULL DEFAULT 1,\n\
-  tmp_id_genre      INTEGER NOT NULL DEFAULT 1,\n\
-  tmp_id_rating     INTEGER NOT NULL DEFAULT 1,\n\
-  tmp_id_mood       INTEGER NOT NULL DEFAULT 1,\n\
-  tmp_id_situation  INTEGER NOT NULL DEFAULT 1,\n\
-  tmp_id_tempo      INTEGER NOT NULL DEFAULT 1,\n\
-  tmp_id_language   INTEGER NOT NULL DEFAULT 1\n\
+  tmp_id           INTEGER NOT NULL PRIMARY KEY,\n\
+  tmp_file_id      TEXT             DEFAULT '',\n\
+  tmp_file         TEXT             DEFAULT '',\n\
+  tmp_title        TEXT             DEFAULT '',\n\
+  tmp_artist       TEXT             DEFAULT '',\n\
+  tmp_album        TEXT             DEFAULT '',\n\
+  tmp_part         INTEGER          DEFAULT 1,\n\
+  tmp_parts        INTEGER          DEFAULT 1,\n\
+  tmp_track        INTEGER          DEFAULT 0,\n\
+  tmp_tracks       INTEGER          DEFAULT 0,\n\
+  tmp_length       INTEGER          DEFAULT 0,\n\
+  tmp_date         TEXT             DEFAULT '',\n\
+  tmp_release      TEXT             DEFAULT '',\n\
+  tmp_genre        TEXT             DEFAULT '',\n\
+  tmp_rating       TEXT             DEFAULT '',\n\
+  tmp_mood         TEXT             DEFAULT '',\n\
+  tmp_situation    TEXT             DEFAULT '',\n\
+  tmp_tempo        TEXT             DEFAULT '',\n\
+  tmp_language     TEXT             DEFAULT '',\n\
+  tmp_comment      TEXT             DEFAULT '',\n\
+  tmp_lyrics       TEXT             DEFAULT '',\n\
+  tmp_id_artist    INTEGER NOT NULL DEFAULT 1,\n\
+  tmp_id_album     INTEGER NOT NULL DEFAULT 1,\n\
+  tmp_id_genre     INTEGER NOT NULL DEFAULT 1,\n\
+  tmp_id_rating    INTEGER NOT NULL DEFAULT 1,\n\
+  tmp_id_mood      INTEGER NOT NULL DEFAULT 1,\n\
+  tmp_id_situation INTEGER NOT NULL DEFAULT 1,\n\
+  tmp_id_tempo     INTEGER NOT NULL DEFAULT 1,\n\
+  tmp_id_language  INTEGER NOT NULL DEFAULT 1\n\
 );\n\
 \n\
 \n\
 \n\
 CREATE VIEW \"standard\" AS\n\
   SELECT\n\
-    file, file_id, artist, title, album, genre,language, mood,\n\
+    file, file_id, artist, title, album, genre, language, mood,\n\
     tempo, rating, situation, part, track, parts, tracks,\n\
-    length, album_release, date, status, comment, lyrics\n\
+    length, release, date, status, comment, lyrics\n\
   FROM\n\
     tbl_music, tbl_artist, tbl_album, tbl_genre, tbl_rating,\n\
     tbl_language,tbl_mood, tbl_situation, tbl_tempo\n\
