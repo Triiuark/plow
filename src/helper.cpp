@@ -126,7 +126,7 @@ void mkdir_r(string const &path, int mode)
     return;
   }
 
-  unsigned int pos = newPath.find_last_of('/');
+  size_t pos = newPath.find_last_of('/');
 
   if(pos != string::npos && pos != 0)
   {

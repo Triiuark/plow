@@ -11,7 +11,7 @@ StringParser::StringParser(const char *str, const char delim)
 
   string  mystring(str);
   string  *token = 0;
-  unsigned int pos;
+  size_t pos;
 
   while(!mystring.empty())
   {

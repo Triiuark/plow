@@ -85,7 +85,7 @@ void ID3v2Reader::read()
 
     std::string s;
     ID3v2::TextIdentificationFrame *tif;
-    unsigned int pos;
+    size_t pos;
 
     if(!(tag->frameListMap()["TRCK"]).isEmpty())
     {

@@ -32,8 +32,8 @@ IniParser::IniParser(const char * const iniFile)
 
   char *option;
 
-  unsigned int pos;
-  unsigned int line = 0;
+  size_t pos;
+  size_t line = 0;
 
   while(getline(ini, buffer))
   {

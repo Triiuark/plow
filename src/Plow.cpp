@@ -779,14 +779,14 @@ string Plow::infoString(unsigned int row,
   string tmp;
   string tmp2;
 
-  unsigned int strsize = 0;
-  unsigned int pos;
+  size_t strsize = 0;
+  size_t pos;
 
 
   bool isField   = true;
   bool lastEmpty = false;
 
-  for(unsigned int i = 0; i < tokens.size(); ++i)
+  for(size_t i = 0; i < tokens.size(); ++i)
   {
     tmp = "";
     isField = true;
