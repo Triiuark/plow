@@ -32,6 +32,8 @@ plow \- create m3u playlist (and start a player)
 \fBplow\fR \-\-query <sql>
 \fBplow\fR \-\-copy
 \fBplow\fR \-\-insert \fI/path/to/music\fR
+\fBplow\fR \-\-dump
+\fBplow\fR \-\-dumpfull
 \fBplow\fR \-\-help
 \fBplow\fR \-\-version
 .fi
@@ -113,6 +115,12 @@ set in configuration file.
 Add files in /path/to/music to database. Files allready in database
 are ignored.
 .
+.IPn "\fB\-\-d|dump"
+Print out a database dump without create <tbl> statements.
+.
+.IPn "\fB\-\-D|dumpfull"
+Print out a database dump with create <tbl> statements.
+.
 .IPn "\fB\-\-help"
 Print out a help message.
 .
@@ -154,10 +162,10 @@ where artist contains queen
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
 .SH "CONFIGURATION FILE"
-\fI~/.plow/plow.conf\fR is the configuration file for plow. It is in
-an INI like format with \fB[section]\fR and \fBkey=value\fR pairs.
-Lines starting with a \fB#\fR are comments. Whitespaces are ignored,
-except within the value.
+\fI$XDG_CONFIG_HOME/projekt182.de/plow.conf\fR
+is the configuration file for plow. It is in an INI like format with
+\fB[section]\fR and \fBkey=value\fR pairs. Lines starting with a \fB#\fR
+are comments. Whitespaces are ignored, except within a value.
 .\" ------------------------------------------------------------------
 .SS "SECTION [general]"
 .
@@ -171,7 +179,7 @@ Default: empty
 Sets the path to the playlist. The file name is always plow.m3u.
 This value is given as an argument to the players you set.
 .br
-Default: ~/.plow
+Default: $XDG_DATA_HOME/projekt182.de
 .
 .IPn "order = album ASC, part ASC, track ASC"
 Sets the default output order. This is in SQL syntax.
@@ -243,8 +251,8 @@ Default: empty (no filtering by file extension)
 .IPn "backups = 5"
 This sets the number of database backups to keep. Every time you
 change the database (with \-\-insert or \-\-set) a backup
-file (\fI~/.plow/.YYYYMMDDHHSS.sqlite~\fR) is created. 0 means don't
-remove old backups. -1 means do not create backups.
+file (\fI$XDG_DATA_HOME/projekt182/plow.YYYYMMDDHHSS.sqlite~\fR) is created.
+0 means don't remove old backups. -1 means do not create backups.
 .br
 Default: 5
 .\" ------------------------------------------------------------------
@@ -352,33 +360,8 @@ album if the album is no compilation, artist otherwise
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
 .SH "DATABASE FILE"
-\fI~/.plow/plow.sqlite\fR is a SQLite3 database file containing all
-the data used by plow.
-.nf
-    name         table            Sqlite type
-
-    album        tbl_album        TEXT
-    artist       tbl_artist       TEXT
-    genre        tbl_genre        TEXT
-    language     tbl_language     TEXT
-    mood         tbl_mood         TEXT
-    rating       tbl_rating       TEXT
-    situation    tbl_situation    TEXT
-    tempo        tbl_tempo        TEXT
-    comment      tbl_music        TEXT
-    date         tbl_music        TEXT
-    file         tbl_music        TEXT
-    file_id      tbl_music        TEXT
-    lyrics       tbl_music        TEXT
-    release      tbl_album        TEXT
-    status       tbl_music        TEXT
-    title        tbl_music        TEXT
-    length       tbl_music        INTEGER
-    tracks       tbl_album        INTEGER
-    track        tbl_music        INTEGER
-    parts        tbl_album        INTEGER
-    part         tbl_music        INTEGER
-.fi
+\fI$XDG_DATA_HOME/projekt182.de/plow.sqlite\fR is a SQLite3 database file
+containing all the data used by plow.
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------

@@ -87,7 +87,7 @@ int parseUpdate(int actual, int argc, char *argv[], Plow &plow)
     if(field == 0)
     {
       PlowException e("parseUpdate", "", USAGE);
-      e.error() << "unkown field '" << key << "'";
+      e.error() << "unknown field '" << key << "'";
       throw e;
     }
 
@@ -309,20 +309,21 @@ int parseLongOption(int actual, int argc, char *argv[], Plow &plow)
                           USAGE);
     }
   }
+
   else if(strcmp(value, "d") == 0 || strcmp(value, "dump") == 0)
   {
     plow.dump(false);
-    //return 1000;
   }
+
   else if(strcmp(value, "D") == 0 || strcmp(value, "dumpfull") == 0)
   {
     plow.dump(true);
-    //return 1000;
   }
+
   else
   {
     PlowException e("parseLongOption", "", USAGE);
-    e.error() << "unkown option '" << value << "'";
+    e.error() << "unknown option '" << value << "'";
     throw e;
   }
 
@@ -348,7 +349,9 @@ void parseArguments(int argc, char *argv[], Plow &plow)
           break;
 
           default:
+            cout << argv[i][1] << endl;
             i = parseFilter(i, argc, argv, plow);
+            cout << argv[i][1] << endl;
           break;
         }
       break;

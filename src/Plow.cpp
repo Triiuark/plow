@@ -138,9 +138,32 @@ void Plow::printQuery(string const &query)
 
 void Plow::createFileNames()
 {
-  mConfigDir    = getenv("HOME");
-  mConfigDir   += "/.plow";
-  mDataDir      = mConfigDir;
+  const char * const envHomeDir = getenv("HOME");
+  const char * const envConfDir = getenv("XDG_CONFIG_HOME");
+  const char * const envDataDir = getenv("XDG_DATA_HOME");
+
+  if(envConfDir)
+  {
+    mConfigDir  = envConfDir;
+    mConfigDir += "/projekt182.de";
+  }
+  else
+  {
+    mConfigDir  = envHomeDir;
+    mConfigDir += "/.config/projekt182.de";
+  }
+
+  if(envDataDir)
+  {
+    mDataDir = envDataDir;
+    mDataDir += "/projekt182.de";
+  }
+  else
+  {
+    mDataDir  = envHomeDir;
+    mDataDir += "/.local/share/projekt182.de";
+  }
+
   mDbFile       = mDataDir + "/plow.sqlite";
   mPlaylistFile = mDataDir + "/plow.m3u";
 }
@@ -299,7 +322,7 @@ void Plow::backup()
   tmp = localtime(&secSince);
   strftime(timeBuff, 23, "%Y%m%d%H%M%S", tmp);
 
-  string dst = mDataDir + "/.";
+  string dst = mDataDir + "/plow.";
   dst += timeBuff;
   dst += ".sqlite~";
 

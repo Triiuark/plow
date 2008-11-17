@@ -124,8 +124,13 @@ class Plow
      */
     void insert(const char * const path);
 
-
+    /**
+     * print out a database dump
+     *
+     * @param full if set print also create &lt;tbl&gt; statements
+     */
     void dump(bool full = false);
+
   private:
     static void initFields();
 

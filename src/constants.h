@@ -27,8 +27,8 @@
 const char * const USAGE = "plow\
  [-|+<c>[e|l|g] <str> [ <str>]*]* [--show]\n\
      ([--0|...|9] [--random] [--add] [--noplay] | [--set (<c> <str>)+])\n\
-     | [--print <tbl>] | [--query <sql>] | [--copy] | [--insert <dir>]\n\
-     | [--help] | [--version]";
+     | [--list <tbl>] | [--query <sql>] | [--copy] | [--insert <dir>]\n\
+     | [--dump] | [--dumpfull] | [--help] | [--version]";
 
 
 
@@ -51,7 +51,7 @@ const char * const HELP = "\
                      (you can change more than one field at a time)\n\
 --0|...|9            select player number (set in configuration file)\n\
 --r|random           shuffle playlist\n\
---a|add              append to playlist\n\
+--a|add              append to current playlist\n\
 --n|noplay           don't start a player\n\
 --s|show             print out sql statement for filter or set option\n\
 \n\
@@ -66,6 +66,9 @@ const char * const HELP = "\
 \n\
 --i|insert <path>    add all (supported) files in <path> to database\n\
                      Note: <path> has to be absolute\n\
+\n\
+--d|dump             print out a table dump (without create statements)\n\
+--D|dumpfull         print out a full table dump (with create statements)\n\
 \n\
 --h|help             print this message\n\
 --v|version          print version\n\
