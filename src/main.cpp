@@ -349,9 +349,7 @@ void parseArguments(int argc, char *argv[], Plow &plow)
           break;
 
           default:
-            cout << argv[i][1] << endl;
             i = parseFilter(i, argc, argv, plow);
-            cout << argv[i][1] << endl;
           break;
         }
       break;
