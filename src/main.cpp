@@ -285,7 +285,7 @@ int parseLongOption(int actual, int argc, char *argv[], Plow &plow)
     else
     {
       throw PlowException("parseLongOption",
-                          "missing argument for option '--print'",
+                          "missing argument for option '--list'",
                           USAGE);
     }
   }
