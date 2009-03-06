@@ -248,7 +248,7 @@ void Plow::dumpTable(const char * const table, bool full)
   char select[48];
   char *quotedValue;
 
-  snprintf(select, 47, "SELECT * FROM %s;", table);
+  snprintf(select, 47, "SELECT * FROM `%s`;", table);
   Sqlite3 sql(mDbFile.c_str());
 
   sql.exe(select);
@@ -286,7 +286,7 @@ void Plow::dump(bool full)
 
   mDoNothing = true;
 
-  mSqlite3->exe("SELECT name, sql FROM SQLITE_MASTER WHERE type='table';");
+  mSqlite3->exe("SELECT `name`, `sql` FROM `SQLITE_MASTER` WHERE `type`='table';");
 
   cout << "BEGIN TRANSACTION;" << endl;
 
@@ -390,8 +390,8 @@ void Plow::appendUpdate(char key, const char * const value)
       switch(type)
       {
         case Plow::TABLE:
-          select << "SELECT id_" << field << " FROM tbl_" << field
-                 << " WHERE " << field << "='" << quotedValue << "';";
+          select << "SELECT `id_" << field << "` FROM `tbl_" << field
+                 << "` WHERE `" << field << "`='" << quotedValue << "';";
 
           mSqlite3->exe(select.str().c_str());
 
@@ -462,7 +462,7 @@ void Plow::createFilter(const string &select)
   }
   else if(order.empty())
   {
-    order = "album ASC, part ASC, track ASC";
+    order = "`album` ASC, `part` ASC, `track` ASC";
   }
 
   mFilter += order + ";";
@@ -688,7 +688,7 @@ void Plow::update()
   string insert;
   ostringstream query;
 
-  string filter = "SELECT\n\tid_music\n  ";
+  string filter = "SELECT\n\t`id_music`\n  ";
   filter += FROM;
   filter += "  ";
   filter += WHERE;
@@ -715,13 +715,13 @@ void Plow::update()
 
     quotedValue = sqlite3_mprintf("%q", value);
 
-    query << "INSERT INTO tbl_" << field << " (" << field
-          << ") VALUES ('" << quotedValue << "');";
+    query << "INSERT INTO `tbl_" << field << "` (`" << field
+          << "`) VALUES ('" << quotedValue << "');";
 
     printQuery(query.str());
 
-    query << "SELECT id_" << field << " FROM tbl_" << field
-          << " WHERE " << field << "='" << quotedValue << "';";
+    query << "SELECT `id_" << field << "` FROM `tbl_" << field
+          << "` WHERE `" << field << "`='" << quotedValue << "';";
 
     if(!backedUp)
     {
@@ -735,9 +735,9 @@ void Plow::update()
 
     sqlite3_free(quotedValue);
 
-    mUpdate += ",\n\t_id_";
+    mUpdate += ",\n\t`_id_";
     mUpdate += field;
-    mUpdate += "=";
+    mUpdate += "`=";
     mUpdate += mSqlite3->get(0,0);
   }
 
@@ -745,9 +745,9 @@ void Plow::update()
 
   if(mUpdate.size() > 0)
   {
-    update  = "UPDATE tbl_music SET ";
+    update  = "UPDATE `tbl_music` SET ";
     update += &(mUpdate.c_str()[1]);
-    update += "\nWHERE id_music IN (\n  ";
+    update += "\nWHERE `id_music` IN (\n  ";
     update += filter + ");";
 
     if(!backedUp)
@@ -767,9 +767,9 @@ void Plow::update()
 
   if(mUpdateAlbum.size() > 0)
   {
-    update  = "UPDATE tbl_album SET ";
+    update  = "UPDATE `tbl_album` SET ";
     update += &(mUpdateAlbum.c_str()[1]);
-    update += "\nWHERE id_album IN (\n  SELECT id_album\n ";
+    update += "\nWHERE `id_album` IN (\n  SELECT `id_album`\n ";
     update += FROM;
     update += "  ";
     update += WHERE;
@@ -1083,7 +1083,7 @@ int Plow::readTags()
   }
 
   /// clear table tbl_tmp
-  mSqlite3->exe("DELETE FROM tbl_tmp; VACUUM;");
+  mSqlite3->exe("DELETE FROM `tbl_tmp`; VACUUM;");
 
   ReaderSelector *selector;
   AbstractReader *reader;
@@ -1093,10 +1093,10 @@ int Plow::readTags()
   char           *quoted;
 
   const char * const  format =
-      "INSERT INTO tbl_tmp (tmp_file_id, tmp_file, tmp_title, tmp_artist, \
-      tmp_album, tmp_part, tmp_parts, tmp_track, tmp_tracks, tmp_length,\
-      tmp_date, tmp_release, tmp_genre, tmp_rating, tmp_mood,\
-      tmp_situation, tmp_tempo, tmp_language, tmp_comment, tmp_lyrics)\
+      "INSERT INTO `tbl_tmp` (`tmp_file_id`, `tmp_file`, `tmp_title`, `tmp_artist`, \
+      `tmp_album`, `tmp_part`, `tmp_parts`, `tmp_track`, `tmp_tracks`, `tmp_length`,\
+      `tmp_date`, `tmp_release`, `tmp_genre`, `tmp_rating`, `tmp_mood`,\
+      `tmp_situation`, `tmp_tempo`, `tmp_language`, `tmp_comment`, `tmp_lyrics`)\
       VALUES ('%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q',\
       '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q');";
 
@@ -1122,7 +1122,7 @@ int Plow::readTags()
     files->pop();
 
     quoted = sqlite3_mprintf(
-                 "SELECT id_music FROM tbl_music WHERE file='%q';",
+                 "SELECT `id_music` FROM `tbl_music` WHERE `file`='%q';",
                  file.substr(removePos).c_str());
 
     mSqlite3->exe(quoted);
@@ -1214,9 +1214,9 @@ void Plow::addNewValues()
 
     cout << "> new " << it->second.first << "s ..." << flush;
 
-    query  = "SELECT DISTINCT tmp_";
+    query  = "SELECT DISTINCT `tmp_";
     query += it->second.first;
-    query += " FROM tbl_tmp;";
+    query += "` FROM `tbl_tmp`;";
 
     mSqlite3->exe(query.c_str());
 
@@ -1224,13 +1224,13 @@ void Plow::addNewValues()
     {
       quoted = sqlite3_mprintf("%q", mSqlite3->get(j, 0));
 
-      query  = "SELECT id_";
+      query  = "SELECT `id_";
       query += it->second.first;
-      query += " FROM tbl_";
+      query += "` FROM `tbl_";
       query += it->second.first;
-      query += " WHERE ";
+      query += "` WHERE `";
       query += it->second.first;
-      query += "='";
+      query += "`='";
       query += quoted;
       query += "';";
 
@@ -1238,11 +1238,11 @@ void Plow::addNewValues()
 
       if(sql.rows() == 0)
       {
-        query2  = "INSERT INTO tbl_";
+        query2  = "INSERT INTO `tbl_";
         query2 += it->second.first;
-        query2 += " (";
+        query2 += "` (`";
         query2 += it->second.first;
-        query2 += ")  VALUES ('";
+        query2 += "`)  VALUES ('";
         query2 += quoted;
         query2 += "');";
         query2 += query;
@@ -1252,13 +1252,13 @@ void Plow::addNewValues()
         cout << "\n\t" << mSqlite3->get(j, 0);
       }
 
-      query3 += "UPDATE tbl_tmp SET tmp_id_";
+      query3 += "UPDATE `tbl_tmp` SET `tmp_id_";
       query3 += it->second.first;
-      query3 += "='";
+      query3 += "`='";
       query3 += sql.get(0, 0);
-      query3 += "' WHERE tmp_";
+      query3 += "' WHERE `tmp_";
       query3 += it->second.first;
-      query3 += "='";
+      query3 += "`='";
       query3 += quoted;
       query3 += "';";
 
@@ -1280,8 +1280,8 @@ void Plow::addNewValues()
   ///
   cout << "> add info to new albums ..." << endl;
 
-  query  = "SELECT tmp_id_album, tmp_id_artist FROM \
-            tbl_tmp GROUP BY tmp_id_artist, tmp_id_album\
+  query  = "SELECT `tmp_id_album`, `tmp_id_artist` FROM \
+            `tbl_tmp` GROUP BY `tmp_id_artist`, `tmp_id_album`\
             HAVING COUNT(*) > 3;";
 
   mSqlite3->exe(query.c_str());
@@ -1290,9 +1290,9 @@ void Plow::addNewValues()
 
   for(int i = 0; i < mSqlite3->rows(); ++i)
   {
-    query += "UPDATE tbl_album SET album_id_artist='";
+    query += "UPDATE `tbl_album` SET `album_id_artist`='";
     query += mSqlite3->get(i, "tmp_id_artist");
-    query += "' WHERE id_album='";
+    query += "' WHERE `id_album`='";
     query += mSqlite3->get(i, "tmp_id_album");
     query += "';";
   }
@@ -1302,17 +1302,17 @@ void Plow::addNewValues()
   mSqlite3->exe(query.c_str());
 
   mSqlite3->exe(
-      "SELECT DISTINCT tmp_id_album, tmp_parts, tmp_tracks,\
-       tmp_release FROM tbl_tmp;");
+      "SELECT DISTINCT `tmp_id_album`, `tmp_parts`, `tmp_tracks`,\
+       `tmp_release` FROM `tbl_tmp`;");
 
   query = "BEGIN TRANSACTION;";
 
   for(int i = 0; i < mSqlite3->rows(); ++i)
   {
-    query += "UPDATE tbl_album SET ";
+    query += "UPDATE `tbl_album` SET ";
     if(mSqlite3->get(i, "tmp_parts")[0] != 0)
     {
-      quoted = sqlite3_mprintf("parts='%q', ",
+      quoted = sqlite3_mprintf("`parts`='%q', ",
                                mSqlite3->get(i, "tmp_parts"));
       query += quoted;
       sqlite3_free(quoted);
@@ -1320,19 +1320,19 @@ void Plow::addNewValues()
 
     if(mSqlite3->get(i, "tmp_tracks")[0] != 0)
     {
-      quoted = sqlite3_mprintf("tracks='%q', ",
+      quoted = sqlite3_mprintf("`tracks`='%q', ",
                                mSqlite3->get(i, "tmp_tracks"));
       query += quoted;
       sqlite3_free(quoted);
     }
 
-    quoted = sqlite3_mprintf("release='%q' ",
+    quoted = sqlite3_mprintf("`release`='%q' ",
                              mSqlite3->get(i, "tmp_release"));
     query += quoted;
     sqlite3_free(quoted);
 
 
-    query += "WHERE id_album='";
+    query += "WHERE `id_album`='";
     query += mSqlite3->get(i, "tmp_id_album");
     query += "';";
   }
@@ -1351,14 +1351,14 @@ void Plow::insertNewSongs()
   char *quoted;
 
   const char * const format =
-      "INSERT INTO tbl_music (file_id, file, title, _id_artist, _id_album,\
-      part, track, length, _id_genre, _id_rating, _id_mood,\
-      _id_situation, _id_tempo, _id_language, date, comment, lyrics)\
+      "INSERT INTO `tbl_music` (`file_id`, `file`, `title`, `_id_artist`, `_id_album`,\
+      `part`, `track`, `length`, `_id_genre`, `_id_rating`, `_id_mood`,\
+      `_id_situation`, `_id_tempo`, `_id_language`, `date`, `comment`, `lyrics`)\
       VALUES ('%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q',\
       '%q', '%q', '%q', '%q', '%q', '%q', '%q');";
 
   mSqlite3->exe(
-      "SELECT * FROM tbl_tmp ORDER BY tmp_album, tmp_part, tmp_track;");
+      "SELECT * FROM `tbl_tmp` ORDER BY `tmp_album`, `tmp_part`, `tmp_track`;");
 
   int i = 0;
   for(; i < mSqlite3->rows(); ++i)
@@ -1394,7 +1394,7 @@ void Plow::insertNewSongs()
 
   cout << "> " << i << " file(s) added" << endl;
 
-  mSqlite3->exe("DELETE FROM tbl_tmp; VACUUM;");
+  mSqlite3->exe("DELETE FROM `tbl_tmp`; VACUUM;");
 }
 
 

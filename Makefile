@@ -15,19 +15,27 @@ LIBS           = -lsqlite3
 LIBDIRS        =
 LDFLAGS        = ${LIBDIRS} ${LIBS} `taglib-config --libs`
 
-OBJS = bin/PlowException.o bin/helper.o \
-       bin/StringParser.o bin/IniParser.o \
-       bin/AbstractReader.o bin/ID3v2Reader.o \
-       bin/VorbisReader.o bin/ReaderSelector.o \
-       bin/Sqlite3.o bin/Plow.o
+OBJS_H = bin/PlowException.o bin/helper.o \
+         bin/StringParser.o bin/IniParser.o \
+         bin/AbstractReader.o bin/ID3v2Reader.o \
+         bin/VorbisReader.o bin/ReaderSelector.o \
+         bin/Sqlite3.o bin/Plow.o
+
+OBJS_S = bin/main.o
 
 all: bin/plow
 
-bin/plow: bin/ ${OBJS} src/main.cpp
-	${CPP} ${CPPFLAGS} -o $@ ${OBJS} src/main.cpp ${LDFLAGS}
+bin/plow: bin/ ${OBJS_H} ${OBJS_S}
+	@echo " [LD]  $@"
+	@${CPP} -o $@ ${OBJS_H} ${OBJS_S}  ${LDFLAGS}
 
 bin/%.o: src/%.h src/%.cpp
-	${CPP} ${CPPFLAGS} -c -o $@ src/$*.cpp
+	@echo " [CXX] $@"
+	@${CPP} ${CPPFLAGS} -c -o $@ src/$*.cpp
+
+bin/%.o: src/%.cpp
+	@echo " [CXX] $@"
+	@${CPP} ${CPPFLAGS} -c -o $@ src/$*.cpp
 
 bin/:
 	${MKDIR} ./bin/

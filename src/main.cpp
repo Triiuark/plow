@@ -178,7 +178,9 @@ int parseFilter(int actual, int argc, char **argv, Plow &plow)
   {
     quoted = sqlite3_mprintf("%q", argv[actual]);
 
+    filter.append("`");
     filter.append(field);
+    filter.append("`");
     filter.append(pre);
     filter.append(quoted);
     filter.append(post);

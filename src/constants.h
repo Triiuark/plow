@@ -81,20 +81,20 @@ See man plow for some detailed information.";
 /// constants for sql stuff
 ///
 
-const char * const SELECT = "SELECT\n\t'%s' || file AS file,\n\t file_id,\
- artist, title, album, genre, language, mood,\n\t tempo, rating,\
- situation, part, track, parts, tracks,\n\t length, release, date,\
- status, comment, lyrics\n";
+const char * const SELECT = "SELECT\n\t'%s' || `file` AS `file`,\n\t `file_id`,\
+ `artist`, `title`, `album`, `genre`, `language`, `mood`,\n\t `tempo`, `rating`,\
+ `situation`, `part`, `track`, `parts`, `tracks`,\n\t `length`, `release`, `date`,\
+ `status`, `comment`, `lyrics`\n";
 
-const char * const FROM = "FROM\n\ttbl_music, tbl_artist, tbl_album,\
- tbl_genre, tbl_rating,\n\ttbl_language,tbl_mood, tbl_situation,\
- tbl_tempo\n";
+const char * const FROM = "FROM\n\t`tbl_music`, `tbl_artist`, `tbl_album`,\
+ `tbl_genre`, `tbl_rating`,\n\t`tbl_language`, `tbl_mood`, `tbl_situation`,\
+ `tbl_tempo`\n";
 
-const char * const WHERE = "WHERE\n\tid_artist=_id_artist AND\
- id_album=_id_album\n\tAND id_genre=_id_genre AND\
- id_rating=_id_rating\n\tAND id_language=_id_language AND\
- id_mood=_id_mood\n\tAND id_situation=_id_situation AND\
- id_tempo=_id_tempo\n";
+const char * const WHERE = "WHERE\n\t`id_artist`=`_id_artist` AND\
+ `id_album`=`_id_album`\n\tAND `id_genre`=`_id_genre` AND\
+ `id_rating`=`_id_rating`\n\tAND `id_language`=`_id_language` AND\
+ `id_mood`=`_id_mood`\n\tAND `id_situation`=`_id_situation` AND\
+ `id_tempo`=`_id_tempo`\n";
 
 ///
 /// constants for the first run setup
@@ -117,7 +117,7 @@ const char * const INI_FILE ="\
 \n\
 \n\
 ### default output order (SQL 'ORDER BY' syntax)\n\
-#order = \"album ASC, part ASC, track ASC\"\n\
+#order = \"`album` ASC, `part` ASC, `track` ASC\"\n\
 \n\
 \n\
 ### the player you wish to use, at minimum player0 is required\n\
@@ -199,147 +199,147 @@ extinf = [length] \", \" [artist] \" - \" [title]\n\
 
 
 const char * const DATABASE =" BEGIN TRANSACTION;\
-CREATE TABLE tbl_album (\n\
-  id_album        INTEGER NOT NULL PRIMARY KEY,\n\
-  album           TEXT             DEFAULT '',\n\
-  album_id_artist INTEGER NOT NULL DEFAULT 1,\n\
-  tracks          INTEGER          DEFAULT 0,\n\
-  parts           INTEGER          DEFAULT 1,\n\
-  release         TEXT             DEFAULT ''\n\
+CREATE TABLE `tbl_album` (\n\
+  `id_album`        INTEGER NOT NULL PRIMARY KEY,\n\
+  `album`           TEXT             DEFAULT '',\n\
+  `album_id_artist` INTEGER NOT NULL DEFAULT 1,\n\
+  `tracks`          INTEGER          DEFAULT 0,\n\
+  `parts`           INTEGER          DEFAULT 1,\n\
+  `release`         TEXT             DEFAULT ''\n\
 );\n\
-INSERT INTO 'tbl_album' VALUES(1, '', 1, 0, 1, '');\n\
+INSERT INTO `tbl_album` VALUES(1, '', 1, 0, 1, '');\n\
 \n\
 \n\
 \n\
-CREATE TABLE tbl_artist (\n\
-  id_artist INTEGER NOT NULL PRIMARY KEY,\n\
-  artist    TEXT             UNIQUE\n\
+CREATE TABLE `tbl_artist` (\n\
+  `id_artist` INTEGER NOT NULL PRIMARY KEY,\n\
+  `artist`    TEXT             UNIQUE\n\
 );\n\
-INSERT INTO 'tbl_artist' VALUES(1, '');\n\
+INSERT INTO `tbl_artist` VALUES(1, '');\n\
 \n\
 \n\
 \n\
-CREATE TABLE tbl_genre (\n\
-  id_genre INTEGER NOT NULL PRIMARY KEY,\n\
-  genre    TEXT             UNIQUE\n\
+CREATE TABLE `tbl_genre` (\n\
+  `id_genre` INTEGER NOT NULL PRIMARY KEY,\n\
+  `genre`    TEXT             UNIQUE\n\
 );\n\
-INSERT INTO 'tbl_genre' VALUES(1, '');\n\
+INSERT INTO `tbl_genre` VALUES(1, '');\n\
 \n\
 \n\
 \n\
-CREATE TABLE tbl_language (\n\
-  id_language INTEGER NOT NULL PRIMARY KEY,\n\
-  language    TEXT             UNIQUE\n\
+CREATE TABLE `tbl_language` (\n\
+  `id_language` INTEGER NOT NULL PRIMARY KEY,\n\
+  `language`    TEXT             UNIQUE\n\
 );\n\
-INSERT INTO 'tbl_language' VALUES(1, '');\n\
+INSERT INTO `tbl_language` VALUES(1, '');\n\
 \n\
 \n\
 \n\
-CREATE TABLE tbl_mood (\n\
-  id_mood INTEGER NOT NULL PRIMARY KEY,\n\
-  mood    TEXT             UNIQUE\n\
+CREATE TABLE `tbl_mood` (\n\
+  `id_mood` INTEGER NOT NULL PRIMARY KEY,\n\
+  `mood`    TEXT             UNIQUE\n\
 );\n\
-INSERT INTO 'tbl_mood' VALUES(1, '');\n\
+INSERT INTO `tbl_mood` VALUES(1, '');\n\
 \n\
 \n\
 \n\
-CREATE TABLE tbl_music (\n\
-  id_music       INTEGER NOT NULL PRIMARY KEY,\n\
-  file_id        TEXT             DEFAULT '',\n\
-  file           TEXT    NOT NULL UNIQUE,\n\
-  title          TEXT             DEFAULT '',\n\
-  _id_artist     INTEGER NOT NULL DEFAULT 1,\n\
-  _id_album      INTEGER NOT NULL DEFAULT 1,\n\
-  part           INTEGER          DEFAULT 1,\n\
-  track          INTEGER          DEFAULT 0,\n\
-  length         INTEGER          DEFAULT 0,\n\
-  _id_genre      INTEGER NOT NULL DEFAULT 1,\n\
-  _id_rating     INTEGER NOT NULL DEFAULT 1,\n\
-  _id_mood       INTEGER NOT NULL DEFAULT 1,\n\
-  _id_situation  INTEGER NOT NULL DEFAULT 1,\n\
-  _id_tempo      INTEGER NOT NULL DEFAULT 1,\n\
-  _id_language   INTEGER NOT NULL DEFAULT 1,\n\
-  date           TEXT             DEFAULT '',\n\
-  status         TEXT             DEFAULT '',\n\
-  comment        TEXT             DEFAULT '',\n\
-  lyrics         TEXT             DEFAULT ''\n\
-);\n\
-\n\
-\n\
-\n\
-CREATE TABLE tbl_rating (\n\
-  id_rating INTEGER NOT NULL PRIMARY KEY,\n\
-  rating    TEXT             UNIQUE\n\
-);\n\
-INSERT INTO 'tbl_rating' VALUES(1, '');\n\
-\n\
-\n\
-\n\
-CREATE TABLE tbl_situation (\n\
-  id_situation INTEGER NOT NULL PRIMARY KEY,\n\
-  situation    TEXT             UNIQUE\n\
-);\n\
-INSERT INTO 'tbl_situation' VALUES(1, '');\n\
-\n\
-\n\
-\n\
-CREATE TABLE tbl_tempo (\n\
-  id_tempo INTEGER NOT NULL PRIMARY KEY,\n\
-  tempo    TEXT             UNIQUE\n\
-);\n\
-INSERT INTO 'tbl_tempo' VALUES(1, '');\n\
-\n\
-\n\
-\n\
-CREATE TABLE tbl_tmp (\n\
-  tmp_id           INTEGER NOT NULL PRIMARY KEY,\n\
-  tmp_file_id      TEXT             DEFAULT '',\n\
-  tmp_file         TEXT             DEFAULT '',\n\
-  tmp_title        TEXT             DEFAULT '',\n\
-  tmp_artist       TEXT             DEFAULT '',\n\
-  tmp_album        TEXT             DEFAULT '',\n\
-  tmp_part         INTEGER          DEFAULT 1,\n\
-  tmp_parts        INTEGER          DEFAULT 1,\n\
-  tmp_track        INTEGER          DEFAULT 0,\n\
-  tmp_tracks       INTEGER          DEFAULT 0,\n\
-  tmp_length       INTEGER          DEFAULT 0,\n\
-  tmp_date         TEXT             DEFAULT '',\n\
-  tmp_release      TEXT             DEFAULT '',\n\
-  tmp_genre        TEXT             DEFAULT '',\n\
-  tmp_rating       TEXT             DEFAULT '',\n\
-  tmp_mood         TEXT             DEFAULT '',\n\
-  tmp_situation    TEXT             DEFAULT '',\n\
-  tmp_tempo        TEXT             DEFAULT '',\n\
-  tmp_language     TEXT             DEFAULT '',\n\
-  tmp_comment      TEXT             DEFAULT '',\n\
-  tmp_lyrics       TEXT             DEFAULT '',\n\
-  tmp_id_artist    INTEGER NOT NULL DEFAULT 1,\n\
-  tmp_id_album     INTEGER NOT NULL DEFAULT 1,\n\
-  tmp_id_genre     INTEGER NOT NULL DEFAULT 1,\n\
-  tmp_id_rating    INTEGER NOT NULL DEFAULT 1,\n\
-  tmp_id_mood      INTEGER NOT NULL DEFAULT 1,\n\
-  tmp_id_situation INTEGER NOT NULL DEFAULT 1,\n\
-  tmp_id_tempo     INTEGER NOT NULL DEFAULT 1,\n\
-  tmp_id_language  INTEGER NOT NULL DEFAULT 1\n\
+CREATE TABLE `tbl_music` (\n\
+  `id_music`       INTEGER NOT NULL PRIMARY KEY,\n\
+  `file_id`        TEXT             DEFAULT '',\n\
+  `file`           TEXT    NOT NULL UNIQUE,\n\
+  `title`          TEXT             DEFAULT '',\n\
+  `_id_artist`     INTEGER NOT NULL DEFAULT 1,\n\
+  `_id_album`      INTEGER NOT NULL DEFAULT 1,\n\
+  `part`           INTEGER          DEFAULT 1,\n\
+  `track`          INTEGER          DEFAULT 0,\n\
+  `length`         INTEGER          DEFAULT 0,\n\
+  `_id_genre`      INTEGER NOT NULL DEFAULT 1,\n\
+  `_id_rating`     INTEGER NOT NULL DEFAULT 1,\n\
+  `_id_mood`       INTEGER NOT NULL DEFAULT 1,\n\
+  `_id_situation`  INTEGER NOT NULL DEFAULT 1,\n\
+  `_id_tempo`      INTEGER NOT NULL DEFAULT 1,\n\
+  `_id_language`   INTEGER NOT NULL DEFAULT 1,\n\
+  `date`           TEXT             DEFAULT '',\n\
+  `status`         TEXT             DEFAULT '',\n\
+  `comment`        TEXT             DEFAULT '',\n\
+  `lyrics`         TEXT             DEFAULT ''\n\
 );\n\
 \n\
 \n\
 \n\
-CREATE VIEW \"standard\" AS\n\
+CREATE TABLE `tbl_rating` (\n\
+  `id_rating` INTEGER NOT NULL PRIMARY KEY,\n\
+  `rating`    TEXT             UNIQUE\n\
+);\n\
+INSERT INTO `tbl_rating` VALUES(1, '');\n\
+\n\
+\n\
+\n\
+CREATE TABLE `tbl_situation` (\n\
+  `id_situation` INTEGER NOT NULL PRIMARY KEY,\n\
+  `situation`    TEXT             UNIQUE\n\
+);\n\
+INSERT INTO `tbl_situation` VALUES(1, '');\n\
+\n\
+\n\
+\n\
+CREATE TABLE `tbl_tempo` (\n\
+  `id_tempo` INTEGER NOT NULL PRIMARY KEY,\n\
+  `tempo`    TEXT             UNIQUE\n\
+);\n\
+INSERT INTO `tbl_tempo` VALUES(1, '');\n\
+\n\
+\n\
+\n\
+CREATE TABLE `tbl_tmp` (\n\
+  `tmp_id`           INTEGER NOT NULL PRIMARY KEY,\n\
+  `tmp_file_id`      TEXT             DEFAULT '',\n\
+  `tmp_file`         TEXT             DEFAULT '',\n\
+  `tmp_title`        TEXT             DEFAULT '',\n\
+  `tmp_artist`       TEXT             DEFAULT '',\n\
+  `tmp_album`        TEXT             DEFAULT '',\n\
+  `tmp_part`         INTEGER          DEFAULT 1,\n\
+  `tmp_parts`        INTEGER          DEFAULT 1,\n\
+  `tmp_track`        INTEGER          DEFAULT 0,\n\
+  `tmp_tracks`       INTEGER          DEFAULT 0,\n\
+  `tmp_length`       INTEGER          DEFAULT 0,\n\
+  `tmp_date`         TEXT             DEFAULT '',\n\
+  `tmp_release`      TEXT             DEFAULT '',\n\
+  `tmp_genre`        TEXT             DEFAULT '',\n\
+  `tmp_rating`       TEXT             DEFAULT '',\n\
+  `tmp_mood`         TEXT             DEFAULT '',\n\
+  `tmp_situation`    TEXT             DEFAULT '',\n\
+  `tmp_tempo`        TEXT             DEFAULT '',\n\
+  `tmp_language`     TEXT             DEFAULT '',\n\
+  `tmp_comment`      TEXT             DEFAULT '',\n\
+  `tmp_lyrics`       TEXT             DEFAULT '',\n\
+  `tmp_id_artist`    INTEGER NOT NULL DEFAULT 1,\n\
+  `tmp_id_album`     INTEGER NOT NULL DEFAULT 1,\n\
+  `tmp_id_genre`     INTEGER NOT NULL DEFAULT 1,\n\
+  `tmp_id_rating`    INTEGER NOT NULL DEFAULT 1,\n\
+  `tmp_id_mood`      INTEGER NOT NULL DEFAULT 1,\n\
+  `tmp_id_situation` INTEGER NOT NULL DEFAULT 1,\n\
+  `tmp_id_tempo`     INTEGER NOT NULL DEFAULT 1,\n\
+  `tmp_id_language`  INTEGER NOT NULL DEFAULT 1\n\
+);\n\
+\n\
+\n\
+\n\
+CREATE VIEW `view_std` AS\n\
   SELECT\n\
-    file, file_id, artist, title, album, genre, language, mood,\n\
-    tempo, rating, situation, part, track, parts, tracks,\n\
-    length, release, date, status, comment, lyrics\n\
+    `file`, `file_id`, `artist`, `title`, `album`, `genre`, `language`, `mood`,\n\
+    `tempo`, `rating`, `situation`, `part`, `track`, `parts`, `tracks`,\n\
+    `length`, `release`, `date`, `status`, `comment`, `lyrics`\n\
   FROM\n\
-    tbl_music, tbl_artist, tbl_album, tbl_genre, tbl_rating,\n\
-    tbl_language,tbl_mood, tbl_situation, tbl_tempo\n\
+    `tbl_music`, `tbl_artist`, `tbl_album`, `tbl_genre`, `tbl_rating`,\n\
+    `tbl_language`, `tbl_mood`, `tbl_situation`, `tbl_tempo`\n\
   WHERE\n\
-    id_artist=_id_artist AND id_album=_id_album\n\
-    AND id_genre=_id_genre AND id_rating=_id_rating\n\
-    AND id_language=_id_language AND id_mood=_id_mood\n\
-    AND id_situation=_id_situation AND id_tempo=_id_tempo\n\
+    `id_artist`=`_id_artist` AND `id_album`=`_id_album`\n\
+    AND `id_genre`=`_id_genre` AND `id_rating`=`_id_rating`\n\
+    AND `id_language`=`_id_language` AND `id_mood`=`_id_mood`\n\
+    AND `id_situation`=`_id_situation` AND `id_tempo`=`_id_tempo`\n\
   ORDER BY\n\
-    album ASC, part ASC, track ASC;\n\
+    `album` ASC, `part` ASC, `track` ASC;\n\
 COMMIT;";
 
 #endif
