@@ -22,10 +22,7 @@ INSTALL = install
 RM      = -rm -f
 RMDIR   = -rmdir
 MKDIR   = mkdir -p
-
-ifneq ($(shell strip --version 2>/dev/null),)
-	STRIP = strip --strip-unneeded
-endif
+STRIP = strip --strip-unneeded
 
 ifeq ($(version),)
 	version = svn-$(shell svn info 2>/dev/null | grep "Revision" 2>/dev/null |\
@@ -54,13 +51,14 @@ HEADS = src/constants.h src/types.h
 .PHONY: all
 all: bin/plow
 
+.PHONY: strip
+strip: bin/plow
+	@echo " [STRIP]     bin/plow"
+	@$(STRIP) bin/plow
+
 bin/plow: bin/ $(OBJS)
 	@echo " [LD]        $@"
 	@$(CXX) -o $@ $(OBJS) $(LDFLAGS)
-ifneq ($(STRIP),) 
-	@echo " [STRIP]     $@"
-	@$(STRIP) $@
-endif
 
 bin/%.o: src/%.h src/%.cpp $(HEADS)
 	@echo " [CXX]       $@"
