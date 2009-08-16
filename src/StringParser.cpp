@@ -82,8 +82,6 @@ char **StringParser::getArgv()
     unsigned int size = mTokens.size();
     mArgv = new char*[size + 1];
 
-    memset(mArgv, 0, sizeof(char *) * (size + 1));
-
     for(unsigned int i = 0; i < size; ++i)
     {
       mArgv[i] = (char *)(mTokens[i]->c_str());

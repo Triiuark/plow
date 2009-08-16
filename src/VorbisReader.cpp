@@ -1,5 +1,7 @@
 #include "VorbisReader.h"
 
+#include <memory>
+
 #include <tag.h>
 #include <oggfile.h>
 #include <vorbisfile.h>

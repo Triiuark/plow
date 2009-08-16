@@ -52,7 +52,7 @@ class StringParser
     /**
      * @returns the number of tokens
      */
-    uint getSize() const;
+    unsigned int getSize() const;
 
     /**
      * destroys the StringParser

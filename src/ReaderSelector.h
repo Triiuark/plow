@@ -20,7 +20,7 @@
 #ifndef PLOW_READER_SELECTOR_H
 #define PLOW_READER_SELECTOR_H
 
-#include <map>
+#include <memory>
 
 #include "types.h"
 #include "AbstractReader.h"

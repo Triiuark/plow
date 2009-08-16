@@ -2,105 +2,85 @@
 
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <cerrno>
 
 using namespace std;
 
 PlowException::PlowException(const char * const function,
-                             const char * const error,
-                             const char * const solution)
+		const char * const error, const char * const solution)
 {
-  mErrno = errno;
+	mErrno = errno;
 
-  errno = 0;
+	errno = 0;
 
-  mFunction = function;
+	mFunction = function;
 
-  if(error != 0)
-  {
-    mError << error;
-  }
+	if(error != 0) {
+		mError << error;
+	}
 
-  if(solution != 0)
-  {
-    mSolution = solution;
-  }
+	if(solution != 0) {
+		mSolution = solution;
+	}
 }
-
-
 
 PlowException::PlowException(PlowException const &e)
 {
-  mErrno    = e.err();
-  mFunction = e.function();
-  mSolution = e.solution();
+	mErrno = e.err();
+	mFunction = e.function();
+	mSolution = e.solution();
 
-  mError << e.errorStr();
+	mError << e.errorStr();
 }
-
-
 
 std::ostringstream &PlowException::error()
 {
-  return mError;
+	return mError;
 }
-
-
 
 void PlowException::print() const
 {
-  cout << endl;
-  cerr << message() << endl;
+	cout << endl;
+	cerr << message() << endl;
 
-  if(!mSolution.empty())
-  {
-    cout << "\n" << mSolution << endl;
-  }
+	if(!mSolution.empty()) {
+		cout << "\n" << mSolution << endl;
+	}
 }
-
-
 
 string PlowException::message() const
 {
-  string out("Error in ");
+	string out("Error in ");
 
-  out.append(mFunction);
-  out.append(": ");
-  out.append(mError.str());
+	out.append(mFunction);
+	out.append(": ");
+	out.append(mError.str());
 
-  if(mErrno != 0)
-  {
-    out.append(": ");
-    out.append(strerror(mErrno));
-  }
+	if(mErrno != 0) {
+		out.append(": ");
+		out.append(strerror(mErrno));
+	}
 
-  return out;
+	return out;
 }
-
-
 
 int PlowException::err() const
 {
-  return mErrno;
+	return mErrno;
 }
-
-
 
 string const &PlowException::function() const
 {
-  return mFunction;
+	return mFunction;
 }
-
-
 
 string PlowException::errorStr() const
 {
-  return mError.str();
+	return mError.str();
 }
-
-
 
 string const &PlowException::solution() const
 {
-  return mSolution;
+	return mSolution;
 }

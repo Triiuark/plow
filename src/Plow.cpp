@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 
+#include <cstdlib>
 #include <cerrno>
 
 extern "C" {
@@ -335,7 +336,7 @@ void Plow::backup()
 
   PrioQ fnames;
   char  *path         = new char[mDataDir.size() + 1];
-  char  *extension[8] = {"sqlite~"};
+  char  *extension[8] = {(char *)"sqlite~"};
 
   sprintf(path, "%s", mDataDir.c_str());
 

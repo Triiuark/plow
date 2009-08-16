@@ -1,5 +1,5 @@
 /***********************************************************************
-* Copyright (C) 2006 - 2008 by René Bählkow                            *
+* Copyright (C) 2006 - 2009 by René Bählkow                            *
 *                                                                      *
 * This program is free software; you can redistribute it and/or modify *
 * it under the terms of the GNU General Public License as published by *
@@ -30,6 +30,8 @@
 #include <sstream>
 #include <string>
 
+#include <cstdlib>
+
 extern "C"
 {
 #include <sqlite3.h> /// for quoting with sqlite3_mprintf()
@@ -57,7 +59,12 @@ void printUsage()
  */
 void printVersion()
 {
-  cout << PACKAGE << " " << VERSION << endl;
+  cout << PACKAGE << " " << VERSION
+       << "\nCopyright 2006 - 2009 René Bählkow\n"
+       << "This program is free software; you may redistribute it"
+       << " under the terms of\nthe GNU General Public License"
+       << " version 2 or (at your option) any later version.\n"
+       << "This program has absolutely no warranty." << std::endl;
 }
 
 

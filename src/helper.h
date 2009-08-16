@@ -55,7 +55,7 @@ void getFiles(PrioQ &fnames,
  * and sets permission to @a mode
  *
  * @param path to create
- * @param mode to use, default: 0755
+ * @param mode to use, default: 0700
  *
  * @throws PlowException on any error
  */
