@@ -1,21 +1,21 @@
-/***********************************************************************
-* Copyright (C) 2006 - 2008 by René Bählkow                            *
-*                                                                      *
-* This program is free software; you can redistribute it and/or modify *
-* it under the terms of the GNU General Public License as published by *
-* the Free Software Foundation; either version 2 of the License, or    *
-* (at your option) any later version.                                  *
-*                                                                      *
-* This program is distributed in the hope that it will be useful,      *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
-* GNU General Public License for more details.                         *
-*                                                                      *
-* You should have received a copy of the GNU General Public License    *
-* along with this program; if not, write to the                        *
-* Free Software Foundation, Inc.,                                      *
-* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
-***********************************************************************/
+/************************************************************************
+ * Copyright (C) 2006 - 2009 by René Bählkow                            *
+ *                                                                      *
+ * This program is free software; you can redistribute it and/or modify *
+ * it under the terms of the GNU General Public License as published by *
+ * the Free Software Foundation; either version 2 of the License, or    *
+ * (at your option) any later version.                                  *
+ *                                                                      *
+ * This program is distributed in the hope that it will be useful,      *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+ * GNU General Public License for more details.                         *
+ *                                                                      *
+ * You should have received a copy of the GNU General Public License    *
+ * along with this program; if not, write to the                        *
+ * Free Software Foundation, Inc.,                                      *
+ * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+ ************************************************************************/
 
 #ifndef PLOW_HELPER_H
 #define PLOW_HELPER_H
@@ -42,13 +42,8 @@
  *                   R_OK, W_OK, X_OK and  F_OK.
  *                   (see: @a man @a access )
  */
-void getFiles(PrioQ &fnames,
-              char *path,
-              const bool recursive,
-              char **extensions = 0,
-              int mode = R_OK);
-
-
+void getFiles(PrioQ &fnames, char *path, const bool recursive,
+		char **extensions = 0, int mode = R_OK);
 
 /**
  * creates (recursive) the complete @a path
@@ -60,8 +55,6 @@ void getFiles(PrioQ &fnames,
  * @throws PlowException on any error
  */
 void mkdir_r(std::string const &path, int mode = 0700);
-
-
 
 /**
  * copies file @a src to @a dst (and creates complete path)
@@ -75,8 +68,6 @@ void mkdir_r(std::string const &path, int mode = 0700);
  */
 int copyfile(std::string const &src, std::string const &dst);
 
-
-
 /**
  * calculates the real string length of utf-8 string @a utf8str
  * (returns number of characters instead of bytes)
@@ -87,8 +78,6 @@ int copyfile(std::string const &src, std::string const &dst);
  */
 unsigned int utf8strlen(const char * const utf8str);
 
-
-
 /**
  * replaces every character listed in @a chars in @a in by @a by, but
  * a continious group of more than one character is replaced by only one
@@ -98,6 +87,7 @@ unsigned int utf8strlen(const char * const utf8str);
  * @param in the string where characters should be replaced
  * @param by character to use instead
  */
-void replaceChars(std::string const &chars, std::string &in, char by='_');
+void replaceChars(std::string const &chars, std::string &in, char by =
+		'_');
 
 #endif

@@ -22,7 +22,7 @@ INSTALL = install
 RM      = -rm -f
 RMDIR   = -rmdir
 MKDIR   = mkdir -p
-STRIP = strip --strip-unneeded
+STRIP   = strip --strip-unneeded -R .comment
 
 ifeq ($(version),)
 	version = svn-$(shell svn info 2>/dev/null | grep "Revision" 2>/dev/null |\
@@ -34,7 +34,7 @@ endif
 
 CXXFLAGS += $(shell pkg-config --cflags sqlite3)
 CXXFLAGS += $(shell pkg-config --cflags taglib)
-CXXFLAGS += -Wall -ansi -DVERSION=\"$(version)\"
+CXXFLAGS += -Wall -DVERSION=\"$(version)\"
 LIBS      = $(shell pkg-config --libs sqlite3)
 LIBS     += $(shell pkg-config --libs taglib)
 LIBDIRS   =

@@ -1,21 +1,21 @@
-/***********************************************************************
-* Copyright (C) 2006 by René Bählkow                                   *
-*                                                                      *
-* This program is free software; you can redistribute it and/or modify *
-* it under the terms of the GNU General Public License as published by *
-* the Free Software Foundation; either version 2 of the License, or    *
-* (at your option) any later version.                                  *
-*                                                                      *
-* This program is distributed in the hope that it will be useful,      *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
-* GNU General Public License for more details.                         *
-*                                                                      *
-* You should have received a copy of the GNU General Public License    *
-* along with this program; if not, write to the                        *
-* Free Software Foundation, Inc.,                                      *
-* 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
-***********************************************************************/
+/************************************************************************
+ * Copyright (C) 2006 - 2009 by René Bählkow                            *
+ *                                                                      *
+ * This program is free software; you can redistribute it and/or modify *
+ * it under the terms of the GNU General Public License as published by *
+ * the Free Software Foundation; either version 2 of the License, or    *
+ * (at your option) any later version.                                  *
+ *                                                                      *
+ * This program is distributed in the hope that it will be useful,      *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+ * GNU General Public License for more details.                         *
+ *                                                                      *
+ * You should have received a copy of the GNU General Public License    *
+ * along with this program; if not, write to the                        *
+ * Free Software Foundation, Inc.,                                      *
+ * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.            *
+ ************************************************************************/
 
 #ifndef PLOW_CONSTANTS_H
 #define PLOW_CONSTANTS_H
@@ -24,15 +24,17 @@
 /// constants for help stuff
 ///
 
-const char * const USAGE = "plow\
+const char
+		* const USAGE =
+				"plow\
  [-|+<c>[e|l|g] <str> [ <str>]*]* [--show]\n\
      ([--0|...|9] [--random] [--add] [--noplay] | [--set (<c> <str>)+])\n\
      | [--list <tbl>] | [--query <sql>] | [--copy] | [--insert <dir>]\n\
      | [--dump] | [--dumpfull] | [--help] | [--version]";
 
-
-
-const char * const HELP = "\
+const char
+		* const HELP =
+				"\
 -|+<c>[e|l|g] <str>  -   search <c> for fields containing <str>\n\
                      +   search <c> for fields not containing <str>\n\
                      e   <str> matches exactly\n\
@@ -75,22 +77,26 @@ const char * const HELP = "\
 \n\
 See man plow for some detailed information.";
 
-
-
 ///
 /// constants for sql stuff
 ///
 
-const char * const SELECT = "SELECT\n\t'%s' || `file` AS `file`,\n\t `file_id`,\
+const char
+		* const SELECT =
+				"SELECT\n\t'%s' || `file` AS `file`,\n\t `file_id`,\
  `artist`, `title`, `album`, `genre`, `language`, `mood`,\n\t `tempo`, `rating`,\
  `situation`, `part`, `track`, `parts`, `tracks`,\n\t `length`, `release`, `date`,\
  `status`, `comment`, `lyrics`\n";
 
-const char * const FROM = "FROM\n\t`tbl_music`, `tbl_artist`, `tbl_album`,\
+const char
+		* const FROM =
+				"FROM\n\t`tbl_music`, `tbl_artist`, `tbl_album`,\
  `tbl_genre`, `tbl_rating`,\n\t`tbl_language`, `tbl_mood`, `tbl_situation`,\
  `tbl_tempo`\n";
 
-const char * const WHERE = "WHERE\n\t`id_artist`=`_id_artist` AND\
+const char
+		* const WHERE =
+				"WHERE\n\t`id_artist`=`_id_artist` AND\
  `id_album`=`_id_album`\n\tAND `id_genre`=`_id_genre` AND\
  `id_rating`=`_id_rating`\n\tAND `id_language`=`_id_language` AND\
  `id_mood`=`_id_mood`\n\tAND `id_situation`=`_id_situation` AND\
@@ -100,7 +106,9 @@ const char * const WHERE = "WHERE\n\t`id_artist`=`_id_artist` AND\
 /// constants for the first run setup
 ///
 
-const char * const INI_FILE ="\
+const char
+		* const INI_FILE =
+				"\
 ######################################################################\n\
 ###\n\
 ### general options you have to set\n\
@@ -196,9 +204,9 @@ extinf = [length] \", \" [artist] \" - \" [title]\n\
 #title     = TIT2\
 ";
 
-
-
-const char * const DATABASE =" BEGIN TRANSACTION;\
+const char
+		* const DATABASE =
+				" BEGIN TRANSACTION;\
 CREATE TABLE `tbl_album` (\n\
   `id_album`        INTEGER NOT NULL PRIMARY KEY,\n\
   `album`           TEXT             DEFAULT '',\n\
