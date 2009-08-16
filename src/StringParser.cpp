@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 
+#include <cstring>
+
 using namespace std;
 
 StringParser::StringParser(const char *str, const char delim)
@@ -64,14 +66,18 @@ unsigned int StringParser::getSize() const
 
 char **StringParser::getArgv()
 {
-	if(mArgv == 0) {
+
+	if(mArgv == 0) {	printf("in getArgv()\n");
 		unsigned int size = mTokens.size();
 		mArgv = new char*[size + 1];
-
+		memset(mArgv, 0, sizeof(char *) * (size + 1));
 		for(unsigned int i = 0; i < size; ++i) {
 			mArgv[i] = (char *)(mTokens[i]->c_str());
+			printf("%s / %s\n", mTokens[i]->c_str(), mArgv[i]);
 		}
 	}
+
+	printf("end in getArgv()\n");
 
 	return mArgv;
 }
