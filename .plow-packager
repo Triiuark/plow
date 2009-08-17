@@ -38,7 +38,7 @@ patchfile="/tmp/${package}/Makefile.patch"
 echo "26a27"                  >> ${patchfile}
 echo "> version = ${version}" >> ${patchfile}
 patch /tmp/${package}/Makefile <${patchfile}
-#rm -f ${patchfile}
+rm -f ${patchfile}
 
 mkdir /tmp/${package}/src
 cp src/*.cpp /tmp/${package}/src
