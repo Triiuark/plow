@@ -23,9 +23,10 @@ RM      = -rm -f
 RMDIR   = -rmdir
 MKDIR   = mkdir -p
 STRIP   = strip --strip-unneeded -R .comment
-
+# #########################################################################
 ifeq ($(version),)
-	version = svn-$(shell svn info 2>/dev/null | grep "Revision" 2>/dev/null |\
+	version = svn-$(shell svn info 2>/dev/null |\
+              grep "Revision" 2>/dev/null |\
               tr -d "[:alpha:][:space:]:" 2>/dev/null)
 	ifeq ($(version), svn-)
 		version = "UNKNOWN VERSION"

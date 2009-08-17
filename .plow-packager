@@ -35,11 +35,10 @@ if test "$?" -eq 1; then
 fi
 
 patchfile="/tmp/${package}/Makefile.patch"
-echo "10a11,12"                                         >> ${patchfile}
-echo "> VERSION        = ${version}"                    >> ${patchfile}
-echo "> CXXFLAGS      += -DVERSION=\\\"\${VERSION}\\\"" >> ${patchfile}
+echo "26a27"                  >> ${patchfile}
+echo "> version = ${version}" >> ${patchfile}
 patch /tmp/${package}/Makefile <${patchfile}
-rm -f ${patchfile}
+#rm -f ${patchfile}
 
 mkdir /tmp/${package}/src
 cp src/*.cpp /tmp/${package}/src
@@ -50,7 +49,7 @@ cd /tmp
 tar czf ${package}.tar.gz ${package}
 cd ${dir}
 mv /tmp/${package}.tar.gz ./
-rm -rf /tmp/${package}
-rm -rf /tmp/plow-packager
+#rm -rf /tmp/${package}
+#rm -rf /tmp/plow-packager
 echo "${dir}/${package}.tar.gz created ..."
 
