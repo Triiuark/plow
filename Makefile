@@ -25,17 +25,17 @@ MKDIR   = mkdir -p
 STRIP   = strip --strip-unneeded -R .comment
 # #########################################################################
 ifeq ($(version),)
-	version = svn-$(shell svn info 2>/dev/null |\
-              grep "Revision" 2>/dev/null |\
-              tr -d "[:alpha:][:space:]:" 2>/dev/null)
-	ifeq ($(version), svn-)
-		version = "UNKNOWN VERSION"
+	version = git-$(shell git log --oneline --abbrev=8 2>/dev/null |\
+              head -1 2>/dev/null |\
+              awk -F' ' '{print $$1}' 2>/dev/null)
+	ifeq ($(version), git-)
+		version = UNKNOWN VERSION
 	endif
 endif
 
 CXXFLAGS += $(shell pkg-config --cflags sqlite3)
 CXXFLAGS += $(shell pkg-config --cflags taglib)
-CXXFLAGS += -Wall -DVERSION=\"$(version)\"
+CXXFLAGS += -Wall -DVERSION="\"$(version)\""
 LIBS      = $(shell pkg-config --libs sqlite3)
 LIBS     += $(shell pkg-config --libs taglib)
 LIBDIRS   =
