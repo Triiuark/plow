@@ -1,0 +1,65 @@
+Overview
+========
+
+plow is a powerfull command-line tool for putting songs from your
+music collection into a playlist. Most id3v2/vorbis tag information
+is used by plow to create a (sqlite3) database for filtering.
+Additionaly plow supports fields like mood, language, etc.
+
+
+How to compile and install
+==========================
+
+Requirements:
+  * sqlite3 libs (best is >= 3.3)
+  * KDE taglib (>= 1.4)
+
+Download source code, then:
+  $ tar zxvf plow-x.y.z.tar.gz
+  $ cd plow-x.y.z
+  $ make
+  (and as root):
+  $ make install
+
+Notes:
+  * If you want to optimize your build of plow use
+    CXXFLAGS, e.g.
+      $ CXXFLAGS="-O2 -march=pentium4" make
+  * If you want to install plow into another directory
+    than /usr/local/ change PREFIX in Makefile.
+
+
+Setting up and using plow
+=========================
+
+If you use plow for the first time, plow creates
+$XDG_CONFIG_HOME/projekt182.de/plow.conf and
+$XDG_DATA_HOME/projket182.de/plow.sqlite.
+
+Notes:
+  * If $XDG_CONFIG_HOME is empty then ~/.config is used.
+  * If $XDG_DATA_HOME is empty then ~/.local/share is used.
+
+Then edit $XDG_CONFIG_HOME/projekt182.de/plow.conf and change at least
+path and player0 settings under [general] section. If you use Ogg/Vorbis files
+it is recommanded to change also the field names under [vorbis] section.
+
+Run:
+  $ plow --insert /path/to/music
+to fill the database. This may take a long time.
+
+Thats it now you can try:
+  $ plow --help
+or just create a playlist containing all files
+  $ plow
+
+
+Documentation
+=============
+
+You will find actual documentation on http://plow.projekt182.de
+or take a look at the man page:
+  $ man ./plow.1
+or
+  $ man plow
+if you already installed plow.

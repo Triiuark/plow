@@ -1,0 +1,374 @@
+.\" Encoding: iso-8859-1
+.
+.de IPn
+.na
+.nh
+.IP "\\$1"
+.ad
+.hy
+..
+.
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.TH "plow" "1" "local" "René Bählkow" "The Playlist Generator"
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.SH "NAME"
+plow \- create m3u playlist (and start a player)
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.SH "SYNOPSIS"
+.na
+.nh
+.nf
+\fBplow\fR [-|+<c>[e|l|g] <str> [<str>]*]* [\-\-random] [\-\-add]
+     [\-\-0|...|9] [\--show] [\-\-noplay]
+\fBplow\fR [-|+<c>[e|l|g] <str> [<str>]*]* \-\-set <c> <str> [<c> <str>]*
+     [\--show]
+\fBplow\fR \-\-list <tbl>
+\fBplow\fR \-\-query <sql>
+\fBplow\fR \-\-copy
+\fBplow\fR \-\-insert \fI/path/to/music\fR
+\fBplow\fR \-\-dump
+\fBplow\fR \-\-dumpfull
+\fBplow\fR \-\-help
+\fBplow\fR \-\-version
+.fi
+.ad
+.hy
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.SH "DESCRIPTION"
+\fBplow\fR is a powerfull command\-line tool for putting songs
+from your music collection into a playlist. Most id3v2/ogg tag
+information is used by \fBplow\fR to create a (sqlite3)
+database for filtering. Additionaly \fBplow\fR supports
+fields like mood, tempo, language, etc.
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.SH "OPTIONS"
+.
+.IPn "\fB\-|+<c>[e|l|g] <str> [<str>]*"
+This sets the filter for creating the playlist.
+.PD 0
+.RS 8
+.IPn "\-"
+search for fields containing <str>
+.IPn "+"
+search for fields \fBnot\fR containing <str>
+.IPn "e"
+<str> matches exactly
+.IPn "l"
+value in <c> is less than <str>
+.IPn "g"
+value in <c> is greater than <str>
+.IPn "<c>"
+is one of the following characters:
+.nf
+  A (album),  a (artist),    c (comment),
+  d (date),   f (file name), g (genre),
+  i (id),     L (lyrics),    l (language),
+  m (mood),   N (tracks),    n (track),
+  P (parts),  p (part),      R (release),
+  r (rating), S (status),    s (situation),
+  T (title),  t (tempo),     x (length)
+.fi
+.RE
+.PD 1
+.
+.IPn "\fB\-\-S|set <c> <str> [<c> <str>]*"
+This sets the field <c> to <str> in all songs that matches the actual
+filter. <c> is one of the characters above.
+.
+.IPn "\fB\-\-s|show"
+Print out the executed SQL query for filter and set options.
+.
+.IPn "\fB\-\-0|...|9"
+Select the player set in configuration file.
+.
+.IPn "\fB\-\-r|random"
+Shuffle the playlist.
+.
+.IPn "\fB\-\-a|add"
+Append the files to the playlist (do not overwrite the old one).
+.
+.IPn "\fB\-\-n|noplay"
+Create the playlist normally, but do not start a player.
+.
+.IPn "\fB\-\-l|list <tbl>"
+Print out values for <tbl>. <tbl> is one of album, artist, genre,
+language, mood, rating, situation or tempo.
+.
+.IPn "\fB\-\-q|query <sql>"
+Execute SQL query <sql> and print the result.
+.
+.IPn "\fB\-\-c|copy"
+Copy all files in the current playlist to the portable device
+set in configuration file.
+.
+.IPn "\fB\-\-i|insert /path/to/music"
+Add files in /path/to/music to database. Files allready in database
+are ignored.
+.
+.IPn "\fB\-\-d|dump"
+Print out a database dump without create <tbl> statements.
+.
+.IPn "\fB\-\-D|dumpfull"
+Print out a database dump with create <tbl> statements.
+.
+.IPn "\fB\-\-help"
+Print out a help message.
+.
+.IPn "\fB\-\-version"
+Print out version.
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.SH "EXAMPLES"
+.\" ------------------------------------------------------------------
+.SS "CREATING PLAYLISTS"
+.IPn "plow"
+This creates a playlist containing all songs.
+.IPn "plow \-a queen"
+artist contains queen
+.IPn "plow \-a queen \-T rock"
+artist contains queen \fBand\fR title
+contains rock
+.IPn "plow \-ae Queen"
+artist is exactly Queen
+.IPn "plow +a queen"
+artist \fBnot\fR contains queen
+.IPn "plow +ae Queen"
+artist \fBis not\fR Queen
+.IPn "plow \-a queen beatles"
+artist contains queen \fBor\fR beatles
+.IPn "plow \-a queen +a queens"
+artist contains queen \fBand not\fR queens
+.IPn "plow \-a queen \-a 'stone age'"
+artist contains queen \fBand\fR stone age
+.IPn "plow \-al Queen"
+artist is less than Queen
+.\" ------------------------------------------------------------------
+.SS "SETTING VALUES"
+.IPn "plow \-a queen \-\-set l english r 'best music ever'"
+sets language = english and rating = 'best music ever' for all songs
+where artist contains queen
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.SH "CONFIGURATION FILE"
+\fI$XDG_CONFIG_HOME/projekt182.de/plow.conf\fR
+is the configuration file for plow. It is in an INI like format with
+\fB[section]\fR and \fBkey=value\fR pairs. Lines starting with a \fB#\fR
+are comments. Whitespaces are ignored, except within a value.
+.\" ------------------------------------------------------------------
+.SS "SECTION [general]"
+.
+.IPn "path = /path/to/music"
+If all your music is in one folder you can set it here. If you add
+songs to your database path is stripped from file names.
+.br
+Default: empty
+.
+.IPn "playlist = /path/to/playlist"
+Sets the path to the playlist. The file name is always plow.m3u.
+This value is given as an argument to the players you set.
+.br
+Default: $XDG_DATA_HOME/projekt182.de
+.
+.IPn "order = album ASC, part ASC, track ASC"
+Sets the default output order. This is in SQL syntax.
+.br
+Default: album ASC, part ASC, track ASC
+.
+.IPn "player0 = mplayer \-playlist"
+Here you have to set your default player, so that it plays a playlist.
+The playlist is given as an argument to the players.
+.br
+Default: empty (in default configuration file it is mplayer -playlist)
+.
+.IPn "player[1..9] = <player-executable -options>"
+You can set up to 9 additional player. If one is not found, plow will
+fallback to player0.
+.br
+Default: empty
+.
+.IPn "playernofork = 0"
+If you do not want plow to fork a player, then add its number here
+(you can use space or nothing to seperate them). This is normally
+the case if you use a command-line player like mplayer.
+.br
+Default: empty
+.
+.IPn "portable = /path/to/portable/player"
+Sets the path to your portable device.
+.br
+Default: empty
+.
+
+.IPn "portable_name = [artistOrAlbum] / [albumOrEmpty] \- [part0] \- [track0] \- [emptyOrArtist] \- [title] [extension]"
+If you want plow to rename the files before copying to portable, you
+can set here how to do that. Therefore you can use all fields from the
+database surrounded by '[' and ']' like [title]. Additionally there
+are some special fields like [artistOrAlbum], which are explained
+in "SPECIAL FIELDS FOR portable_name AND extinf" below.
+.br
+The following characters are replaced by a '_':
+\\\\n\\r\\t"'$@*{}[]()/:;&? and space.
+.br
+The fields and strings here are seperated by space characters.
+.br
+The value above will create something like
+.nh
+Queen/The_Platinum_Collection-01-16-We_will_rock_you.ogg for a
+song from a normal album and something like
+The_Matrix/01-07-The_Prodigy-Mindfields.ogg
+.hy
+for a song from a compilation album.
+.br
+Default: empty (no renaming)
+.
+.IPn "extinf = [length] "", "" [artist] "" - "" [title]"
+A m3u file can contain extended information, so if a player can't
+read tags from files or reads them only if the file is played,
+it shows (maybe) this as file information. You can use the same
+as in portable_name here.
+.br
+Default: empty (no extinf in playlist)
+.
+.IPn "extensions = mp3 MP3 ogg OGG"
+If your music folders contains other files than the songs, set here
+which extensions your music files have. Otherwise plow tries to
+read tags from every file.
+.br
+Default: empty (no filtering by file extension)
+.
+.IPn "backups = 5"
+This sets the number of database backups to keep. Every time you
+change the database (with \-\-insert or \-\-set) a backup
+file (\fI$XDG_DATA_HOME/projekt182/plow.YYYYMMDDHHSS.sqlite~\fR) is created.
+0 means don't remove old backups. -1 means do not create backups.
+.br
+Default: 5
+.\" ------------------------------------------------------------------
+.SS "SECTION [vorbis]"
+Here you set how your ogg/vorbis files are tagged. (The values here
+are the defaults used by plow.)
+\fBAll keys have to be in uppercase, even if they are in lowercase in the
+files.\fR
+.IPn "title     = TITLE"
+.IPn "artist    = ARTIST"
+.IPn "album     = ALBUM"
+.IPn "part      = DISCNUMBER"
+If you have a record that is divided into more than one disc, this
+field is used for the disc number.
+.IPn "track     = TRACKNUMBER"
+.IPn "genre     = GENRE"
+.IPn "comment   = COMMENT"
+.IPn "date      = DATE"
+.IPn "id        = ID"
+This is used for unique file ids.
+.IPn "parts     = DISCS"
+If you have a record that is divided into more than one disc, this
+field is used for the total number of discs.
+.IPn "tracks    = TRACKS"
+.IPn "rating    = RATING"
+.IPn "mood      = MOOD"
+.IPn "situation = SITUATION"
+.IPn "tempo     = TEMPO"
+.IPn "language  = LANGUAGE"
+.\"-------------------------------------------------------------------
+.SS "SECTION [id3v2]"
+Here you set how your mp3s are tagged.
+.br
+plow supports the following frame types:
+.PD 0
+.RS 8
+.IPn "TXXX"
+user text frame with a description string
+.IPn "COMM"
+comment frame with a description string and a language
+(the language is ignored by plow)
+.IPn "UFID"
+unique file identifier frame with an owner string
+.IPn "POPM"
+popularimeter frame (rating) with an owner string
+.RE
+.PD 1
+.PP
+The frame identifier has to be followed by a '/' and the description
+or owner string you used in the frame. Is there nothing after the '/' it
+means an empty description or owner string. If you just want to use the
+first frame of UFID or POPM frames, or there is just one, than you can use
+a '*' as owner string.
+.PP
+You can use all frame types for all fields, e.g. tempo = UFID/* or
+rating = COMM/rating.
+.PP
+(The values here are the defaults used by plow.)
+.IPn "album     = TALB"
+ID3v2 standard
+.IPn "artist    = TPE1"
+ID3v2 standard
+.IPn "comment   = COMM/"
+.IPn "date      = TDRC"
+ID3v2 standard
+.IPn "genre     = TCON"
+ID3v2 standard
+.IPn "id        = UFID/*"
+.IPn "language  = TLAN"
+ID3v2 standard
+.IPn "lyrics    = TXXX/LYRICS"
+.IPn "mood      = TXXX/MOOD"
+.IPn "rating    = POPM/*"
+.IPn "release   = TDRL"
+.IPn "situation = TXXX/SITUATION"
+.IPn "tempo     = TXXX/TEMPO"
+.IPn "title     = TIT2"
+ID3v2 standard
+.\" ------------------------------------------------------------------
+.SS "SPECIAL FIELDS FOR portable_name AND extinf"
+.IPn "[track0]"
+track number with a leading 0
+.IPn "[tracks0]"
+total number of tracks with a leading 0
+.IPn "[part0]"
+part number with a leading 0
+.IPn "[parts0]"
+total number of parts with a leading 0
+.IPn "[extension]"
+file extension (the part from the last '.' of tbl_music.file)
+.IPn "[artistOrEmpty]"
+artist if the album is no compilation, empty otherwise
+.IPn "[albumOrEmpty]"
+album if the album is no compilation, empty otherwise
+.IPn "[emptyOrArtist]"
+empty if the album is no compilation, artist otherwise
+.IPn "[emptyOrAlbum]"
+empty if the album is no compilation, album otherwise
+.IPn "[artistOrAlbum]"
+artist if the album is no compilation, album otherwise
+.IPn "[albumOrArtist]"
+album if the album is no compilation, artist otherwise
+.RE
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.SH "DATABASE FILE"
+\fI$XDG_DATA_HOME/projekt182.de/plow.sqlite\fR is a SQLite3 database file
+containing all the data used by plow.
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.SH "AUTHOR"
+René Bählkow
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.\" ------------------------------------------------------------------
+.SH "SEE ALSO"
+\fIhttp://plow.projekt182.de/

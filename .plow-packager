@@ -1,0 +1,48 @@
+#!/bin/bash
+
+#
+# This script creates a plow source tar.gz package
+# from the latest svn tags/version-x.y.z directory.
+#
+
+if [[ -z "${1}" ]]; then
+	version=$(git tag -l | grep 'version-' | tail -1 | awk -F'-' '{print $2}')
+else
+	version="${1}"
+fi
+echo version-${version}
+git checkout version-${version} || exit 1
+
+name='plow'
+package="${name}-${version}"
+
+rm -rf   /tmp/${package}
+mkdir -p /tmp/${package} || exit 1
+
+cp AUTHORS ChangeLog COPYING NEWS README TODO plow.1 Makefile /tmp/${package}
+if test "$?" -eq 1; then
+	echo  "There are some files missing."
+	exit 1
+fi
+
+patchfile="/tmp/${package}/Makefile.patch"
+echo "26a27"                  >> ${patchfile}
+echo "> version = ${version}" >> ${patchfile}
+patch /tmp/${package}/Makefile <${patchfile}
+rm -f ${patchfile}
+
+mkdir /tmp/${package}/src
+cp src/*.cpp /tmp/${package}/src
+cp src/*.h /tmp/${package}/src
+mkdir /tmp/${package}/bin
+
+dir=$(pwd)
+
+cd /tmp
+tar czf ${package}.tar.gz ${package}
+cd ${dir}
+mv /tmp/${package}.tar.gz ./
+rm -rf /tmp/${package}
+rm -rf /tmp/plow-packager
+echo "${dir}/${package}.tar.gz created ..."
+
