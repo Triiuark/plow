@@ -72,6 +72,12 @@ Plow::Plow()
 	mShuffle = false;
 	mCopy = false;
 	mDoNothing = false;
+	mPrintValue = NONE;
+}
+
+void Plow::setPrintValues(int what)
+{
+	mPrintValue = what;
 }
 
 void Plow::setPlay(bool play)
@@ -1240,6 +1246,19 @@ void Plow::run()
 	initialize();
 
 	if(mDoNothing) {
+		return;
+	}
+
+	if(mPrintValue != NONE) {
+		if(mPrintValue & CONFIG_FILE) {
+			cout << mConfigDir << "/plow.conf" << endl;
+		}
+		if(mPrintValue & DATABASE_FILE) {
+			cout << mDbFile << endl;
+		}
+		if(mPrintValue & PLAYLIST_FILE) {
+			cout << mPlaylistFile << endl;
+		}
 		return;
 	}
 

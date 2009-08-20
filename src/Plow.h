@@ -39,6 +39,18 @@ class Plow
 		};
 
 		/**
+		 * these defines what values are printed to stdout
+		 * if set with setPrintValues to something else then NONE
+		 */
+		enum PrintValue
+		{
+			NONE          = 0x00,
+			CONFIG_FILE   = 0x01,
+			DATABASE_FILE = 0x02,
+			PLAYLIST_FILE = 0x04
+		};
+
+		/**
 		 * a map with the chars used for filter and set arguments as keys
 		 * @param key a char that represents the field (chars used for
 		 *            filter and set arguments)
@@ -59,6 +71,13 @@ class Plow
 		 * call it after parsing ALL arguments
 		 */
 		void run();
+
+		/**
+		 * print out the specified values
+		 *
+		 * @param what the values to print
+		 */
+		void setPrintValues(int what);
 
 		/**
 		 * @param play start a player?
@@ -158,7 +177,6 @@ class Plow
 		std::auto_ptr<Sqlite3> mSqlite3;
 
 		std::string mConfigDir;
-		std::string mConfFile;
 		std::string mDataDir;
 		std::string mDbFile;
 		std::string mPlaylistFile;
@@ -175,6 +193,8 @@ class Plow
 		int mKeepBackup;
 
 		char mPlayer;
+
+		int mPrintValue;
 
 		bool mShowQuery;
 		bool mPlay;

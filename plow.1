@@ -1,4 +1,4 @@
-.\" Encoding: iso-8859-1
+.\" Encoding: utf-8
 .
 .de IPn
 .na
@@ -11,7 +11,7 @@
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
-.TH "plow" "1" "local" "René Bählkow" "The Playlist Generator"
+.TH "plow" "1" "local" "RenÃ© BÃ¤hlkow" "The Playlist Generator"
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
@@ -34,6 +34,7 @@ plow \- create m3u playlist (and start a player)
 \fBplow\fR \-\-insert \fI/path/to/music\fR
 \fBplow\fR \-\-dump
 \fBplow\fR \-\-dumpfull
+\fBplow\fR \-\-print [c][d][p]
 \fBplow\fR \-\-help
 \fBplow\fR \-\-version
 .fi
@@ -121,10 +122,19 @@ Print out a database dump without create <tbl> statements.
 .IPn "\fB\-\-D|dumpfull"
 Print out a database dump with create <tbl> statements.
 .
-.IPn "\fB\-\-help"
+.IPn "\fB\-\-f|print [c][d][p]"
+Print out configuration values. If no argument is given the
+configuration file name is printed. You can use more than one argument.
+.nf
+  c configuration file name
+  d database file name
+  p playlist file name
+.fi
+.
+.IPn "\fB\-\-h|help"
 Print out a help message.
 .
-.IPn "\fB\-\-version"
+.IPn "\fB\-\-v|version"
 Print out version.
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
@@ -175,11 +185,11 @@ songs to your database path is stripped from file names.
 .br
 Default: empty
 .
-.IPn "playlist = /path/to/playlist"
-Sets the path to the playlist. The file name is always plow.m3u.
-This value is given as an argument to the players you set.
+.IPn "playlist = /path/to/playlist.m3u"
+Sets the path to the playlist. This value is given as an argument to the
+players you set.
 .br
-Default: $XDG_DATA_HOME/projekt182.de
+Default: $XDG_DATA_HOME/projekt182.de/plow/plow.m3u
 .
 .IPn "order = album ASC, part ASC, track ASC"
 Sets the default output order. This is in SQL syntax.
@@ -251,7 +261,8 @@ Default: empty (no filtering by file extension)
 .IPn "backups = 5"
 This sets the number of database backups to keep. Every time you
 change the database (with \-\-insert or \-\-set) a backup
-file (\fI$XDG_DATA_HOME/projekt182/plow.YYYYMMDDHHSS.sqlite~\fR) is created.
+file (\fI$XDG_DATA_HOME/projekt182/plow.YYYYMMDDHHSS.sqlite~\fR) is
+created.
 0 means don't remove old backups. -1 means do not create backups.
 .br
 Default: 5
@@ -259,8 +270,8 @@ Default: 5
 .SS "SECTION [vorbis]"
 Here you set how your ogg/vorbis files are tagged. (The values here
 are the defaults used by plow.)
-\fBAll keys have to be in uppercase, even if they are in lowercase in the
-files.\fR
+\fBAll keys have to be in uppercase, even if they are in lowercase in
+the files.\fR
 .IPn "title     = TITLE"
 .IPn "artist    = ARTIST"
 .IPn "album     = ALBUM"
@@ -304,7 +315,8 @@ popularimeter frame (rating) with an owner string
 The frame identifier has to be followed by a '/' and the description
 or owner string you used in the frame. Is there nothing after the '/' it
 means an empty description or owner string. If you just want to use the
-first frame of UFID or POPM frames, or there is just one, than you can use
+first frame of UFID or POPM frames, or there is just one,
+than you can use
 a '*' as owner string.
 .PP
 You can use all frame types for all fields, e.g. tempo = UFID/* or
@@ -360,15 +372,15 @@ album if the album is no compilation, artist otherwise
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
 .SH "DATABASE FILE"
-\fI$XDG_DATA_HOME/projekt182.de/plow.sqlite\fR is a SQLite3 database file
-containing all the data used by plow.
+\fI$XDG_DATA_HOME/projekt182.de/plow.sqlite\fR is a SQLite3 database
+file containing all the data used by plow.
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
 .SH "AUTHOR"
-René Bählkow
+RenÃ© BÃ¤hlkow
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
 .SH "SEE ALSO"
-\fIhttp://plow.projekt182.de/
+\fIhttp://projekt182.de/en/plow

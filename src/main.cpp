@@ -204,6 +204,29 @@ int parseLongOption(int actual, int argc, char *argv[], Plow &plow)
 		exit(0);
 	}
 
+	else if(strcmp(value, "p") == 0 || strcmp(value, "print") == 0) {
+		if(argv[actual + 1] == 0 || argv[actual + 1][0] == '-') {
+			plow.setPrintValues(Plow::CONFIG_FILE);
+		} else {
+			int pv = Plow::NONE;
+			if(strchr(argv[++actual], 'c')) {
+				pv |= Plow::CONFIG_FILE;
+			}
+			if(strchr(argv[actual], 'd')) {
+				pv |= Plow::DATABASE_FILE;
+			}
+			if(strchr(argv[actual], 'p')) {
+				pv |= Plow::PLAYLIST_FILE;
+			}
+			if(pv != Plow::NONE) {
+				plow.setPrintValues(pv);
+			} else {
+				throw PlowException("parseLongOption",
+						"wrong argument for option '--print'", USAGE);
+			}
+		}
+	}
+
 	else if(strcmp(value, "q") == 0 || strcmp(value, "query") == 0) {
 		if(argv[++actual] == 0) {
 			throw PlowException("parseLongOption",

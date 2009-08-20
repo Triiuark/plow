@@ -55,7 +55,7 @@ typedef std::map<const char *, const char *, _cstrcmp> CStrMap;
 /**
  * iterator for associative array of C strings
  */
-typedef std::map<const char *, const char*, _cstrcmp>::iterator
+typedef std::map<const char *, const char *, _cstrcmp>::iterator
 		CStrMapIt;
 
 /**

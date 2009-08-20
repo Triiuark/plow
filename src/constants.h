@@ -30,7 +30,7 @@ const char
  [-|+<c>[e|l|g] <str> [ <str>]*]* [--show]\n\
      ([--0|...|9] [--random] [--add] [--noplay] | [--set (<c> <str>)+])\n\
      | [--list <tbl>] | [--query <sql>] | [--copy] | [--insert <dir>]\n\
-     | [--dump] | [--dumpfull] | [--help] | [--version]";
+     | [--dump] | [--dumpfull] | [--print [c][d][p]] | [--help] | [--version]";
 
 const char
 		* const HELP =
@@ -72,6 +72,10 @@ const char
 --d|dump             print out a table dump (without create statements)\n\
 --D|dumpfull         print out a full table dump (with create statements)\n\
 \n\
+--p|print [c][d][p]  print configuration values:\n\
+                       none or c - configuration file name\n\
+                       d         - database file name\n\
+                       p         - playlist file name\n\
 --h|help             print this message\n\
 --v|version          print version\n\
 \n\
