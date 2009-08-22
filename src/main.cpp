@@ -283,12 +283,21 @@ int parseLongOption(int actual, int argc, char *argv[], Plow &plow)
 
 	else if(strcmp(value, "i") == 0 || strcmp(value, "insert") == 0) {
 		if(actual + 1 < argc) {
-			plow.insert(argv[++actual]);
-			++actual;
+			if(argv[++actual][0] == '/') {
+				plow.insert(argv[actual]);
+				++actual;
+			} else if (argv[actual][0] == '-') {
+				plow.insert();
+			} else {
+				throw PlowException("parseLongOption",
+						"wrong argument for option '--insert'", USAGE);
+			}
 		} else {
-			throw PlowException("parseLongOption",
-					"missing argument for option '--insert'", USAGE);
+			plow.insert();
+			//throw PlowException("parseLongOption",
+			//		"missing argument for option '--insert'", USAGE);
 		}
+		++actual;
 	}
 
 	else if(strcmp(value, "d") == 0 || strcmp(value, "dump") == 0) {

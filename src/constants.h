@@ -29,7 +29,7 @@ const char
 				"plow\
  [-|+<c>[e|l|g] <str> [ <str>]*]* [--show]\n\
      ([--0|...|9] [--random] [--add] [--noplay] | [--set (<c> <str>)+])\n\
-     | [--list <tbl>] | [--query <sql>] | [--copy] | [--insert <dir>]\n\
+     | [--list <tbl>] | [--query <sql>] | [--copy] | [--insert [<path>]]\n\
      | [--dump] | [--dumpfull] | [--print [c][d][p]] | [--help] | [--version]";
 
 const char
@@ -66,8 +66,11 @@ const char
 --c|copy             copy all files in the current playlist\n\
                      to portable_device set in config file\n\
 \n\
---i|insert <path>    add all (supported) files in <path> to database\n\
-                     Note: <path> has to be absolute\n\
+--i|insert [<path>]  add (supported) files to database\n\
+                     if called without argument path from config file is\n\
+                     used\n\
+                     Note: <path> has to be absolute and has to start\n\
+                           with path from config file\n\
 \n\
 --d|dump             print out a table dump (without create statements)\n\
 --D|dumpfull         print out a full table dump (with create statements)\n\

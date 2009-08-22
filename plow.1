@@ -31,7 +31,7 @@ plow \- create m3u playlist (and start a player)
 \fBplow\fR \-\-list <tbl>
 \fBplow\fR \-\-query <sql>
 \fBplow\fR \-\-copy
-\fBplow\fR \-\-insert \fI/path/to/music\fR
+\fBplow\fR \-\-insert \fI[/path/to/music]\fR
 \fBplow\fR \-\-dump
 \fBplow\fR \-\-dumpfull
 \fBplow\fR \-\-print [c][d][p]
@@ -112,9 +112,10 @@ Execute SQL query <sql> and print the result.
 Copy all files in the current playlist to the portable device
 set in configuration file.
 .
-.IPn "\fB\-\-i|insert /path/to/music"
-Add files in /path/to/music to database. Files allready in database
-are ignored.
+.IPn "\fB\-\-i|insert [/path/to/music]"
+Add files in /path/to/music, or if not given in path set in config file
+to database. Files allready in database are ignored. [/path/to/music]
+has to start with path from config file.
 .
 .IPn "\fB\-\-d|dump"
 Print out a database dump without create <tbl> statements.

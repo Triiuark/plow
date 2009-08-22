@@ -137,8 +137,10 @@ class Plow
 		 * add files in path to database
 		 *
 		 * @param path a path to a dir containing music files
+		 *             if path is 0 the value of path set in config
+		 *             file is used
 		 */
-		void insert(const char * const path);
+		void insert(const char * const path = 0);
 
 		/**
 		 * print out a database dump
@@ -202,6 +204,7 @@ class Plow
 		bool mShuffle;
 		bool mFork;
 		bool mCopy;
+		bool mDoInsert;
 		bool mDoNothing;
 };
 

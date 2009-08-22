@@ -1238,7 +1238,10 @@ void Plow::insertNewSongs()
 
 void Plow::insert(const char * const path)
 {
-	mInsert = path;
+	mDoInsert = true;
+	if(path != 0) {
+		mInsert = path;
+	}
 }
 
 void Plow::run()
@@ -1274,13 +1277,24 @@ void Plow::run()
 		printTable();
 		return;
 	}
+	if(mDoInsert) {
+		if(mInsert.length() == 0) {
+			mInsert = mMusicDir;
+		} else if(mMusicDir.length() > 0
+				&& mMusicDir.compare(
+						mInsert.substr(0,mMusicDir.length())) != 0) {
+			PlowException e("Plow::insert");
+			e.error() << mInsert << " does not start with " << mMusicDir;
+			throw e;
+		}
 
-	if(mInsert.size() > 0) {
+
 		if(readTags() > 0) {
 			backup();
 			addNewValues();
 			insertNewSongs();
 		}
+
 		return;
 	}
 
