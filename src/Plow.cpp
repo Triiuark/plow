@@ -71,6 +71,7 @@ Plow::Plow()
 	mAddToPlaylist = false;
 	mShuffle = false;
 	mCopy = false;
+	mDoInsert = false;
 	mDoNothing = false;
 	mPrintValue = NONE;
 }
