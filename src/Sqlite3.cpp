@@ -65,7 +65,7 @@ void Sqlite3::exe(const char *query)
 
 	for(int i = 0; i < mCols; ++i) {
 		mHead.push_back(mData[i]);
-		(mColumns)[mData[i]] = i + 1;
+		(mColumns)[mData[i]] = i;
 	}
 }
 
@@ -94,7 +94,7 @@ const char * const Sqlite3::get(int row, int col)
 
 const char * const Sqlite3::get(int row, const char * const column)
 {
-	return get(row, (mColumns)[column] - 1);
+	return get(row, (mColumns)[column]);
 }
 
 int Sqlite3::rows() const

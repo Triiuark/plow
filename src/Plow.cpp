@@ -948,6 +948,7 @@ int Plow::readTags()
 	strcpy(path, mInsert.c_str());
 
 	auto_ptr<PrioQ> files(new PrioQ);
+	auto_ptr<PrioQ> ignored(new PrioQ);
 
 	StringParser sp(mIniParser->get("general/extensions").c_str());
 
@@ -1042,6 +1043,8 @@ int Plow::readTags()
 			query += quoted;
 			sqlite3_free(quoted);
 			++added;
+		} else {
+			ignored->push(strdup(file.c_str()));
 		}
 
 		if(selector->fileType() != ReaderSelector::UNKNOWN
@@ -1064,6 +1067,14 @@ int Plow::readTags()
 	query += "COMMIT TRANSACTION;";
 
 	mSqlite3->exe(query.c_str());
+
+
+	cout << "> ignored files ... " << endl;
+	while(!ignored->empty()) {
+		cout << "\t" << ignored->top() << endl;
+		free(ignored->top());
+		ignored->pop();
+	}
 
 	return added;
 }
