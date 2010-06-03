@@ -62,7 +62,7 @@ void printUsage()
 void printVersion()
 {
 	cout << PACKAGE << " " << VERSION
-			<< "\nCopyright 2006 - 2009 René Bählkow\n"
+			<< "\nCopyright 2006 - 2010 René Bählkow\n"
 			<< "This program is free software; you may redistribute it"
 			<< " under the terms of\nthe GNU General Public License"
 			<< " version 2 or (at your option) any later version.\n"

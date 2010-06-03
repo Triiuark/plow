@@ -34,12 +34,15 @@ ReaderSelector::ReaderSelector(const char * const fname)
 	/// (max. 255)
 	/// + 8 for 0x01 + "vorbis"
 	char head[readSize];
+	memset(head, 0, readSize);
 
 	FILE *f = fopen(fname, "r");
-
-	fread(head, sizeof(char), readSize - 1, f);
+	size_t len = fread(head, sizeof(char), readSize - 1, f);
 	fclose(f);
-	head[readSize - 1] = 0;
+
+	if(len != readSize - 1) {
+		return;
+	}
 
 	if(strncmp("OggS", head, 4) == 0) {
 		unsigned int pos = (unsigned char)head[26] + 27;
