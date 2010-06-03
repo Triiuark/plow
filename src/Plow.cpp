@@ -1068,12 +1068,13 @@ int Plow::readTags()
 
 	mSqlite3->exe(query.c_str());
 
-
-	cout << "> ignored files ... " << endl;
-	while(!ignored->empty()) {
-		cout << "\t" << ignored->top() << endl;
-		free(ignored->top());
-		ignored->pop();
+	if(!ignored->empty()) {
+		cout << "> ignored files ... " << endl;
+		while(!ignored->empty()) {
+			cout << "\t" << ignored->top() << endl;
+			free(ignored->top());
+			ignored->pop();
+		}
 	}
 
 	return added;
