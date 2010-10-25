@@ -23,6 +23,8 @@
 
 #include "VorbisReader.h"
 
+#include <cstdio>
+
 #include <memory>
 
 #include <tag.h>

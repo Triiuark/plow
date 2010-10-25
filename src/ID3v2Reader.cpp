@@ -23,6 +23,8 @@
 
 #include "ID3v2Reader.h"
 
+#include <cstdio>
+
 #include <tag.h>
 #include <audioproperties.h>
 #include <mpegfile.h>

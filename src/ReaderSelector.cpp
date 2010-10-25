@@ -23,6 +23,8 @@
 
 #include "ReaderSelector.h"
 
+#include <cstdio>
+
 #include "VorbisReader.h"
 #include "ID3v2Reader.h"
 

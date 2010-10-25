@@ -35,6 +35,7 @@
 #include <string>
 
 #include <cstdlib>
+#include <cstdio>
 
 extern "C"
 {
