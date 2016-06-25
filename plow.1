@@ -44,11 +44,7 @@ plow \- create m3u playlist (and start a player)
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
 .SH "DESCRIPTION"
-\fBplow\fR is a powerfull command\-line tool for putting songs
-from your music collection into a playlist. Most id3v2/ogg tag
-information is used by \fBplow\fR to create a (sqlite3)
-database for filtering. Additionaly \fBplow\fR supports
-fields like mood, tempo, language, etc.
+\fBplow\fR is a command-line music library and playlist creation tool.
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
@@ -173,7 +169,7 @@ where artist contains queen
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
 .SH "CONFIGURATION FILE"
-\fI$XDG_CONFIG_HOME/projekt182.de/plow.conf\fR
+\fI$XDG_CONFIG_HOME/triiuark/plow.conf\fR
 is the configuration file for plow. It is in an INI like format with
 \fB[section]\fR and \fBkey=value\fR pairs. Lines starting with a \fB#\fR
 are comments. Whitespaces are ignored, except within a value.
@@ -190,7 +186,7 @@ Default: empty
 Sets the path to the playlist. This value is given as an argument to the
 players you set.
 .br
-Default: $XDG_DATA_HOME/projekt182.de/plow/plow.m3u
+Default: $XDG_DATA_HOME/triiuark/plow/plow.m3u
 .
 .IPn "order = album ASC, part ASC, track ASC"
 Sets the default output order. This is in SQL syntax.
@@ -262,7 +258,7 @@ Default: empty (no filtering by file extension)
 .IPn "backups = 5"
 This sets the number of database backups to keep. Every time you
 change the database (with \-\-insert or \-\-set) a backup
-file (\fI$XDG_DATA_HOME/projekt182/plow.YYYYMMDDHHSS.sqlite~\fR) is
+file (\fI$XDG_DATA_HOME/triiuark/plow.YYYYMMDDHHSS.sqlite~\fR) is
 created.
 0 means don't remove old backups. -1 means do not create backups.
 .br
@@ -373,7 +369,7 @@ album if the album is no compilation, artist otherwise
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
 .SH "DATABASE FILE"
-\fI$XDG_DATA_HOME/projekt182.de/plow.sqlite\fR is a SQLite3 database
+\fI$XDG_DATA_HOME/triiuark/plow.sqlite\fR is a SQLite3 database
 file containing all the data used by plow.
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
@@ -384,5 +380,5 @@ René Bählkow
 .\" ------------------------------------------------------------------
 .\" ------------------------------------------------------------------
 .SH "SEE ALSO"
-\fIhttp://projekt182.de/en/software/plow
-.\" vi:set enc=latin1:
+\fIhttp://github.com/Triiuark/plow
+.\" vi:set fenc=latin1:
