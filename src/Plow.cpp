@@ -151,22 +151,23 @@ void Plow::createFileNames()
 	const char * const envHomeDir = getenv("HOME");
 	const char * const envConfDir = getenv("XDG_CONFIG_HOME");
 	const char * const envDataDir = getenv("XDG_DATA_HOME");
+	const char * const envSubDir  = "/triiuark";
 
 	if(envConfDir) {
 		mConfigDir = envConfDir;
-		mConfigDir += "/projekt182.de";
 	} else {
 		mConfigDir = envHomeDir;
-		mConfigDir += "/.config/projekt182.de";
+		mConfigDir += "/.config";
 	}
+	mConfigDir += envSubDir;
 
 	if(envDataDir) {
 		mDataDir = envDataDir;
-		mDataDir += "/projekt182.de";
 	} else {
 		mDataDir = envHomeDir;
-		mDataDir += "/.local/share/projekt182.de";
+		mDataDir += "/.local/share";
 	}
+	mDataDir += envSubDir;
 
 	mDbFile = mDataDir + "/plow.sqlite";
 	mPlaylistFile = mDataDir + "/plow.m3u";
