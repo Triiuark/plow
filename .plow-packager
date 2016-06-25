@@ -2,16 +2,18 @@
 
 #
 # This script creates a plow source tar.gz package
-# from the latest svn tags/version-x.y.z directory.
+# from the latest release tag.
 #
 
+releasePrefix='release-'
+
 if [[ -z "${1}" ]]; then
-	version=$(git tag -l | grep 'version-' | tail -1 | awk -F'-' '{print $2}')
+	version=$(git tag -l | grep "${releasePrefix}" | tail -1 | awk -F'-' '{print $2}')
 else
 	version="${1}"
 fi
-echo version-${version}
-git checkout version-${version} || exit 1
+echo ${version}
+git checkout "${releasePrefix}${version}" || exit 1
 
 name='plow'
 package="${name}-${version}"
