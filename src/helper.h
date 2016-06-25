@@ -25,7 +25,7 @@
 #define PLOW_HELPER_H
 
 #include <iostream>
-
+#include <unistd.h>
 #include "types.h"
 
 /**
