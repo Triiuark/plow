@@ -351,7 +351,6 @@ void Plow::appendUpdate(char key, const char * const value)
 
 	ostringstream select;
 
-	int numberValue;
 	char *endptr;
 
 	switch(key) {
@@ -387,7 +386,8 @@ void Plow::appendUpdate(char key, const char * const value)
 
 				case NUMBER:
 					errno = 0;
-					numberValue = strtol(quotedValue, &endptr, 10);
+					// ignore return value - just check for success
+					strtol(quotedValue, &endptr, 10);
 					if(endptr[0] || errno) {
 						sqlite3_free(quotedValue);
 						throw PlowException("appendUpdate",
