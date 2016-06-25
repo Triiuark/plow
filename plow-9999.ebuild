@@ -1,6 +1,6 @@
-# Copyright 1999-2010 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: $
+# $Id$
 
 EAPI=6
 
@@ -8,8 +8,8 @@ inherit git-r3
 
 EGIT_REPO_URI="https://github.com/Triiuark/plow"
 
-DESCRIPTION="command-line playlist generator"
-HOMEPAGE="http://projekt182.de/en/software/plow.html"
+DESCRIPTION="Plow is a command-line music library and playlist creation tool."
+HOMEPAGE="https://github.com/Triiuark/plow"
 SRC_URI=""
 
 LICENSE="GPL-2"
