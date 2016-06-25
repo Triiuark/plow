@@ -6,7 +6,7 @@ EAPI=6
 
 DESCRIPTION="Plow is a command-line music library and playlist creation tool."
 HOMEPAGE="https://github.com/Triiuark/plow"
-SRC_URI="https://github.com/Triiuark/plow/releases/download/v0.6.0/plow-0.6.0.tar.gz"
+SRC_URI="https://github.com/Triiuark/plow/releases/download/v${PV}/${P}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
