@@ -2,7 +2,7 @@
 
 /***********************************************************************
  *                                                                     *
- *  Copyright (C) 2006 -2010  René Bählkow <reba@projekt182.de>        *
+ *  Copyright (C) 2006-2016 René Bählkow <triiuark@projekt182.de>      *
  *                                                                     *
  *  This file is part of Plow.                                         *
  *                                                                     *
