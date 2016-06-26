@@ -1,0 +1,22 @@
+# foo
+_plow() {
+	local cur
+	local MY_OUTPUT="/tmp/comp.txt"
+	COMPREPLY=()
+	cur="${COMP_WORDS[COMP_CWORD]}"
+	echo ${cur} >> ${MY_OUTPUT}
+	case "${cur}" in
+		"")  COMPREPLY=( '-' '+' ) ;;
+		"-")
+			COMPREPLY=( '--' '-a' '-A' '-c' '-m' '-l' ) ;;
+		"+")COMPREPLY=( $(compgen -W 'a A c m l' -- ${cur}) ) ;;
+		--*) COMPREPLY=( $(compgen -W '--find --print --do' -- ${cur}) ) ;;
+		*)
+			local IFS=$'\n'
+			local myCur=$(echo "${cur}" | sed 's/\\//g')
+			COMPREPLY=( $( plow --find a ${myCur} 2>/dev/null | sed 's/ /\\ /g') )
+			echo "${COMPREPLY[@]}" >> ${MY_OUTPUT}
+		;;
+	esac
+}
+complete -F _plow plow

@@ -89,6 +89,7 @@ Plow::Plow()
 {
 	mKeepBackup = 5;
 	mPlayer = '0';
+	mPlainPrint = false;
 	mShowQuery = false;
 	mPlay = true;
 	mAddToPlaylist = false;
@@ -137,6 +138,11 @@ void Plow::setPlayer(char player)
 void Plow::setQuery(const char * const query)
 {
 	mQuery = query;
+}
+
+void Plow::setPlainPrint(bool plainPrint)
+{
+	mPlainPrint = plainPrint;
 }
 
 void Plow::printQuery(string const &query)
@@ -441,6 +447,18 @@ void Plow::createFilter(const string &select)
 void Plow::printTable()
 {
 	mSqlite3->exe(mQuery.c_str());
+
+	if (mPlainPrint) {
+		if (mSqlite3->cols() > 0) {
+			for(int i = 0; i < mSqlite3->rows(); i++) {
+				for(int j = 0; j < mSqlite3->cols(); j++) {
+					cout << mSqlite3->get(i, j);
+				}
+				cout << endl;
+			}
+		}
+		return;
+	}
 
 	if(mSqlite3->cols() > 0) {
 		cout << "| ";

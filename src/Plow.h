@@ -123,6 +123,13 @@ class Plow
 		void setQuery(const char * const query);
 
 		/**
+		 * set plain (not table like) output of setQuery
+		 *
+		 * @param bool to set output format
+		 */
+		void setPlainPrint(bool plainPrint);
+
+		/**
 		 * add a filter value
 		 *
 		 * @param filter
@@ -202,6 +209,7 @@ class Plow
 
 		int mPrintValue;
 
+		bool mPlainPrint;
 		bool mShowQuery;
 		bool mPlay;
 		bool mAddToPlaylist;
