@@ -4,7 +4,7 @@
 
 EAPI=6
 
-inherit git-r3
+inherit git-r3 bash-completion-r1
 
 EGIT_REPO_URI="https://github.com/Triiuark/plow"
 
@@ -12,6 +12,7 @@ DESCRIPTION="Plow is a command-line music library and playlist creation tool."
 HOMEPAGE="https://github.com/Triiuark/plow"
 SRC_URI=""
 
+IUSE="bash-completion"
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
@@ -26,5 +27,8 @@ src_install() {
 	exeinto /usr/bin
 	doexe ${S}/bin/plow
 	doman ${S}/plow.1
+	if use bash-completion; then
+		newbashcomp ${PN}.bash-completion ${PN}
+	fi
 }
 
