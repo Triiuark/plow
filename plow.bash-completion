@@ -1,4 +1,4 @@
-# foo
+# plow bash-completion
 _plow_debug()
 {
 	echo "${@}" >> /tmp/plow-complete-debug
