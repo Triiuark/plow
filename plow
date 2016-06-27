@@ -1,22 +1,35 @@
 # foo
+_plow_debug()
+{
+	echo "${@}" >> /tmp/plow-complete-debug
+}
+
 _plow() {
-	local cur
-	local MY_OUTPUT="/tmp/comp.txt"
 	COMPREPLY=()
-	cur="${COMP_WORDS[COMP_CWORD]}"
-	echo ${cur} >> ${MY_OUTPUT}
-	case "${cur}" in
-		"")  COMPREPLY=( '-' '+' ) ;;
-		"-")
-			COMPREPLY=( '--' '-a' '-A' '-c' '-m' '-l' ) ;;
-		"+")COMPREPLY=( $(compgen -W 'a A c m l' -- ${cur}) ) ;;
-		--*) COMPREPLY=( $(compgen -W '--find --print --do' -- ${cur}) ) ;;
-		*)
-			local IFS=$'\n'
-			local myCur=$(echo "${cur}" | sed 's/\\//g')
-			COMPREPLY=( $( plow --find a ${myCur} 2>/dev/null | sed 's/ /\\ /g') )
-			echo "${COMPREPLY[@]}" >> ${MY_OUTPUT}
-		;;
-	esac
+	local cur="${COMP_WORDS[COMP_CWORD]}"
+	
+	local args=( "${@}" )
+	local arg
+	local val=""
+	for (( ii=${#}-1; ii>-1; ii--)); do
+		arg=${args[ii]}
+		if [[ "${arg}" == -* || "${arg}" == +*  ]]; then
+			if [[ ${#arg} > 1 && ${#arg} < 4 ]]; then
+				val=${arg:1:1}
+			fi
+			break
+		fi
+	done
+	if [[ -z "${val}" ]]; then
+		return
+	fi
+	local IFS=$'\n'
+	local myCur=$(echo "${cur}" | sed 's/\\//g')
+	vals=( $(plow --find ${val} "${myCur}" 2>/dev/null) )
+	COMPREPLY=($(printf "%q\n" "${vals[@]}"))
+	#_plow_debug "${COMPREPLY[@]}"
+	#_plow_debug "${vals[@]}"
+	#_plow_debug "${cur}"
+	#_plow_debug "${myCur}"
 }
 complete -F _plow plow
