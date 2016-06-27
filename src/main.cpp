@@ -285,25 +285,35 @@ int parseLongOption(int actual, int argc, char *argv[], Plow &plow)
 	else if(strcmp(value, "f") == 0 || strcmp(value, "find") == 0) {
 		if(argv[++actual] != 0) {
 			char *quotedTable;
+			char *quotedField;
 			if (strlen(argv[actual]) == 1) {
-				quotedTable = sqlite3_mprintf(Plow::getField(argv[actual][0])->first);
-				if (quotedTable == 0) {
+				std::pair<const char *, Plow::FieldType> *field =
+						Plow::getField(argv[actual][0]);
+				quotedField = sqlite3_mprintf(field->first);
+				if (quotedField == 0) {
 					throw PlowException("parseLongOption",
 						"wrong argument for option '--find'", USAGE);
 				}
+				if (field->second != Plow::TABLE) {
+					quotedTable = sqlite3_mprintf("music");
+				} else {
+					quotedTable = sqlite3_mprintf(field->first);
+				}
 			} else {
 				quotedTable = sqlite3_mprintf(argv[actual]);
+				quotedField = sqlite3_mprintf(argv[actual]);
 			}
 			if (argv[++actual] != 0) {
-				char *quotedValue = sqlite3_mprintf(argv[actual]);
+				char *quotedValue = sqlite3_mprintf("%q", argv[actual]);
 				char query[100 + 4 * strlen(quotedTable) + strlen(quotedValue)];
 
-				sprintf(query, "SELECT %1$s FROM tbl_%1$s WHERE %1$s LIKE '%2$s%%' ORDER BY %1$s;",
-						quotedTable, quotedValue);
+				sprintf(query, "SELECT %1$s FROM tbl_%2$s WHERE %1$s LIKE '%%%3$s%%' ORDER BY %1$s;",
+						quotedField, quotedTable, quotedValue);
 
 				plow.setQuery(query);
 				plow.setPlainPrint(true);
 				sqlite3_free(quotedValue);
+				sqlite3_free(quotedField);
 			} else {
 				char query[100 + 4 * strlen(quotedTable)];
 
